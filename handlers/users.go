@@ -43,32 +43,33 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 
 // LoginHandler kullanıcı giriş endpoint'i
 func LoginHandler(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
-    // POST isteğini al
-    if r.Method != "POST" {
-        http.Error(w, "Sadece POST istekleri kabul edilir", http.StatusMethodNotAllowed)
-        return
-    }
+	// POST isteğini al
+	if r.Method != "POST" {
+		http.Error(w, "Sadece POST istekleri kabul edilir", http.StatusMethodNotAllowed)
+		return
+	}
 
-    // Form verilerini al
-    username := r.FormValue("username")
-    password := r.FormValue("password")
+	// Form verilerini al
+	username := r.FormValue("username")
+	password := r.FormValue("password")
 
-    // Kullanıcıyı veritabanında ara
-    var user models.User
-    if err := db.Where("username = ?", username).First(&user).Error; err != nil {
-        http.Error(w, "Kullanıcı bulunamadı", http.StatusNotFound)
-        return
-    }
+	// Kullanıcıyı veritabanında ara
+	var user models.User
+	if err := db.Where("username = ?", username).First(&user).Error; err != nil {
+		http.Error(w, "Kullanıcı bulunamadı", http.StatusNotFound)
+		return
+	}
 
-    // Parolayı doğrula
-    if user.Password != password {
-        http.Error(w, "Geçersiz parola", http.StatusUnauthorized)
-        return
-    }
+	// Parolayı doğrula
+	if user.Password != password {
+		http.Error(w, "Geçersiz parola", http.StatusUnauthorized)
+		return
+	}
 
-    // Başarılı yanıtı gönder
-    fmt.Fprintf(w, "Kullanıcı girişi başarılı: %s", username)
+	// Başarılı yanıtı gönder
+	fmt.Fprintf(w, "Kullanıcı girişi başarılı: %s", username)
 }
+
 func UsersHandler(w http.ResponseWriter, r *http.Request) {
 	// Kullanıcıları işle
 	// Örneğin, tüm kullanıcıları listeleme
