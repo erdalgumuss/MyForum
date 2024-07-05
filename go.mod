@@ -34,4 +34,5 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/google/uuid v1.6.0
 	golang.org/x/crypto v0.7.0
+	
 )

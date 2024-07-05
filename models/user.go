@@ -1,12 +1,17 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/google/uuid"
+	"github.com/jinzhu/gorm"
+)
 
 type User struct {
-	gorm.Model
-	Username string `gorm:"unique;not null"`
-	Email    string `gorm:"unique;not null"`
-	Password string `gorm:"not null"`
-	Posts    []Post
-	Comments []Comment
+	ID       uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()" json:"id"`
+	Email    string    `gorm:"unique;not null" json:"email"`
+	Username string    `gorm:"unique;not null" json:"username"`
+	Password string    `json:"password"`
+}
+
+func (user *User) BeforeCreate(scope *gorm.Scope) error {
+	return scope.SetColumn("ID", uuid.New())
 }

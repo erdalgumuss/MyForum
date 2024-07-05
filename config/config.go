@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"MyForum/models"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/joho/godotenv"
@@ -28,6 +30,9 @@ func InitDB() {
 	// Veritabanı bağlantısını atama
 	DB = db
 	fmt.Println("Database connected successfully")
+
+	db.AutoMigrate(&models.User{}, &models.Topic{}, &models.Comment{}, &models.Post{})
+	fmt.Println("Tables created successfully")
 
 	// Veritabanı tablolarını oluşturma
 	CreateTables(db)

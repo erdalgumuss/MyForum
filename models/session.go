@@ -8,6 +8,7 @@ import (
 )
 
 type Session struct {
+	gorm.Model
 	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
 	UserID    uint
 	CreatedAt time.Time

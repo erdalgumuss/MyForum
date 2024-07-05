@@ -1,23 +1,86 @@
-{{ define "content" }}
-<div class="container">
-    <h2>Kayıt Ol</h2>
-    <form action="/register" method="post">
-        <div class="form-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" class="form-control" required>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Anasayfa</a></li>
+                <li><a href="/profile">Profil</a></li>
+                <li><a href="/login">Giriş Yap</a></li>
+                <li><a href="/register">Kayıt Ol</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="container">
+            <h2>Kayıt Ol</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Kullanıcı Adı:</label>
+                    <input type="text" id="username" name="username" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Şifre:</label>
+                    <input type="password" id="password" name="password" class="form-control" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+            </form>
         </div>
-        
-        <div class="form-group">
-            <label for="username">Kullanıcı Adı:</label>
-            <input type="text" id="username" name="username" class="form-control" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="password">Şifre:</label>
-            <input type="password" id="password" name="password" class="form-control" required>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Kayıt Ol</button>
-    </form>
-</div>
-{{ end }}
+    </main>
+    <footer>
+        <p>&copy; 2024 FIXIT. Tüm hakları BENDE saklıdır.</p>
+    </footer>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var email = document.getElementById('email').value;
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            var data = {
+                email: email,
+                username: username,
+                password: password
+            };
+
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                if (data.message) {
+                    // Başarılı mesaj alındığında işlem yap
+                    alert("Kayıt başarılı!");
+                    window.location.href = "/login";
+                } else {
+                    // Hata mesajını göster
+                    alert(data.error || "Kayıt sırasında bir hata oluştu.");
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert("Kayıt sırasında bir hata oluştu.");
+            });
+        });
+    </script>
+</body>
+</html>
