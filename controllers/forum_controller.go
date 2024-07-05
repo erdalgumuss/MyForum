@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+
 	"MyForum/config"
 	"MyForum/models"
 
@@ -15,7 +16,12 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 
-	config.DB.Create(&input)
+	_, err := config.DB.Exec("INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)", input.Title, input.Content, input.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
 }
 
@@ -26,49 +32,101 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	config.DB.Create(&input)
+	_, err := config.DB.Exec("INSERT INTO comments (content, user_id, post_id) VALUES (?, ?, ?)", input.Content, input.UserID, input.PostID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Comment created successfully"})
 }
 
 func LikePost(c *gin.Context) {
 	postID := c.Param("id")
-	var post models.Post
-	config.DB.First(&post, postID)
-	post.Likes++
-	config.DB.Save(&post)
+	result, err := config.DB.Exec("UPDATE posts SET likes = likes + 1 WHERE id = ?", postID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like post"})
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Post liked"})
 }
 
 func DislikePost(c *gin.Context) {
 	postID := c.Param("id")
-	var post models.Post
-	config.DB.First(&post, postID)
-	post.Dislikes++
-	config.DB.Save(&post)
+	result, err := config.DB.Exec("UPDATE posts SET dislikes = dislikes + 1 WHERE id = ?", postID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to dislike post"})
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Post disliked"})
 }
 
 func LikeComment(c *gin.Context) {
 	commentID := c.Param("id")
-	var comment models.Comment
-	config.DB.First(&comment, commentID)
-	comment.Likes++
-	config.DB.Save(&comment)
+	result, err := config.DB.Exec("UPDATE comments SET likes = likes + 1 WHERE id = ?", commentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like comment"})
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Comment liked"})
 }
 
 func DislikeComment(c *gin.Context) {
 	commentID := c.Param("id")
-	var comment models.Comment
-	config.DB.First(&comment, commentID)
-	comment.Dislikes++
-	config.DB.Save(&comment)
+	result, err := config.DB.Exec("UPDATE comments SET dislikes = dislikes + 1 WHERE id = ?", commentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to dislike comment"})
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "Comment disliked"})
 }
 
 func GetPosts(c *gin.Context) {
+	rows, err := config.DB.Query("SELECT * FROM posts")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
+		return
+	}
+	defer rows.Close()
+
 	var posts []models.Post
-	config.DB.Preload("User").Preload("Categories").Find(&posts)
+	for rows.Next() {
+		var post models.Post
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan posts"})
+			return
+		}
+		posts = append(posts, post)
+	}
+
 	c.HTML(http.StatusOK, "index.html", gin.H{
 		"Posts": posts,
 	})
@@ -77,10 +135,12 @@ func GetPosts(c *gin.Context) {
 func GetPost(c *gin.Context) {
 	id := c.Param("id")
 	var post models.Post
-	if err := config.DB.Preload("User").Preload("Comments.User").First(&post, id).Error; err != nil {
+	err := config.DB.QueryRow("SELECT * FROM posts WHERE id = ?", id).Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID)
+	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
+
 	c.HTML(http.StatusOK, "post.html", gin.H{
 		"Post": post,
 	})

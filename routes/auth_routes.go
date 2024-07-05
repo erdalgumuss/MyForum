@@ -1,32 +1,24 @@
 package routes
 
 import (
-	"MyForum/controllers"
 
-	"github.com/gin-gonic/gin"
+"time"
+   "MyForum/controllers"
+    "github.com/gin-gonic/gin"
 )
-
-// AuthRoutes handles authentication related routes
-func AuthRoutes(r *gin.Engine) {
-	// GET requests
-	r.GET("/login", controllers.ShowLoginPage)
-	r.GET("/register", controllers.ShowRegisterPage)
-
-	// POST requests
-	r.POST("/login", controllers.ProcessLogin)
-	r.POST("/register", controllers.Register)
-
-	// Logout
-	r.GET("/logout", controllers.Logout)
+type User struct {
+	ID        int64     `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
-func Routes(r *gin.Engine) {
-    // Auth routes
+func AuthRoutes(r *gin.Engine) {
+    // Rotaları tanımla
     r.GET("/login", controllers.ShowLoginPage)
-    r.GET("/register", controllers.ShowRegisterPage)
-    r.POST("/register", controllers.Register)
     r.POST("/login", controllers.ProcessLogin)
-    r.GET("/logout", controllers.Logout)
-    
-    // List users route
-    r.GET("/users", controllers.ListUsers)
+    r.GET("/register", controllers.ShowRegisterPage)
+    r.POST("/register", controllers.ProcessRegister)
+    r.POST("/logout", controllers.Logout)
 }

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
@@ -14,43 +15,49 @@ import (
 )
 
 func Register(c *gin.Context) {
-	var input struct {
-		Email    string `json:"email" binding:"required"`
-		Username string `json:"username" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
-
+	var input models.User
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	var user models.User
-	if config.DB.Where("email = ?", input.Email).First(&user).RowsAffected > 0 {
+	err := config.DB.QueryRow("SELECT id FROM users WHERE email = ?", input.Email).Scan(&user.ID)
+	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Email already taken"})
 		return
-	}
-	if config.DB.Where("username = ?", input.Username).First(&user).RowsAffected > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Username already taken"})
+	} else if err != sql.ErrNoRows {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	err = config.DB.QueryRow("SELECT id FROM users WHERE username = ?", input.Username).Scan(&user.ID)
+	if err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Username already taken"})
+		return
+	} else if err != sql.ErrNoRows {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password.String), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
 
-	user = models.User{
-		Email:    input.Email,
-		Username: input.Username,
-		Password: string(hashedPassword),
+	stmt, err := config.DB.Prepare("INSERT INTO users(username, email, password) VALUES(?, ?, ?)")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
+		return
 	}
+	defer stmt.Close()
 
-	config.DB.Create(&user)
-
-	// Log the new user
-	fmt.Printf("New user created: %v\n", user)
+	_, err = stmt.Exec(input.Username, input.Email, hashedPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
 }
@@ -68,12 +75,16 @@ func Login(c *gin.Context) {
 	}
 
 	var user models.User
-	if config.DB.Where("email = ?", input.Email).First(&user).RowsAffected == 0 {
+	err := config.DB.QueryRow("SELECT id, password FROM users WHERE email = ?", input.Email).Scan(&user.ID, &user.Password)
+	if err == sql.ErrNoRows {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	} else if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password.String), []byte(input.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
@@ -100,19 +111,20 @@ func ProcessLogin(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := config.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
+	err := config.DB.QueryRow("SELECT id, password FROM users WHERE email = ?", input.Email).Scan(&user.ID, &user.Password)
+	if err != nil {
 		c.HTML(http.StatusBadRequest, "login.html", gin.H{"error": "Invalid email or password"})
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password.String), []byte(input.Password)); err != nil {
 		c.HTML(http.StatusBadRequest, "login.html", gin.H{"error": "Invalid email or password"})
 		return
 	}
 
 	sessionToken := uuid.New().String()
 	c.SetCookie("session_token", sessionToken, 3600, "/", "localhost", false, true)
-	c.Redirect(http.StatusFound, "/") // Ana sayfaya yönlendir
+	c.Redirect(http.StatusFound, "/") // Redirect to the homepage
 }
 
 func ShowRegisterPage(c *gin.Context) {
@@ -127,7 +139,8 @@ func ProcessRegister(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := config.DB.Where("email = ?", input.Email).First(&user).Error; err == nil {
+	err := config.DB.QueryRow("SELECT id FROM users WHERE email = ?", input.Email).Scan(&user.ID)
+	if err == nil {
 		c.HTML(http.StatusBadRequest, "register.html", gin.H{"error": "Email already registered"})
 		return
 	}
@@ -138,18 +151,40 @@ func ProcessRegister(c *gin.Context) {
 		return
 	}
 
-	input.Password = string(hashedPassword)
-	config.DB.Create(&input)
+	stmt, err := config.DB.Prepare("INSERT INTO users(username, email, password) VALUES(?, ?, ?)")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
+		return
+	}
+	defer stmt.Close()
 
-	c.Redirect(http.StatusFound, "/login") // Kayıt işlemi başarılı ise giriş sayfasına yönlendir
+	_, err = stmt.Exec(input.Username, input.Email, hashedPassword)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		return
+	}
+
+	c.Redirect(http.StatusFound, "/login") // Redirect to the login page if registration is successful
 }
 
 // ListUsers lists all users
 func ListUsers(c *gin.Context) {
-	var users []models.User
-	if err := config.DB.Find(&users).Error; err != nil {
+	rows, err := config.DB.Query("SELECT id, username, email, created_at, updated_at FROM users")
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
 		return
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.CreatedAt, &user.UpdatedAt)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan user row"})
+			return
+		}
+		users = append(users, user)
 	}
 
 	c.JSON(http.StatusOK, users)

@@ -1,29 +1,30 @@
 package main
 
 import (
-    "MyForum/config"
-    "MyForum/routes"
-    "github.com/gin-gonic/gin"
+	"MyForum/config"
+	"MyForum/routes"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    // Veritabanını başlat
-    config.InitDB()
-    
-    // Yeni bir Gin router oluştur
-    r := gin.Default()
+	// Veritabanını başlat
+	config.InitDB()
 
-    // Statik dosyaları sun
-    r.Static("/static", "./static")
-    
-    // HTML şablonlarını yükle
-    r.LoadHTMLGlob("templates/*")
-    
-    // Rotaları tanımla
-    routes.AuthRoutes(r)
-    routes.ForumRoutes(r)
-    routes.ProfileRoutes(r) // Profil rotalarını ekledik
+	// Yeni bir Gin router oluştur
+	r := gin.Default()
 
-    // Sunucuyu başlat
-    r.Run(":8080")
+	// Statik dosyaları sun
+	r.Static("/static", "./static")
+
+	// HTML şablonlarını yükle
+	r.LoadHTMLGlob("templates/*")
+
+	// Rotaları tanımla
+	routes.AuthRoutes(r)
+	routes.ForumRoutes(r)
+	routes.ProfileRoutes(r) // Profil rotalarını ekledik
+
+	// Sunucuyu başlat
+	r.Run(":8080")
 }

@@ -8,9 +8,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterProfileRoutes profil rotalarını kaydeder
+// ProfileRoutes profil rotalarını kaydeder
 func ProfileRoutes(r *gin.Engine) {
-	r.GET("/profile", controllers.GetProfile)
+	r.GET("/profile", controllers.GetUserProfile)
 	r.PUT("/profile", controllers.UpdateProfile)
 	r.POST("/profile/change-password", controllers.ChangePassword)
 }
