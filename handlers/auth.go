@@ -1,62 +1,108 @@
 package handlers
 
 import (
-    "encoding/json"
-    "net/http"
-    "MyForum/models"
-    "MyForum/utils"
-    "golang.org/x/crypto/bcrypt"
+	"net/http"
+
+	"MyForum/config"
+	"MyForum/models"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
-func Register(w http.ResponseWriter, r *http.Request) {
-    var user models.User
-    err := json.NewDecoder(r.Body).Decode(&user)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
+// Register function for registering new users
+func Register(c *gin.Context) {
+	var input struct {
+		Email    string `json:"email" binding:"required"`
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
 
-    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
-    user.Password = string(hashedPassword)
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-    if err := models.DB.Create(&user).Error; err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+	// Check if email or username already exists
+	var user models.User
+	if config.DB.Where("email = ?", input.Email).First(&user).RowsAffected > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Email already taken"})
+		return
+	}
+	if config.DB.Where("username = ?", input.Username).First(&user).RowsAffected > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Username already taken"})
+		return
+	}
 
-    w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(map[string]string{"message": "User registered successfully"})
+	// Hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		return
+	}
+
+	// Create user
+	user = models.User{
+		Email:    input.Email,
+		Username: input.Username,
+		Password: string(hashedPassword),
+	}
+
+	config.DB.Create(&user)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
-    var credentials models.User
-    err := json.NewDecoder(r.Body).Decode(&credentials)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusBadRequest)
-        return
-    }
+// Login function for authenticating users
+func Login(c *gin.Context) {
+	var input struct {
+		Email    string `json:"email" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
 
-    var user models.User
-    if err := models.DB.Where("email = ?", credentials.Email).First(&user).Error; err != nil {
-        http.Error(w, "Invalid email or password", http.StatusUnauthorized)
-        return
-    }
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-    if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credentials.Password)); err != nil {
-        http.Error(w, "Invalid email or password", http.StatusUnauthorized)
-        return
-    }
+	var user models.User
+	if config.DB.Where("email = ?", input.Email).First(&user).RowsAffected == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
 
-    token, err := utils.GenerateJWT(user)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-        return
-    }
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
 
-    w.WriteHeader(http.StatusOK)
-    json.NewEncoder(w).Encode(map[string]string{"token": token})
+	session := models.Session{
+		UserID: user.ID,
+	}
+	config.DB.Create(&session)
+
+	c.SetCookie("session_id", session.ID.String(), 3600, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+}
+
+// Logout function for logging out users
+func Logout(c *gin.Context) {
+	sessionID, err := c.Cookie("session_id")
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid session"})
+		return
+	}
+
+	var session models.Session
+	if config.DB.Where("id = ?", sessionID).First(&session).RowsAffected == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid session"})
+		return
+	}
+
+	config.DB.Delete(&session)
+
+	c.SetCookie("session_id", "", -1, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 }

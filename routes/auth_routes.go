@@ -1,21 +1,21 @@
 package routes
 
 import (
-	"MyForum/handlers"
-	"net/http"
+	"MyForum/controllers"
 
-	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
+	"github.com/gin-gonic/gin"
 )
 
-func SetupAuthRoutes(r *mux.Router, db *gorm.DB) {
-	r.HandleFunc("/api/users/register", func(w http.ResponseWriter, r *http.Request) {
-		handlers.RegisterHandler(w, r, db)
-	}).Methods("POST")
+// AuthRoutes handles authentication related routes
+func AuthRoutes(r *gin.Engine) {
+	// GET requests
+	r.GET("/login", controllers.ShowLoginPage)
+	r.GET("/register", controllers.ShowRegisterPage)
 
-	r.HandleFunc("/api/users/login", func(w http.ResponseWriter, r *http.Request) {
-		handlers.LoginHandler(w, r, db)
-	}).Methods("POST")
+	// POST requests
+	r.POST("/login", controllers.ProcessLogin)
+	r.POST("/register", controllers.Register)
 
-	// Diğer auth endpoint'lerini burada tanımlayabilirsiniz
+	// Logout
+	r.GET("/logout", controllers.Logout)
 }

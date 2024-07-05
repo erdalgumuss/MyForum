@@ -1,29 +1,45 @@
 package utils
 
 import (
-	"time"
-
+	"MyForum/config"
 	"MyForum/models"
-
-	"github.com/dgrijalva/jwt-go"
+	"net/http"
+	"time"
+	"strconv"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
-var jwtKey = []byte("my_secret_key")
+func AuthRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		sessionID, err := c.Cookie("session_id")
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
 
-type Claims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
-}
+		var session models.Session
+		if err := config.DB.Where("id = ?", uuid.MustParse(sessionID)).First(&session).Error; err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
 
-func GenerateJWT(user models.User) (string, error) {
-	expirationTime := time.Now().Add(24 * time.Hour)
-	claims := &Claims{
-		Username: user.Username,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-		},
+		if session.ExpiresAt.Before(time.Now()) {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Session expired"})
+			c.Abort()
+			return
+		}
+
+		c.Set("user_id", session.UserID)
+		c.Next()
 	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtKey)
+}
+func StringToUint(str string) uint {
+	num, err := strconv.ParseUint(str, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return uint(num)
 }

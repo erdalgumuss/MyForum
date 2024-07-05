@@ -1,102 +1,130 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 
+	"MyForum/config"
 	"MyForum/models"
+	"MyForum/utils"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 )
 
-func CreateTopic(w http.ResponseWriter, r *http.Request) {
-	var topic models.Topic
-	err := json.NewDecoder(r.Body).Decode(&topic)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// Örneğin, oturum açmış kullanıcının kimliğini almak için bir yöntem kullanabilirsiniz
-	// userID := utils.GetUserIDFromContext(r.Context())
-
-	// Şu anda sabit olarak örneğin 1 numaralı kullanıcıyı kullanıyoruz
-	topic.UserID = 1
-
-	if err := models.DB.Create(&topic).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(topic)
+// GetForums retrieves all forums
+func GetForums(c *gin.Context) {
+	var forums []models.Post
+	config.DB.Preload("Categories").Find(&forums)
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"forums": forums,
+	})
 }
 
-func ListTopics(w http.ResponseWriter, r *http.Request) {
-	var topics []models.Topic
-	if err := models.DB.Find(&topics).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+// CreateForum handles forum creation
+func CreateForum(c *gin.Context) {
+	var input struct {
+		Title      string   `json:"title" binding:"required"`
+		Content    string   `json:"content" binding:"required"`
+		Categories []string `json:"categories"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(topics)
+	userID, _ := c.Get("user_id")
+
+	forum := models.Post{
+		Title:   input.Title,
+		Content: input.Content,
+		UserID:  userID.(uint),
+	}
+
+	if len(input.Categories) > 0 {
+		var categories []models.Category
+		for _, categoryName := range input.Categories {
+			var category models.Category
+			if config.DB.Where("name = ?", categoryName).First(&category).RowsAffected == 0 {
+				category = models.Category{Name: categoryName}
+				config.DB.Create(&category)
+			}
+			categories = append(categories, category)
+		}
+		forum.Categories = categories
+	}
+
+	config.DB.Create(&forum)
+	c.JSON(http.StatusOK, gin.H{"message": "Forum created successfully"})
 }
 
-func GetTopic(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	topicID := params["id"]
+// GetForum retrieves a specific forum by ID
+func GetForum(c *gin.Context) {
+	id := c.Param("id")
 
-	var topic models.Topic
-	if err := models.DB.First(&topic, topicID).Error; err != nil {
-		http.Error(w, "Konu bulunamadı", http.StatusNotFound)
+	var forum models.Post
+	if config.DB.Preload("Categories").Preload("Comments").Where("id = ?", id).First(&forum).RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Forum not found"})
 		return
 	}
 
-	json.NewEncoder(w).Encode(topic)
+	c.HTML(http.StatusOK, "forum.html", gin.H{
+		"forum": forum,
+	})
 }
 
-// Yeni yorum ekleme
-func CreateComment(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	topicID := params["topic_id"]
+// CreateComment handles comment creation
+func CreateComment(c *gin.Context) {
+	id := c.Param("id")
 
-	var comment models.Comment
-	err := json.NewDecoder(r.Body).Decode(&comment)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	var input struct {
+		Content string `json:"content" binding:"required"`
 	}
-	comment.TopicID = topicID
 
-	if err := models.DB.Create(&comment).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(comment)
+	userID, _ := c.Get("user_id")
+
+	comment := models.Comment{
+		Content: input.Content,
+		UserID:  userID.(uint),
+		PostID:  utils.StringToUint(id), // Corrected here
+	}
+
+	config.DB.Create(&comment)
+	c.JSON(http.StatusOK, gin.H{"message": "Comment created successfully"})
 }
 
-// Yorum güncelleme veya silme
-func UpdateComment(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	topicID := params["topic_id"]
-	commentID := params["comment_id"]
+// LikeForum handles liking a forum
+func LikeForum(c *gin.Context) {
+	id := c.Param("id")
 
-	var comment models.Comment
-	if err := models.DB.First(&comment, commentID).Error; err != nil {
-		http.Error(w, "Yorum bulunamadı", http.StatusNotFound)
+	var forum models.Post
+	if config.DB.Where("id = ?", id).First(&forum).RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Forum not found"})
 		return
 	}
 
-	// Yorum güncelleme işlemleri burada yapılabilir
-	// Örneğin, comment.Body = updatedBody gibi güncelleme işlemleri
+	forum.Likes++
+	config.DB.Save(&forum)
 
-	if err := models.DB.Save(&comment).Error; err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	c.JSON(http.StatusOK, gin.H{"message": "Forum liked successfully"})
+}
+
+// DislikeForum handles disliking a forum
+func DislikeForum(c *gin.Context) {
+	id := c.Param("id")
+
+	var forum models.Post
+	if config.DB.Where("id = ?", id).First(&forum).RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Forum not found"})
 		return
 	}
 
-	json.NewEncoder(w).Encode(comment)
+	forum.Dislikes++
+	config.DB.Save(&forum)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Forum disliked successfully"})
 }
