@@ -154,67 +154,27 @@ func ProcessLogin(c *gin.Context) {
 
 	c.SetCookie("session_token", sessionToken, 3600, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
-}
-
-func ShowRegisterPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "register.html", gin.H{})
+	c.Redirect(http.StatusFound, "/") // Başarılı giriş sonrası yönlendirme
 }
 
 func ProcessRegister(c *gin.Context) {
-	var input struct {
-		Username string `form:"username" binding:"required"`
-		Email    string `form:"email" binding:"required"`
-		Password string `form:"password" binding:"required"`
-	}
-
-	// Form verilerini al ve input yapısına bind et
-	if err := c.ShouldBind(&input); err != nil {
-		// Hatalı form verisi durumunda hata mesajı gönder
-		c.HTML(http.StatusBadRequest, "register.html", gin.H{"error": "Invalid form data"})
+	var input models.User
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Veritabanında kullanıcı var mı diye kontrol et
-	var user models.User
-	err := config.DB.QueryRow("SELECT id FROM users WHERE email = ?", input.Email).Scan(&user.ID)
-	if err == nil {
-		// Eğer email zaten kayıtlıysa hata mesajı gönder
-		c.HTML(http.StatusBadRequest, "register.html", gin.H{"error": "Email already registered"})
-		return
-	} else if err != sql.ErrNoRows {
-		// Veritabanı hatası durumunda hata mesajı gönder
-		c.HTML(http.StatusInternalServerError, "register.html", gin.H{"error": "Database error"})
-		fmt.Println("Database error:", err) // Hata konsola yazdırıldı
-		return
-	}
-
-	// Şifreyi hash'le
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
-		// Şifreleme hatası durumunda hata mesajı gönder
-		c.HTML(http.StatusInternalServerError, "register.html", gin.H{"error": "Password encryption failed"})
-		fmt.Println("Password encryption failed:", err) // Hata konsola yazdırıldı
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
 
-	// Kullanıcıyı veritabanına ekle
-	stmt, err := config.DB.Prepare("INSERT INTO users(username, email, password) VALUES(?, ?, ?)")
+	_, err = config.DB.Exec("INSERT INTO users (username, email, password, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", input.Username, input.Email, hashedPassword)
 	if err != nil {
-		// Veritabanına hazırlık hatası durumunda hata mesajı gönder
-		c.HTML(http.StatusInternalServerError, "register.html", gin.H{"error": "Database error"})
-		fmt.Println("Prepare statement error:", err) // Hata konsola yazdırıldı
-		return
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(input.Username, input.Email, hashedPassword)
-	if err != nil {
-		// Veritabanına ekleme hatası durumunda hata mesajı gönder
-		c.HTML(http.StatusInternalServerError, "register.html", gin.H{"error": "Failed to create user"})
-		fmt.Println("Exec statement error:", err) // Hata konsola yazdırıldı
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 
-	// Başarılı kayıt durumunda ana sayfaya yönlendir
-	c.Redirect(http.StatusFound, "/")
+	c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
 }
