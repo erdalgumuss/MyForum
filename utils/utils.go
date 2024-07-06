@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -39,13 +40,22 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func CreateSession(userID uint) (string, error) {
-	sessionID := uuid.New().String()
-	_, err := config.DB.Exec("INSERT INTO sessions (id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)", sessionID, userID, time.Now(), time.Now().Add(24*time.Hour))
+func CreateSession(userID int) (string, error) {
+	sessionToken := uuid.New().String()
+	createdAt := time.Now().Format("2006-01-02 15:04:05")
+	updatedAt := createdAt
+	expiresAt := time.Now().Add(24 * time.Hour).Format("2006-01-02 15:04:05") // 24 saat sonra
+
+	insertSessionQuery := `
+    INSERT INTO sessions (user_id, token, created_at, updated_at, expires_at)
+    VALUES (?, ?, ?, ?, ?)
+    `
+	_, err := config.DB.Exec(insertSessionQuery, userID, sessionToken, createdAt, updatedAt, expiresAt)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to create session: %v", err)
 	}
-	return sessionID, nil
+
+	return sessionToken, nil
 }
 
 func GetUserIDFromSession(c *gin.Context) uint {

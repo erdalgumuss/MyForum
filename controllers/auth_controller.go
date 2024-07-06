@@ -7,6 +7,7 @@ import (
 
 	"MyForum/config"
 	"MyForum/models"
+	"MyForum/utils"
 
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -110,29 +111,49 @@ func ShowLoginPage(c *gin.Context) {
 
 func ProcessLogin(c *gin.Context) {
 	var input struct {
-		Email    string `form:"email" binding:"required"`
-		Password string `form:"password" binding:"required"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
-	if err := c.ShouldBind(&input); err != nil {
-		c.HTML(http.StatusBadRequest, "login.html", gin.H{"error": "Invalid form data"})
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		fmt.Println("JSON binding error:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var user models.User
-	err := config.DB.QueryRow("SELECT id, password FROM users WHERE email = ?", input.Email).Scan(&user.ID, &user.Password)
+	fmt.Println("Received login request:", input)
+
+	var storedUser models.User
+	err := config.DB.QueryRow("SELECT id, password FROM users WHERE email = ?", input.Email).Scan(&storedUser.ID, &storedUser.Password)
 	if err != nil {
-		c.HTML(http.StatusBadRequest, "login.html", gin.H{"error": "Invalid email or password"})
+		if err == sql.ErrNoRows {
+			fmt.Println("No user found for email:", input.Email)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+		} else {
+			fmt.Println("Database query error:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query user"})
+		}
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-		c.HTML(http.StatusBadRequest, "login.html", gin.H{"error": "Invalid email or password"})
+	fmt.Println("Stored user found:", storedUser)
+
+	err = bcrypt.CompareHashAndPassword([]byte(storedUser.Password), []byte(input.Password))
+	if err != nil {
+		fmt.Println("Password comparison error:", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
 	}
 
-	sessionToken := uuid.New().String()
+	sessionToken, err := utils.CreateSession(storedUser.ID)
+	if err != nil {
+		fmt.Println("Session creation error:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
+		return
+	}
+
 	c.SetCookie("session_token", sessionToken, 3600, "/", "localhost", false, true)
-	c.Redirect(http.StatusFound, "/")
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
 }
 
 func ShowRegisterPage(c *gin.Context) {

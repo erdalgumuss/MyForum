@@ -3,8 +3,8 @@ package config
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
+	"strings"
 
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
@@ -12,34 +12,32 @@ import (
 
 var DB *sql.DB
 
-func InitDB() {
-	// Load .env file
+func InitDB() error {
+	// .env dosyasını yükle
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file")
+		return fmt.Errorf("error loading .env file: %v", err)
 	}
 
-	// Create a database connection
+	// Veritabanı bağlantısını oluştur
 	dsn := os.Getenv("DB_PATH")
-	db, err := sql.Open("sqlite3", dsn)
+	DB, err = sql.Open("sqlite3", dsn)
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		return fmt.Errorf("failed to connect to database: %v", err)
 	}
 
-	// Check the database connection
-	if err := db.Ping(); err != nil {
-		log.Fatalf("Failed to ping database: %v", err)
+	// Veritabanı bağlantısını kontrol et
+	if err := DB.Ping(); err != nil {
+		return fmt.Errorf("failed to ping database: %v", err)
 	}
 
-	// Assign the db connection to the global variable
-	DB = db
 	fmt.Println("Database connected successfully")
 
-	// Create tables if they don't exist
-	createTables()
+	// Tabloları oluştur
+	return createTables()
 }
 
-func createTables() {
+func createTables() error {
 	createUserTable := `
 	CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,6 +47,10 @@ func createTables() {
 		created_at DATETIME,
 		updated_at DATETIME
 	);`
+	_, err := DB.Exec(createUserTable)
+	if err != nil {
+		return fmt.Errorf("failed to create users table: %v", err)
+	}
 
 	createPostTable := `
 	CREATE TABLE IF NOT EXISTS posts (
@@ -61,6 +63,10 @@ func createTables() {
 		created_at DATETIME,
 		updated_at DATETIME
 	);`
+	_, err = DB.Exec(createPostTable)
+	if err != nil {
+		return fmt.Errorf("failed to create posts table: %v", err)
+	}
 
 	createCommentTable := `
 	CREATE TABLE IF NOT EXISTS comments (
@@ -73,12 +79,20 @@ func createTables() {
 		created_at DATETIME,
 		updated_at DATETIME
 	);`
+	_, err = DB.Exec(createCommentTable)
+	if err != nil {
+		return fmt.Errorf("failed to create comments table: %v", err)
+	}
 
 	createCategoryTable := `
 	CREATE TABLE IF NOT EXISTS categories (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT UNIQUE NOT NULL
 	);`
+	_, err = DB.Exec(createCategoryTable)
+	if err != nil {
+		return fmt.Errorf("failed to create categories table: %v", err)
+	}
 
 	createPostCategoriesTable := `
 	CREATE TABLE IF NOT EXISTS post_categories (
@@ -87,12 +101,33 @@ func createTables() {
 		FOREIGN KEY (post_id) REFERENCES posts(id),
 		FOREIGN KEY (category_id) REFERENCES categories(id)
 	);`
-
-	tables := []string{createUserTable, createPostTable, createCommentTable, createCategoryTable, createPostCategoriesTable}
-
-	for _, table := range tables {
-		if _, err := DB.Exec(table); err != nil {
-			log.Fatalf("Failed to create table: %v", err)
-		}
+	_, err = DB.Exec(createPostCategoriesTable)
+	if err != nil {
+		return fmt.Errorf("failed to create post_categories table: %v", err)
 	}
+
+	createSessionTable := `
+	CREATE TABLE IF NOT EXISTS sessions (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER NOT NULL,
+		token TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		expires_at DATETIME,
+		FOREIGN KEY (user_id) REFERENCES users (id)
+	);
+	`
+	_, err = DB.Exec(createSessionTable)
+	if err != nil {
+		return fmt.Errorf("failed to create sessions table: %v", err)
+	}
+
+	// Try to add the column if it doesn't exist
+	alterTableQuery := `ALTER TABLE sessions ADD COLUMN expires_at DATETIME;`
+	_, err = DB.Exec(alterTableQuery)
+	if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
+		return fmt.Errorf("failed to alter sessions table: %v", err)
+	}
+
+	return nil
 }
