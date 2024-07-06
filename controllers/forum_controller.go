@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CreatePost handles the creation of a new post
 func CreatePost(c *gin.Context) {
 	var input models.Post
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -16,7 +17,14 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 
-	_, err := config.DB.Exec("INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)", input.Title, input.Content, input.UserID)
+	stmt, err := config.DB.Prepare("INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(input.Title, input.Content, input.UserID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
 		return
@@ -25,6 +33,7 @@ func CreatePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
 }
 
+// CreateComment handles the creation of a new comment
 func CreateComment(c *gin.Context) {
 	var input models.Comment
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -32,7 +41,14 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	_, err := config.DB.Exec("INSERT INTO comments (content, user_id, post_id) VALUES (?, ?, ?)", input.Content, input.UserID, input.PostID)
+	stmt, err := config.DB.Prepare("INSERT INTO comments (content, user_id, post_id) VALUES (?, ?, ?)")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(input.Content, input.UserID, input.PostID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment"})
 		return
@@ -41,6 +57,7 @@ func CreateComment(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Comment created successfully"})
 }
 
+// LikePost handles the liking of a post
 func LikePost(c *gin.Context) {
 	postID := c.Param("id")
 	result, err := config.DB.Exec("UPDATE posts SET likes = likes + 1 WHERE id = ?", postID)
@@ -58,6 +75,7 @@ func LikePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Post liked"})
 }
 
+// DislikePost handles the disliking of a post
 func DislikePost(c *gin.Context) {
 	postID := c.Param("id")
 	result, err := config.DB.Exec("UPDATE posts SET dislikes = dislikes + 1 WHERE id = ?", postID)
@@ -75,6 +93,7 @@ func DislikePost(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Post disliked"})
 }
 
+// LikeComment handles the liking of a comment
 func LikeComment(c *gin.Context) {
 	commentID := c.Param("id")
 	result, err := config.DB.Exec("UPDATE comments SET likes = likes + 1 WHERE id = ?", commentID)
@@ -92,6 +111,7 @@ func LikeComment(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Comment liked"})
 }
 
+// DislikeComment handles the disliking of a comment
 func DislikeComment(c *gin.Context) {
 	commentID := c.Param("id")
 	result, err := config.DB.Exec("UPDATE comments SET dislikes = dislikes + 1 WHERE id = ?", commentID)
@@ -109,8 +129,9 @@ func DislikeComment(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Comment disliked"})
 }
 
+// GetPosts retrieves all posts
 func GetPosts(c *gin.Context) {
-	rows, err := config.DB.Query("SELECT * FROM posts")
+	rows, err := config.DB.Query("SELECT id, title, content, likes, dislikes, user_id FROM posts")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
 		return
@@ -121,27 +142,25 @@ func GetPosts(c *gin.Context) {
 	for rows.Next() {
 		var post models.Post
 		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan posts"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan post"})
 			return
 		}
 		posts = append(posts, post)
 	}
 
-	c.HTML(http.StatusOK, "index.html", gin.H{
-		"Posts": posts,
-	})
+	c.HTML(http.StatusOK, "index.html", gin.H{"Posts": posts})
 }
 
+// GetPost retrieves a single post by ID
 func GetPost(c *gin.Context) {
 	id := c.Param("id")
 	var post models.Post
-	err := config.DB.QueryRow("SELECT * FROM posts WHERE id = ?", id).Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID)
+	err := config.DB.QueryRow("SELECT id, title, content, likes, dislikes, user_id FROM posts WHERE id = ?", id).
+		Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
 
-	c.HTML(http.StatusOK, "post.html", gin.H{
-		"Post": post,
-	})
+	c.HTML(http.StatusOK, "post.html", gin.H{"Post": post})
 }

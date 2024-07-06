@@ -1,18 +1,18 @@
 package routes
 
 import (
-	"MyForum/controllers"
+	"MyForum/handlers" // controllers yerine handlers
+
 	"github.com/gin-gonic/gin"
 )
 
-
 func ForumRoutes(r *gin.Engine) {
-	r.GET("/", controllers.GetPosts)
-	r.GET("/posts/:id", controllers.GetPost)
-	r.POST("/posts", controllers.CreatePost)
-	r.POST("/comments", controllers.CreateComment)
-	r.POST("/posts/:id/like", controllers.LikePost)
-	r.POST("/posts/:id/dislike", controllers.DislikePost)
-	r.POST("/comments/:id/like", controllers.LikeComment)
-	r.POST("/comments/:id/dislike", controllers.DislikeComment)
+	r.GET("/", handlers.GetPosts)                            // controllers yerine handlers
+	r.GET("/posts/:id", handlers.GetPost)                    // controllers yerine handlers
+	r.POST("/posts", handlers.CreatePost)                    // controllers yerine handlers
+	r.POST("/comments", handlers.CreateComment)              // controllers yerine handlers
+	r.POST("/posts/:id/like", handlers.LikePost)             // controllers yerine handlers
+	r.POST("/posts/:id/dislike", handlers.DislikePost)       // controllers yerine handlers
+	r.POST("/comments/:id/like", handlers.LikeComment)       // controllers yerine handlers
+	r.POST("/comments/:id/dislike", handlers.DislikeComment) // controllers yerine handlers
 }

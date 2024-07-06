@@ -1,16 +1,14 @@
-// routes/profile_routes.go
-
 package routes
 
 import (
-	"MyForum/controllers"
+	"MyForum/handlers"
+	"MyForum/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
-// ProfileRoutes profil rotalarını kaydeder
-func ProfileRoutes(r *gin.Engine) {
-	r.GET("/profile", controllers.GetUserProfile)
-	r.PUT("/profile", controllers.UpdateProfile)
-	r.POST("/profile/change-password", controllers.ChangePassword)
+func RegisterProfileRoutes(router *gin.Engine) {
+	router.GET("/profile", utils.AuthMiddleware(), handlers.ProfileView)
+	router.PUT("/profile", utils.AuthMiddleware(), handlers.ProfileUpdate)
+	router.POST("/profile/change-password", utils.AuthMiddleware(), handlers.ChangePassword)
 }

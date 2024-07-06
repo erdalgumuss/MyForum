@@ -8,23 +8,23 @@ import (
 )
 
 func main() {
-	// Veritabanını başlat
+	// Initialize database
 	config.InitDB()
 
-	// Yeni bir Gin router oluştur
+	// Create a new Gin router
 	r := gin.Default()
 
-	// Statik dosyaları sun
-	r.Static("/static", "./static")
+	// Serve static files
+	//r.Static("/static", "./static")
 
-	// HTML şablonlarını yükle
+	// Load HTML templates
 	r.LoadHTMLGlob("templates/*")
 
-	// Rotaları tanımla
+	// Define routes
 	routes.AuthRoutes(r)
 	routes.ForumRoutes(r)
-	routes.ProfileRoutes(r) // Profil rotalarını ekledik
+	routes.RegisterProfileRoutes(r)
 
-	// Sunucuyu başlat
+	// Start the server
 	r.Run(":8080")
 }

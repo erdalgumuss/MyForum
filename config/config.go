@@ -13,59 +13,86 @@ import (
 var DB *sql.DB
 
 func InitDB() {
-	// .env dosyasını yükle
+	// Load .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Error loading .env file: %v", err)
+		log.Fatalf("Error loading .env file")
 	}
 
-	// Veritabanı bağlantısını oluştur
-	db, err := sql.Open("sqlite3", os.Getenv("DB_PATH"))
+	// Create a database connection
+	dsn := os.Getenv("DB_PATH")
+	db, err := sql.Open("sqlite3", dsn)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Veritabanı bağlantısını atama
+	// Check the database connection
+	if err := db.Ping(); err != nil {
+		log.Fatalf("Failed to ping database: %v", err)
+	}
+
+	// Assign the db connection to the global variable
 	DB = db
 	fmt.Println("Database connected successfully")
 
-	// Tabloları oluşturma işlemini yap
+	// Create tables if they don't exist
 	createTables()
 }
 
 func createTables() {
-	// Kullanıcı tablosunu oluştur
-	_, err := DB.Exec(`
+	createUserTable := `
 	CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT,
-		email TEXT UNIQUE,
+		username TEXT ,
+		email TEXT	,
 		password TEXT,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	);
-	`)
-	if err != nil {
-		log.Fatalf("Failed to create users table: %v", err)
-	}
+		created_at DATETIME,
+		updated_at DATETIME
+	);`
 
-	// Post tablosunu oluştur
-	_, err = DB.Exec(`
+	createPostTable := `
 	CREATE TABLE IF NOT EXISTS posts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		title TEXT NOT NULL,
-		content TEXT NOT NULL,
+		title TEXT,
+		content TEXT,
 		user_id INTEGER,
 		likes INTEGER DEFAULT 0,
 		dislikes INTEGER DEFAULT 0,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY(user_id) REFERENCES users(id)
-	);
-	`)
-	if err != nil {
-		log.Fatalf("Failed to create posts table: %v", err)
-	}
+		created_at DATETIME,
+		updated_at DATETIME
+	);`
 
-	// Diğer tabloları oluşturma işlemlerini buraya ekleyebilirsiniz.
+	createCommentTable := `
+	CREATE TABLE IF NOT EXISTS comments (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		content TEXT,
+		user_id INTEGER,
+		post_id INTEGER,
+		likes INTEGER DEFAULT 0,
+		dislikes INTEGER DEFAULT 0,
+		created_at DATETIME,
+		updated_at DATETIME
+	);`
+
+	createCategoryTable := `
+	CREATE TABLE IF NOT EXISTS categories (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT UNIQUE NOT NULL
+	);`
+
+	createPostCategoriesTable := `
+	CREATE TABLE IF NOT EXISTS post_categories (
+		post_id INTEGER,
+		category_id INTEGER,
+		FOREIGN KEY (post_id) REFERENCES posts(id),
+		FOREIGN KEY (category_id) REFERENCES categories(id)
+	);`
+
+	tables := []string{createUserTable, createPostTable, createCommentTable, createCategoryTable, createPostCategoriesTable}
+
+	for _, table := range tables {
+		if _, err := DB.Exec(table); err != nil {
+			log.Fatalf("Failed to create table: %v", err)
+		}
+	}
 }

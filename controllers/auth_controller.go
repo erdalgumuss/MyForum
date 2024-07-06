@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Register handles user registration.
 func Register(c *gin.Context) {
 	var input models.User
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -21,8 +22,9 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	var user models.User
-	err := config.DB.QueryRow("SELECT id FROM users WHERE email = ?", input.Email).Scan(&user.ID)
+	// Check if email is already registered
+	var existingUser models.User
+	err := config.DB.QueryRow("SELECT id FROM users WHERE email = ?", input.Email).Scan(&existingUser.ID)
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Email already taken"})
 		return
@@ -31,7 +33,8 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	err = config.DB.QueryRow("SELECT id FROM users WHERE username = ?", input.Username).Scan(&user.ID)
+	// Check if username is already taken
+	err = config.DB.QueryRow("SELECT id FROM users WHERE username = ?", input.Username).Scan(&existingUser.ID)
 	if err == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Username already taken"})
 		return
@@ -40,12 +43,14 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password.String), bcrypt.DefaultCost)
+	// Hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
 
+	// Insert user into database
 	stmt, err := config.DB.Prepare("INSERT INTO users(username, email, password) VALUES(?, ?, ?)")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
@@ -64,11 +69,11 @@ func Register(c *gin.Context) {
 
 func Login(c *gin.Context) {
 	var input struct {
-		Email    string `form:"email" binding:"required"`
-		Password string `form:"password" binding:"required"`
+		Email    string `json:"email" binding:"required"`
+		Password string `json:"password" binding:"required"`
 	}
 
-	if err := c.ShouldBind(&input); err != nil {
+	if err := c.ShouldBindJSON(&input); err != nil {
 		fmt.Println("ShouldBind error:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -84,7 +89,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password.String), []byte(input.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
@@ -104,7 +109,10 @@ func ShowLoginPage(c *gin.Context) {
 }
 
 func ProcessLogin(c *gin.Context) {
-	var input models.User
+	var input struct {
+		Email    string `form:"email" binding:"required"`
+		Password string `form:"password" binding:"required"`
+	}
 	if err := c.ShouldBind(&input); err != nil {
 		c.HTML(http.StatusBadRequest, "login.html", gin.H{"error": "Invalid form data"})
 		return
@@ -117,14 +125,14 @@ func ProcessLogin(c *gin.Context) {
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password.String), []byte(input.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
 		c.HTML(http.StatusBadRequest, "login.html", gin.H{"error": "Invalid email or password"})
 		return
 	}
 
 	sessionToken := uuid.New().String()
 	c.SetCookie("session_token", sessionToken, 3600, "/", "localhost", false, true)
-	c.Redirect(http.StatusFound, "/") // Redirect to the homepage
+	c.Redirect(http.StatusFound, "/")
 }
 
 func ShowRegisterPage(c *gin.Context) {
@@ -132,60 +140,60 @@ func ShowRegisterPage(c *gin.Context) {
 }
 
 func ProcessRegister(c *gin.Context) {
-	var input models.User
+	var input struct {
+		Username string `form:"username" binding:"required"`
+		Email    string `form:"email" binding:"required"`
+		Password string `form:"password" binding:"required"`
+	}
+
+	// Form verilerini al ve input yapısına bind et
 	if err := c.ShouldBind(&input); err != nil {
+		// Hatalı form verisi durumunda hata mesajı gönder
 		c.HTML(http.StatusBadRequest, "register.html", gin.H{"error": "Invalid form data"})
 		return
 	}
 
+	// Veritabanında kullanıcı var mı diye kontrol et
 	var user models.User
 	err := config.DB.QueryRow("SELECT id FROM users WHERE email = ?", input.Email).Scan(&user.ID)
 	if err == nil {
+		// Eğer email zaten kayıtlıysa hata mesajı gönder
 		c.HTML(http.StatusBadRequest, "register.html", gin.H{"error": "Email already registered"})
 		return
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Password encryption failed"})
+	} else if err != sql.ErrNoRows {
+		// Veritabanı hatası durumunda hata mesajı gönder
+		c.HTML(http.StatusInternalServerError, "register.html", gin.H{"error": "Database error"})
+		fmt.Println("Database error:", err) // Hata konsola yazdırıldı
 		return
 	}
 
+	// Şifreyi hash'le
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		// Şifreleme hatası durumunda hata mesajı gönder
+		c.HTML(http.StatusInternalServerError, "register.html", gin.H{"error": "Password encryption failed"})
+		fmt.Println("Password encryption failed:", err) // Hata konsola yazdırıldı
+		return
+	}
+
+	// Kullanıcıyı veritabanına ekle
 	stmt, err := config.DB.Prepare("INSERT INTO users(username, email, password) VALUES(?, ?, ?)")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
+		// Veritabanına hazırlık hatası durumunda hata mesajı gönder
+		c.HTML(http.StatusInternalServerError, "register.html", gin.H{"error": "Database error"})
+		fmt.Println("Prepare statement error:", err) // Hata konsola yazdırıldı
 		return
 	}
 	defer stmt.Close()
 
 	_, err = stmt.Exec(input.Username, input.Email, hashedPassword)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		// Veritabanına ekleme hatası durumunda hata mesajı gönder
+		c.HTML(http.StatusInternalServerError, "register.html", gin.H{"error": "Failed to create user"})
+		fmt.Println("Exec statement error:", err) // Hata konsola yazdırıldı
 		return
 	}
 
-	c.Redirect(http.StatusFound, "/login") // Redirect to the login page if registration is successful
-}
-
-// ListUsers lists all users
-func ListUsers(c *gin.Context) {
-	rows, err := config.DB.Query("SELECT id, username, email, created_at, updated_at FROM users")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch users"})
-		return
-	}
-	defer rows.Close()
-
-	var users []models.User
-	for rows.Next() {
-		var user models.User
-		err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.CreatedAt, &user.UpdatedAt)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan user row"})
-			return
-		}
-		users = append(users, user)
-	}
-
-	c.JSON(http.StatusOK, users)
+	// Başarılı kayıt durumunda ana sayfaya yönlendir
+	c.Redirect(http.StatusFound, "/")
 }

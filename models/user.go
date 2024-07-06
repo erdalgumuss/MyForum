@@ -1,12 +1,14 @@
 package models
 
-import "database/sql"
+import (
+	"time"
+)
 
 type User struct {
-	ID       int64          `json:"id"`
-	Username sql.NullString `json:"username"`
-	Email    sql.NullString `json:"email"`
-	Password sql.NullString `json:"password"`
-	CreatedAt sql.NullTime   `json:"created_at"`
-	UpdatedAt sql.NullTime   `json:"updated_at"`
+	ID        uint      `json:"id"`       // Unique identifier for the user
+	Email     string    `json:"email"`    // Email of the user (nullable)
+	Username  string    `json:"username"` // Username of the user (nullable)
+	Password  string    `json:"password"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

@@ -4,24 +4,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jinzhu/gorm"
 )
 
 type Session struct {
-	gorm.Model
-	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()"`
-	UserID    uint
-	CreatedAt time.Time
-	ExpiresAt time.Time
-}
-
-func (session *Session) BeforeCreate(scope *gorm.Scope) error {
-	uuid, err := uuid.NewRandom()
-	if err != nil {
-		return err
-	}
-	scope.SetColumn("ID", uuid)
-	scope.SetColumn("CreatedAt", time.Now())
-	scope.SetColumn("ExpiresAt", time.Now().Add(24*time.Hour))
-	return nil
+	ID        uuid.UUID `json:"id"`
+	UserID    uint      `json:"user_id"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiresAt time.Time `json:"expires_at"`
 }

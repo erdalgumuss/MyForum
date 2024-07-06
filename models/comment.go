@@ -1,14 +1,10 @@
 package models
 
-import "github.com/jinzhu/gorm"
-
 type Comment struct {
-	gorm.Model
-	Content string `gorm:"not null"`
-	PostID  uint
-	Post    Post
-	UserID  uint
-	User    User
-	Likes   int
-	Dislikes int
+	ID       uint   `json:"id"`
+	Content  string `json:"content"`
+	PostID   uint   `json:"post_id"`
+	UserID   uint   `json:"user_id"`
+	Likes    int    `json:"likes"`
+	Dislikes int    `json:"dislikes"`
 }

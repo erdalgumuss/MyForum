@@ -1,15 +1,11 @@
 package models
 
-import "github.com/jinzhu/gorm"
-
 type Post struct {
-	gorm.Model
-	Title      string `gorm:"not null"`
-	Content    string `gorm:"not null"`
-	UserID     uint
-	User       User
-	Comments   []Comment
-	Categories []Category `gorm:"many2many:post_categories;"`
-	Likes      int
-	Dislikes   int
+	ID         uint       `json:"id"`
+	Title      string     `json:"title"`
+	Content    string     `json:"content"`
+	UserID     uint       `json:"user_id"`
+	Likes      int        `json:"likes"`
+	Dislikes   int        `json:"dislikes"`
+	Categories []Category `json:"categories"`
 }
