@@ -8,6 +8,7 @@ import (
 
 func AuthRoutes(r *gin.Engine) {
 	// Define routes
+	r.GET("/", handlers.ShowIndexPage)
 	r.GET("/login", handlers.ShowLoginPage)
 	r.POST("/login", handlers.ProcessLogin)
 	r.GET("/register", handlers.ShowRegisterPage)

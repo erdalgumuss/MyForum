@@ -12,6 +12,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func ShowIndexPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", nil)
+}
+
 func ShowLoginPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", nil)
 }
@@ -21,7 +25,7 @@ func ProcessLogin(c *gin.Context) {
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-	}	
+	}
 
 	var storedUser models.User
 	err := config.DB.QueryRow("SELECT id, password FROM users WHERE username = ?", input.Username).Scan(&storedUser.ID, &storedUser.Password)
