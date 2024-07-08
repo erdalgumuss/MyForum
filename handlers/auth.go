@@ -19,6 +19,7 @@ func ShowLoginPage(c *gin.Context) {
 		"Title": "Login",
 	})
 }
+
 func ProcessLogin(c *gin.Context) {
 	controllers.ProcessLogin(c)
 }
@@ -29,6 +30,7 @@ func ShowRegisterPage(c *gin.Context) {
 
 func ProcessRegister(c *gin.Context) {
 	controllers.Register(c)
+	//
 }
 
 func Logout(c *gin.Context) {
