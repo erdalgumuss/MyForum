@@ -17,7 +17,7 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionToken, err := c.Cookie("session_token")
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Redirect(http.StatusFound, "/")
 			c.Abort()
 			return
 		}
@@ -25,13 +25,13 @@ func AuthMiddleware() gin.HandlerFunc {
 		var session models.Session
 		err = config.DB.QueryRow("SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?", sessionToken).Scan(&session.ID, &session.UserID, &session.CreatedAt, &session.ExpiresAt)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Redirect(http.StatusFound, "/")
 			c.Abort()
 			return
 		}
 
 		if session.ExpiresAt.Before(time.Now()) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Session expired"})
+			c.Redirect(http.StatusFound, "/")
 			c.Abort()
 			return
 		}

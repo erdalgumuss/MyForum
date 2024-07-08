@@ -1,80 +1,48 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyForum</title>
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
-</head>
-<body>
-    <header>
-        <h1>FIXIT FORUM</h1>
-        <nav>
-            <ul>
-                <li><a href="index">Anasayfa</a></li>
-                <li><a href="profile.html">Profil</a></li>
-                <li><a href="#" id="login-btn">Giriş Yap</a></li>
-                <li><a href="#" id="register-btn">Kayıt Ol</a></li>
-            </ul>
-        </nav>
-    </header>
+<!-- Header ve nav aynı kalacak -->
 
-    <main id="content">
-        <h2>Forum Anasayfa</h2>
-        <div id="filter">
-            <input type="text" id="search" placeholder="Ara...">
-            <button id="search-btn">Ara</button>
+<main id="content">
+    <h2>Kullanıcı Profili</h2>
+    <div id="profile-info">
+        <div id="profile-picture">
+            <!-- Profil resmi buraya eklenecek -->
+            <img src="/static/images/profile.jpg" alt="Profil Resmi">
         </div>
-        <div id="posts">
-            <!-- Örnek gönderiler -->
-            <div class="post">
-                <h3 class="post-title">İlk Gönderi</h3>
-                <p>Bu, forumdaki ilk gönderinin içeriğidir.</p>
-            </div>
-            <div class="post">
-                <h3 class="post-title">İkinci Gönderi</h3>
-                <p>Bu, forumdaki ikinci gönderinin içeriğidir.</p>
-            </div>
-            <!-- Daha fazla gönderi ekleyin -->
-        </div>
-    </main>
-
-    <!-- Giriş Yap Pop-up -->
-    <div id="login-popup" class="popup">
-        <div class="popup-content">
-            <span class="close-btn" id="close-login">&times;</span>
-            <h2>Giriş Yap</h2>
-            <form id="login-form">
-                <label for="login-username">Kullanıcı Adı:</label>
-                <input type="text" id="login-username" name="username" required>
-                <label for="login-password">Şifre:</label>
-                <input type="password" id="login-password" name="password" required>
-                <button type="submit">Giriş Yap</button>
-            </form>
+        <div id="profile-details">
+            <h3>Kullanıcı Adı</h3>
+            <p>Adı Soyadı</p>
+            <h3>E-posta Adresi</h3>
+            <p>user@example.com</p>
+            <!-- Diğer profil bilgileri buraya eklenebilir -->
         </div>
     </div>
-
-    <!-- Kayıt Ol Pop-up -->
-    <div id="register-popup" class="popup">
-        <div class="popup-content">
-            <span class="close-btn" id="close-register">&times;</span>
-            <h2>Kayıt Ol</h2>
-            <form id="register-form">
-                <label for="register-username">Kullanıcı Adı:</label>
-                <input type="text" id="register-username" name="username" required>
-                <label for="register-email">Email:</label>
-                <input type="email" id="register-email" name="email" required>
-                <label for="register-password">Şifre:</label>
-                <input type="password" id="register-password" name="password" required>
-                <button type="submit">Kayıt Ol</button>
-            </form>
+    <div id="user-activities">
+        <h3>Beğeniler</h3>
+        <ul id="user-likes">
+            <!-- Kullanıcının beğendiği gönderiler buraya eklenecek -->
+            <li>Beğeni 1</li>
+            <li>Beğeni 2</li>
+            <li>Beğeni 3</li>
+        </ul>
+        <h3>Yorumlar</h3>
+        <ul id="user-comments">
+            <!-- Kullanıcının yaptığı yorumlar buraya eklenecek -->
+            <li>Yorum 1</li>
+            <li>Yorum 2</li>
+            <li>Yorum 3</li>
+        </ul>
+        <h3>Paylaşılan Gönderiler</h3>
+        <div id="user-posts">
+            <!-- Kullanıcının paylaştığı gönderiler buraya eklenecek -->
+            <div class="post">
+                <h4>Gönderi Başlığı</h4>
+                <p>Gönderi içeriği</p>
+            </div>
+            <div class="post">
+                <h4>Gönderi Başlığı</h4>
+                <p>Gönderi içeriği</p>
+            </div>
         </div>
     </div>
+</main>
 
-    <footer>
-        <p>&copy; 2024 Forum Sitesi</p>
-    </footer>
-
-    <script src="/static/js/main.js"></script>
-</body>
-</html>
+<!-- Footer ve popup aynı kalacak -->

@@ -34,9 +34,9 @@ MyForum/
 │   ├── comment.html
 │   ├── create_topic.html
 │   ├── index.html
-│   ├── login.html
+│   ├──
 │   ├── profile.html
-│   ├── register.html
+│   ├── 
 │   └── topic.html
 └── utils
     └── utils.go

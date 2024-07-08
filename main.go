@@ -23,7 +23,7 @@ func main() {
 	// Define routes
 	routes.AuthRoutes(r)
 	routes.ForumRoutes(r)
-	routes.RegisterProfileRoutes(r)
+	routes.ProfileRoutes(r)
 
 	// Start the server
 	r.Run(":8080")

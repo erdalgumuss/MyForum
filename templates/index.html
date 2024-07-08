@@ -12,7 +12,7 @@
         <nav>
             <ul>
                 <li><a href="/">Anasayfa</a></li>
-                <li><a href="profile">Profil</a></li>
+                <li><a href="/profile">Profil</a></li>
                 <li><a href="#" id="login-btn">Giriş Yap</a></li>
                 <li><a href="#" id="register-btn">Kayıt Ol</a></li>
             </ul>
@@ -25,6 +25,22 @@
             <input type="text" id="search" placeholder="Ara...">
             <button id="search-btn">Ara</button>
         </div>
+
+        <!-- Giriş Yap Pop-up -->
+        <div id="login-popup" class="popup">
+            <div class="popup-content">
+                <span class="close-btn" id="close-login">&times;</span>
+                <h2>Giriş Yap</h2>
+                <form id="login-form" action="/login" method="post">
+                    <label for="login-username">Kullanıcı Adı:</label>
+                    <input type="text" id="login-username" name="username" required>
+                    <label for="login-password">Şifre:</label>
+                    <input type="password" id="login-password" name="password" required>
+                    <button type="submit">Giriş Yap</button>
+                </form>
+            </div>
+        </div>
+
         <div id="posts">
             <!-- Örnek gönderiler -->
             <div class="post">
@@ -38,21 +54,6 @@
             <!-- Daha fazla gönderi ekleyin -->
         </div>
     </main>
-
-    <!-- Giriş Yap Pop-up -->
-    <div id="login-popup" class="popup">
-        <div class="popup-content">
-            <span class="close-btn" id="close-login">&times;</span>
-            <h2>Giriş Yap</h2>
-            <form id="login-form">
-                <label for="login-username">Kullanıcı Adı:</label>
-                <input type="text" id="login-username" name="username" required>
-                <label for="login-password">Şifre:</label>
-                <input type="password" id="login-password" name="password" required>
-                <button type="submit">Giriş Yap</button>
-            </form>
-        </div>
-    </div>
 
     <!-- Kayıt Ol Pop-up -->
     <div id="register-popup" class="popup">

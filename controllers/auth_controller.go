@@ -78,7 +78,7 @@ func ShowLoginPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", gin.H{})
 }
 
-func ProcessLogin(c *gin.Context) {
+func Login(c *gin.Context) {
 	var input struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -123,5 +123,4 @@ func ProcessLogin(c *gin.Context) {
 
 	c.SetCookie("session_token", sessionToken, 3600, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
-	// c.Redirect(http.StatusFound, "/") // Başarılı giriş sonrası yönlendirme
 }

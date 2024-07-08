@@ -21,7 +21,7 @@ func ShowLoginPage(c *gin.Context) {
 }
 
 func ProcessLogin(c *gin.Context) {
-	controllers.ProcessLogin(c)
+	controllers.Login(c)
 }
 
 func ShowRegisterPage(c *gin.Context) {
