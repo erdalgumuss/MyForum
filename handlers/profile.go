@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"MyForum/config"
@@ -8,23 +9,31 @@ import (
 	"MyForum/utils"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func ProfileView(c *gin.Context) {
-	userID := utils.GetUserIDFromSession(c)
-
-	var profile models.Profile
-	err := config.DB.QueryRow("SELECT id, username, email, full_name FROM users WHERE id = ?", userID).Scan(&profile.ID, &profile.Username, &profile.Email, &profile.FullName)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch profile"})
+	userID, ok := utils.GetUserIDFromSession(c)
+	if !ok {
+		log.Println("User ID not found in context")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	c.JSON(http.StatusOK, profile)
+	var user models.User
+	err := config.DB.QueryRow("SELECT id, email, username FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Email, &user.Username)
+	if err != nil {
+		log.Println("Failed to retrieve user profile:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user profile"})
+		return
+	}
+
+	log.Println("User profile retrieved for user ID:", user.ID)
+	c.HTML(http.StatusOK, "profile.html", gin.H{
+		"user": user,
+	})
 }
 
-func ProfileUpdate(c *gin.Context) {
+/*func ProfileUpdate(c *gin.Context) {
 	userID := utils.GetUserIDFromSession(c)
 
 	var input models.Profile
@@ -42,7 +51,7 @@ func ProfileUpdate(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Profile updated successfully"})
 }
 
-func ChangePassword(c *gin.Context) {
+/*func ChangePassword(c *gin.Context) {
 	userID := utils.GetUserIDFromSession(c)
 
 	var input models.ChangePasswordRequest
@@ -77,4 +86,4 @@ func ChangePassword(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
-}
+}*/

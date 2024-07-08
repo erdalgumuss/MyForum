@@ -3,11 +3,12 @@ package config
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
 	"github.com/joho/godotenv"
-	_"github.com/mattn/go-sqlite3"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var DB *sql.DB
@@ -16,6 +17,7 @@ func InitDB() error {
 	// .env dosyasını yükle
 	err := godotenv.Load()
 	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
 		return fmt.Errorf("error loading .env file: %v", err)
 	}
 
@@ -23,11 +25,13 @@ func InitDB() error {
 	dsn := os.Getenv("DB_PATH")
 	DB, err = sql.Open("sqlite3", dsn)
 	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
 		return fmt.Errorf("failed to connect to database: %v", err)
 	}
 
 	// Veritabanı bağlantısını kontrol et
 	if err := DB.Ping(); err != nil {
+		log.Fatalf("Failed to ping database: %v", err)
 		return fmt.Errorf("failed to ping database: %v", err)
 	}
 
@@ -49,6 +53,7 @@ func createTables() error {
 	);`
 	_, err := DB.Exec(createUserTable)
 	if err != nil {
+		log.Fatalf("Failed to create users table: %v", err)
 		return fmt.Errorf("failed to create users table: %v", err)
 	}
 
@@ -65,6 +70,7 @@ func createTables() error {
 	);`
 	_, err = DB.Exec(createPostTable)
 	if err != nil {
+		log.Fatalf("Failed to create posts table: %v", err)
 		return fmt.Errorf("failed to create posts table: %v", err)
 	}
 
@@ -81,6 +87,7 @@ func createTables() error {
 	);`
 	_, err = DB.Exec(createCommentTable)
 	if err != nil {
+		log.Fatalf("Failed to create comments table: %v", err)
 		return fmt.Errorf("failed to create comments table: %v", err)
 	}
 
@@ -91,6 +98,7 @@ func createTables() error {
 	);`
 	_, err = DB.Exec(createCategoryTable)
 	if err != nil {
+		log.Fatalf("Failed to create categories table: %v", err)
 		return fmt.Errorf("failed to create categories table: %v", err)
 	}
 
@@ -103,6 +111,7 @@ func createTables() error {
 	);`
 	_, err = DB.Exec(createPostCategoriesTable)
 	if err != nil {
+		log.Fatalf("Failed to create post_categories table: %v", err)
 		return fmt.Errorf("failed to create post_categories table: %v", err)
 	}
 
@@ -119,6 +128,7 @@ func createTables() error {
 	`
 	_, err = DB.Exec(createSessionTable)
 	if err != nil {
+		log.Fatalf("Failed to create sessions table: %v", err)
 		return fmt.Errorf("failed to create sessions table: %v", err)
 	}
 
@@ -126,6 +136,7 @@ func createTables() error {
 	alterTableQuery := `ALTER TABLE sessions ADD COLUMN expires_at DATETIME;`
 	_, err = DB.Exec(alterTableQuery)
 	if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
+		log.Fatalf("Failed to alter sessions table: %v", err)
 		return fmt.Errorf("failed to alter sessions table: %v", err)
 	}
 

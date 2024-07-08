@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -13,29 +15,44 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// AuthMiddleware is a middleware function for checking user authentication via session token.
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Retrieve session token from the cookies
 		sessionToken, err := c.Cookie("session_token")
 		if err != nil {
+			log.Println("No session token found, redirecting to home")
 			c.Redirect(http.StatusFound, "/")
 			c.Abort()
 			return
 		}
 
+		log.Println("Session token retrieved from cookie:", sessionToken)
+
+		// Query the session from the database using the session token
 		var session models.Session
 		err = config.DB.QueryRow("SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?", sessionToken).Scan(&session.ID, &session.UserID, &session.CreatedAt, &session.ExpiresAt)
 		if err != nil {
+			if err == sql.ErrNoRows {
+				log.Println("Invalid session token, no session found for token:", sessionToken)
+			} else {
+				log.Println("Error querying session:", err)
+			}
 			c.Redirect(http.StatusFound, "/")
 			c.Abort()
 			return
 		}
 
+		// Check if the session is expired
 		if session.ExpiresAt.Before(time.Now()) {
+			log.Println("Session expired for token:", sessionToken)
 			c.Redirect(http.StatusFound, "/")
 			c.Abort()
 			return
 		}
 
+		// Set the userID in the context for further handlers
+		log.Println("User authenticated with ID:", session.UserID)
 		c.Set("userID", session.UserID)
 		c.Next()
 	}
@@ -59,12 +76,22 @@ func CreateSession(userID int) (string, error) {
 	return sessionToken, nil
 }
 
-func GetUserIDFromSession(c *gin.Context) uint {
+// GetUserIDFromSession retrieves the user ID from the context set by the AuthMiddleware.
+// Returns the user ID and a boolean indicating if the user ID was successfully retrieved.
+func GetUserIDFromSession(c *gin.Context) (int, bool) {
 	userID, exists := c.Get("userID")
 	if !exists {
-		return 0
+		return 0, false
 	}
-	return userID.(uint)
+
+	// Type assertion with check
+	id, ok := userID.(int)
+	if !ok {
+		log.Println("UserID found in context is not of type uint")
+		return 0, false
+	}
+
+	return id, true
 }
 
 // AuthRequired middleware checks if the user is authenticated
@@ -89,14 +116,6 @@ func AuthRequired() gin.HandlerFunc {
 		c.Set("user_id", userID)
 		c.Next()
 	}
-}
-
-func HashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hashedPassword), nil
 }
 
 // CheckPasswordHash compares a password with its hashed value.

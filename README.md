@@ -30,7 +30,7 @@ MyForum/
 │   └── js
 │       └── main.js
 ├── templates
-│   ├── base.html
+│   ├──
 │   ├── comment.html
 │   ├── create_topic.html
 │   ├── index.html

@@ -1,48 +1,46 @@
-<!-- Header ve nav aynı kalacak -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>MyForum</h1>
+        <nav>
+            <ul>
+                <li><a href="/">Anasayfa</a></li>
+                <li><a href="/profile">Profil</a></li>
+                <li><a href="/logout">Çıkış</a></li>
+            </ul>
+        </nav>
+    </header>
 
-<main id="content">
-    <h2>Kullanıcı Profili</h2>
-    <div id="profile-info">
-        <div id="profile-picture">
-            <!-- Profil resmi buraya eklenecek -->
-            <img src="/static/images/profile.jpg" alt="Profil Resmi">
+    <main id="content">
+        <h2>Kullanıcı Profili</h2>
+        <div id="profile-info">
+            <div id="profile-picture"></div>
+            <div id="profile-details"></div>
         </div>
-        <div id="profile-details">
-            <h3>Kullanıcı Adı</h3>
-            <p>Adı Soyadı</p>
-            <h3>E-posta Adresi</h3>
-            <p>user@example.com</p>
-            <!-- Diğer profil bilgileri buraya eklenebilir -->
-        </div>
-    </div>
-    <div id="user-activities">
-        <h3>Beğeniler</h3>
-        <ul id="user-likes">
-            <!-- Kullanıcının beğendiği gönderiler buraya eklenecek -->
-            <li>Beğeni 1</li>
-            <li>Beğeni 2</li>
-            <li>Beğeni 3</li>
-        </ul>
-        <h3>Yorumlar</h3>
-        <ul id="user-comments">
-            <!-- Kullanıcının yaptığı yorumlar buraya eklenecek -->
-            <li>Yorum 1</li>
-            <li>Yorum 2</li>
-            <li>Yorum 3</li>
-        </ul>
-        <h3>Paylaşılan Gönderiler</h3>
         <div id="user-posts">
-            <!-- Kullanıcının paylaştığı gönderiler buraya eklenecek -->
-            <div class="post">
-                <h4>Gönderi Başlığı</h4>
-                <p>Gönderi içeriği</p>
-            </div>
-            <div class="post">
-                <h4>Gönderi Başlığı</h4>
-                <p>Gönderi içeriği</p>
-            </div>
+            <h3>Paylaşılan Gönderiler</h3>
+            <div id="posts-container"></div>
         </div>
-    </div>
-</main>
+        <div id="user-likes">
+            <h3>Beğeniler</h3>
+            <ul id="likes-list"></ul>
+        </div>
+        <div id="user-comments">
+            <h3>Yorumlar</h3>
+            <ul id="comments-list"></ul>
+        </div>
+    </main>
 
-<!-- Footer ve popup aynı kalacak -->
+    <footer>
+        <p>&copy; 2024 MyForum</p>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
