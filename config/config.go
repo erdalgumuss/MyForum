@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
-	_ "github.com/mattn/go-sqlite3"
+	_"github.com/mattn/go-sqlite3"
 )
 
 var DB *sql.DB

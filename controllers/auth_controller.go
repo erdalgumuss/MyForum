@@ -9,12 +9,12 @@ import (
 	"MyForum/models"
 	"MyForum/utils"
 
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gin-gonic/gin"
 )
 
+// Register handles user registration.
 // Register handles user registration.
 func Register(c *gin.Context) {
 	var input models.User
@@ -68,38 +68,7 @@ func Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
 }
 
-func Login(c *gin.Context) {
-	var input struct {
-		Email    string `json:"email" binding:"required"`
-		Password string `json:"password" binding:"required"`
-	}
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		fmt.Println("ShouldBind error:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	var user models.User
-	err := config.DB.QueryRow("SELECT id, password FROM users WHERE email = ?", input.Email).Scan(&user.ID, &user.Password)
-	if err == sql.ErrNoRows {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
-	} else if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		return
-	}
-
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
-	}
-
-	sessionToken := uuid.New().String()
-	c.SetCookie("session_token", sessionToken, 3600, "/", "localhost", false, true)
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
-}
-
+// Logout handles user logout.
 func Logout(c *gin.Context) {
 	c.SetCookie("session_token", "", -1, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
@@ -154,27 +123,5 @@ func ProcessLogin(c *gin.Context) {
 
 	c.SetCookie("session_token", sessionToken, 3600, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
-	c.Redirect(http.StatusFound, "/") // Başarılı giriş sonrası yönlendirme
-}
-
-func ProcessRegister(c *gin.Context) {
-	var input models.User
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
-
-	_, err = config.DB.Exec("INSERT INTO users (username, email, password, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)", input.Username, input.Email, hashedPassword)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Registration successful"})
+	// c.Redirect(http.StatusFound, "/") // Başarılı giriş sonrası yönlendirme
 }

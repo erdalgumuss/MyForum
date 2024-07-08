@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -70,28 +71,36 @@ func GetUserIDFromSession(c *gin.Context) uint {
 
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		sessionToken, err := c.Cookie("session_token")
+		token := c.GetHeader("Authorization")
+		if token == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token required"})
+			c.Abort()
+			return
+		}
+
+		var userID int
+		err := config.DB.QueryRow("SELECT user_id FROM sessions WHERE token = ?", token).Scan(&userID)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			c.Abort()
 			return
 		}
 
-		var session models.Session
-		err = config.DB.QueryRow("SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?", sessionToken).Scan(&session.ID, &session.UserID, &session.CreatedAt, &session.ExpiresAt)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
-
-		if session.ExpiresAt.Before(time.Now()) {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Session expired"})
-			c.Abort()
-			return
-		}
-
-		c.Set("userID", session.UserID)
+		c.Set("user_id", userID)
 		c.Next()
 	}
+}
+
+func HashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
+}
+
+// CheckPasswordHash compares a password with its hashed value.
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

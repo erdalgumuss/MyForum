@@ -1,76 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyForum - Giriş Yap</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="/">Anasayfa</a></li>
-                <li><a href="/profile">Profil</a></li>
-                <li><a href="/forum">Forum</a></li>
-                <li><a href="/login">Giriş Yap</a></li>
-                <li><a href="/register">Kayıt Ol</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <main>
-        <section class="login-form">
-            <h2>Giriş Yap</h2>
-            <form id="login-form">
-                <label for="email">Email:</label>
-                <input type="text" id="email" name="email" required>
-                
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-                
-                <button type="submit">Giriş Yap</button>
-            </form>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2024 FIXIT. Tüm hakları BENDE saklıdır.</p>
-    </footer>
-
-    <script>
-        document.getElementById('login-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email: email, password: password })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.message) {
-                    alert(data.message);
-                } else {
-                    alert("Giriş işlemi başarısız oldu");
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("Sunucu hatası oluştu");
-            });
-        });
-    </script>
-</body>
-</html>
-
+{{ define "content" }}
+<section class="login-form">
+    <h2>Login</h2>
+    <form action="/login" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        
+        <button type="submit">Login</button>
+    </form>
+</section>
+{{ end }}

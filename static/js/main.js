@@ -1,95 +1,53 @@
-// DOM yüklendiğinde çağrılan işlevler
-document.addEventListener('DOMContentLoaded', function() {
-    // Beğenme butonu
-    document.getElementById('like-btn').addEventListener('click', likePost);
+document.addEventListener('DOMContentLoaded', function () {
+    // Giriş ve Kayıt Pop-up'ları ile ilgili kodlar
+    const loginPopup = document.getElementById('login-popup');
+    const registerPopup = document.getElementById('register-popup');
+    const loginBtn = document.getElementById('login-btn');
+    const registerBtn = document.getElementById('register-btn');
+    const closeLogin = document.getElementById('close-login');
+    const closeRegister = document.getElementById('close-register');
 
-    // Beğenmeme butonu
-    document.getElementById('dislike-btn').addEventListener('click', dislikePost);
-});
-
-// Beğeni işlevi
-function likePost() {
-    fetch('/like', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ action: 'like' })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            likeCount++;
-            updateLikes();
-        } else {
-            alert("Beğeni işlemi başarısız oldu");
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert("Sunucu hatası oluştu");
+    loginBtn.addEventListener('click', function () {
+        loginPopup.style.display = 'block';
     });
-}
 
-// Beğenmeme işlevi
-function dislikePost() {
-    fetch('/like', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ action: 'dislike' })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            dislikeCount++;
-            updateLikes();
-        } else {
-            alert("Beğenmeme işlemi başarısız oldu");
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert("Sunucu hatası oluştu");
+    registerBtn.addEventListener('click', function () {
+        registerPopup.style.display = 'block';
     });
-}
 
-// Beğeni sayılarını güncelleme işlevi
-function updateLikes() {
-    document.getElementById('like-count').textContent = likeCount;
-    document.getElementById('dislike-count').textContent = dislikeCount;
-}
-document.getElementById('login-form').addEventListener('submit', function(event) {
-    event.preventDefault();
+    closeLogin.addEventListener('click', function () {
+        loginPopup.style.display = 'none';
+    });
 
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
+    closeRegister.addEventListener('click', function () {
+        registerPopup.style.display = 'none';
+    });
 
-    console.log("Sending JSON data:", JSON.stringify({ email: email, password: password }));
-
-    fetch('/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email: email, password: password })
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.text().then(text => { throw new Error(text) });
+    window.addEventListener('click', function (event) {
+        if (event.target === loginPopup) {
+            loginPopup.style.display = 'none';
         }
-        return response.json();
-    })
-    .then(data => {
-        if (data.message) {
-            alert(data.message);
-        } else {
-            alert("Giriş işlemi başarısız oldu");
+        if (event.target === registerPopup) {
+            registerPopup.style.display = 'none';
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert("Sunucu hatası oluştu");
+    });
+
+    // Arama işlevi ile ilgili kodlar
+    const searchBtn = document.getElementById('search-btn');
+    const searchInput = document.getElementById('search');
+
+    searchBtn.addEventListener('click', function () {
+        const query = searchInput.value.toLowerCase();
+        const posts = document.querySelectorAll('#posts .post');
+
+        posts.forEach(function (post) {
+            const title = post.querySelector('.post-title').textContent.toLowerCase();
+            const content = post.querySelector('p').textContent.toLowerCase();
+            if (title.includes(query) || content.includes(query)) {
+                post.style.display = 'block';
+            } else {
+                post.style.display = 'none';
+            }
+        });
     });
 });

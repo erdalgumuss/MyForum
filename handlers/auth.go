@@ -9,13 +9,16 @@ import (
 )
 
 func ShowIndexPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "index.html", nil)
+	c.HTML(http.StatusOK, "index.html", gin.H{
+		"Title": "Home",
+	})
 }
 
 func ShowLoginPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "login.html", nil)
+	c.HTML(http.StatusOK, "login.html", gin.H{
+		"Title": "Login",
+	})
 }
-
 func ProcessLogin(c *gin.Context) {
 	controllers.ProcessLogin(c)
 }
@@ -25,7 +28,7 @@ func ShowRegisterPage(c *gin.Context) {
 }
 
 func ProcessRegister(c *gin.Context) {
-	controllers.ProcessRegister(c)
+	controllers.Register(c)
 }
 
 func Logout(c *gin.Context) {

@@ -1,50 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyForum - Anasayfa</title>
-    <link rel="stylesheet" href="/static/css/style.css">
-    <style>
-        /* Eklemeleriniz buraya gelebilir */
-    </style>
+    <title>MyForum</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
 </head>
 <body>
     <header>
+        <h1>FIXIT FORUM</h1>
         <nav>
             <ul>
                 <li><a href="/">Anasayfa</a></li>
-                <li><a href="/profile">Profil</a></li>
-                <li><a href="/forum">Forum</a></li>
-                <li><a href="/login">Giriş Yap</a></li>
-                <li><a href="/register">Kayıt Ol</a></li>
+                <li><a href="profile">Profil</a></li>
+                <li><a href="#" id="login-btn">Giriş Yap</a></li>
+                <li><a href="#" id="register-btn">Kayıt Ol</a></li>
             </ul>
         </nav>
     </header>
 
-    <main>
-        <section class="hero">
-            <h1>Hoş Geldiniz!</h1>
-            <p>Forumumuza hoş geldiniz. Burada araçlarla ilgili konular hakkında tartışabilir, bilgi alışverişi yapabilirsiniz.</p>
-        </section>
-
-        <section class="latest-posts">
-            <h2>Son Gönderiler</h2>
+    <main id="content">
+        <h2>Forum Anasayfa</h2>
+        <div id="filter">
+            <input type="text" id="search" placeholder="Ara...">
+            <button id="search-btn">Ara</button>
+        </div>
+        <div id="posts">
+            <!-- Örnek gönderiler -->
             <div class="post">
-                <h3>Forum Kuralları</h3>
-                <p>Forum kuralları hakkında önemli bilgiler.</p>
-                <a href="/forum/rules">Devamını oku</a>
+                <h3 class="post-title">İlk Gönderi</h3>
+                <p>Bu, forumdaki ilk gönderinin içeriğidir.</p>
             </div>
             <div class="post">
-                <h3>Yeni Araç Modelleri</h3>
-                <p>Yeni piyasaya sürülen araç modelleri hakkında güncellemeler.</p>
-                <a href="/forum/new-models">Devamını oku</a>
+                <h3 class="post-title">İkinci Gönderi</h3>
+                <p>Bu, forumdaki ikinci gönderinin içeriğidir.</p>
             </div>
-        </section>
+            <!-- Daha fazla gönderi ekleyin -->
+        </div>
     </main>
 
+    <!-- Giriş Yap Pop-up -->
+    <div id="login-popup" class="popup">
+        <div class="popup-content">
+            <span class="close-btn" id="close-login">&times;</span>
+            <h2>Giriş Yap</h2>
+            <form id="login-form">
+                <label for="login-username">Kullanıcı Adı:</label>
+                <input type="text" id="login-username" name="username" required>
+                <label for="login-password">Şifre:</label>
+                <input type="password" id="login-password" name="password" required>
+                <button type="submit">Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Kayıt Ol Pop-up -->
+    <div id="register-popup" class="popup">
+        <div class="popup-content">
+            <span class="close-btn" id="close-register">&times;</span>
+            <h2>Kayıt Ol</h2>
+            <form id="register-form">
+                <label for="register-username">Kullanıcı Adı:</label>
+                <input type="text" id="register-username" name="username" required>
+                <label for="register-email">Email:</label>
+                <input type="email" id="register-email" name="email" required>
+                <label for="register-password">Şifre:</label>
+                <input type="password" id="register-password" name="password" required>
+                <button type="submit">Kayıt Ol</button>
+            </form>
+        </div>
+    </div>
+
     <footer>
-        <p>&copy; 2024 FIXIT. Tüm hakları BENDE saklıdır.</p>
+        <p>&copy; 2024 Forum Sitesi</p>
     </footer>
 
     <script src="/static/js/main.js"></script>

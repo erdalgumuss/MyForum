@@ -8,10 +8,32 @@ import (
 	"MyForum/models"
 	"MyForum/utils"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/gin-gonic/gin"
 )
 
-// UpdateProfile handles updating user profile
+// GetUserProfile retrieves user profile details
+func GetUserProfile(c *gin.Context) {
+	var user models.User
+	err := config.DB.QueryRow("SELECT id, username, email FROM users WHERE id = ?", c.Param("id")).Scan(&user.ID, &user.Username, &user.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":       user.ID,
+		"username": user.Username,
+		"email":    user.Email,
+	})
+}
+
+// UpdateProfile handles updating user profile.
 func UpdateProfile(c *gin.Context) {
 	var input struct {
 		Email    string `json:"email"`
@@ -45,8 +67,15 @@ func UpdateProfile(c *gin.Context) {
 		user.Username = input.Username
 	}
 
-	// Execute the update statement
-	_, err = config.DB.Exec("UPDATE users SET email=?, username=? WHERE id=?", user.Email, user.Username, user.ID)
+	// Update user in the database
+	stmt, err := config.DB.Prepare("UPDATE users SET email = ?, username = ? WHERE id = ?")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(user.Email, user.Username, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user profile"})
 		return
@@ -55,32 +84,11 @@ func UpdateProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Profile updated successfully"})
 }
 
-// GetUserProfile retrieves user profile details
-func GetUserProfile(c *gin.Context) {
-	var user models.User
-	err := config.DB.QueryRow("SELECT id, username, email FROM users WHERE id = ?", c.Param("id")).Scan(&user.ID, &user.Username, &user.Email)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user"})
-		}
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"id":       user.ID,
-		"username": user.Username,
-		"email":    user.Email,
-	})
-}
-
-// ChangePassword handles changing user password
-// ChangePassword handles changing user password
+// ChangePassword handles changing the user's password.
 func ChangePassword(c *gin.Context) {
 	var input struct {
-		OldPassword string `json:"old_password"`
-		NewPassword string `json:"new_password"`
+		CurrentPassword string `json:"current_password" binding:"required"`
+		NewPassword     string `json:"new_password" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -93,28 +101,38 @@ func ChangePassword(c *gin.Context) {
 		return
 	}
 
-	// Fetch user's current password
-	var currentPassword string
-	err := config.DB.QueryRow("SELECT password FROM users WHERE id = ?", userID).Scan(&currentPassword)
+	// Fetch user from database
+	var user models.User
+	err := config.DB.QueryRow("SELECT id, password FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Password)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user"})
-		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user password"})
 		return
 	}
 
-	// Check if old password matches
-	if currentPassword != input.OldPassword {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Old password is incorrect"})
+	// Verify current password
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.CurrentPassword)); err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Current password is incorrect"})
 		return
 	}
 
-	// Update password
-	_, err = config.DB.Exec("UPDATE users SET password = ? WHERE id = ?", input.NewPassword, userID)
+	// Hash new password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash new password"})
+		return
+	}
+
+	// Update user password in the database
+	stmt, err := config.DB.Prepare("UPDATE users SET password = ? WHERE id = ?")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(hashedPassword, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to change password"})
 		return
 	}
 
