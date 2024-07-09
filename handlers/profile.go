@@ -20,7 +20,7 @@ func GetUserProfile(c *gin.Context) {
 		return
 	}
 
-	// Kullanıcı bilgilerini veritabanından al
+	/// Kullanıcı bilgilerini veritabanından al
 	var user models.User
 	err := config.DB.QueryRow("SELECT id, email, username, name, surname FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Email, &user.Username, &user.Name, &user.Surname)
 	if err != nil {
