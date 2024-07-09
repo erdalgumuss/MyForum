@@ -7,11 +7,11 @@ import (
 
 	"MyForum/config"
 	"MyForum/models"
+	"MyForum/utils"
 
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // Register handles user registration.
@@ -59,7 +59,7 @@ func Register(c *gin.Context) {
 	}
 
 	// Insert user into database
-	stmt, err := config.DB.Prepare("INSERT INTO users(username, email, password) VALUES(?, ?, ?)")
+	stmt, err := config.DB.Prepare("INSERT INTO users(username, name, surname, email, password) VALUES(?, ?, ?, ?, ?)")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
 		fmt.Println("Failed to prepare statement:", err)
@@ -67,7 +67,7 @@ func Register(c *gin.Context) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(input.Username, input.Email, hashedPassword)
+	_, err = stmt.Exec(input.Username, input.Name, input.Surname, input.Email, hashedPassword)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		fmt.Println("Failed to create user:", err)
@@ -83,14 +83,10 @@ func Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 }
 
-/*func ShowLoginPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "login.html", gin.H{})
-}*/
-
 func Login(c *gin.Context) {
 	var input struct {
-		Email    string `json:"email" `
-		Password string `json:"password" `
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -99,13 +95,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	var user models.User
-	err := config.DB.QueryRow("SELECT id, password FROM users WHERE email = ?", input.Email).Scan(&user.ID, &user.Password)
-	if err == sql.ErrNoRows {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
-	} else if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+	user, err := getUserByEmail(input.Email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		}
 		return
 	}
 
@@ -114,7 +110,25 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	sessionToken := uuid.New().String()
-	c.SetCookie("session_token", sessionToken, 3600, "/profile", "localhost", false, true)
-	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	sessionToken, err := utils.CreateSession(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
+		return
+	}
+	c.SetCookie("session_token", sessionToken, 3600, "/", "localhost", false, true)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Login successful",
+		"user": gin.H{
+			"id":      user.ID,
+			"name":    user.Name,
+			"surname": user.Surname,
+			"email":   user.Email,
+		},
+	})
+}
+
+func getUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	err := config.DB.QueryRow("SELECT id, password FROM users WHERE email = ?", email).Scan(&user.ID, &user.Password)
+	return &user, err
 }

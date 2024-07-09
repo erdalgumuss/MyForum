@@ -18,7 +18,6 @@ import (
 // AuthMiddleware is a middleware function for checking user authentication via session token.
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Retrieve session token from the cookies
 		sessionToken, err := c.Cookie("session_token")
 		if err != nil {
 			log.Println("No session token found, redirecting to home")
@@ -27,11 +26,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		log.Println("Session token retrieved from cookie:", sessionToken)
-
-		// Query the session from the database using the session token
-		var session models.Session
-		err = config.DB.QueryRow("SELECT id, user_id, created_at, expires_at FROM sessions WHERE id = ?", sessionToken).Scan(&session.ID, &session.UserID, &session.CreatedAt, &session.ExpiresAt)
+		session, err := getSessionByToken(sessionToken)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				log.Println("Invalid session token, no session found for token:", sessionToken)
@@ -43,7 +38,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Check if the session is expired
 		if session.ExpiresAt.Before(time.Now()) {
 			log.Println("Session expired for token:", sessionToken)
 			c.Redirect(http.StatusFound, "/")
@@ -51,13 +45,16 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Set the userID in the context for further handlers
-		log.Println("User authenticated with ID:", session.UserID)
 		c.Set("userID", session.UserID)
 		c.Next()
 	}
 }
 
+func getSessionByToken(token string) (*models.Session, error) {
+	var session models.Session
+	err := config.DB.QueryRow("SELECT id, user_id, created_at, expires_at FROM sessions WHERE token = ?", token).Scan(&session.ID, &session.UserID, &session.CreatedAt, &session.ExpiresAt)
+	return &session, err
+}
 func CreateSession(userID int) (string, error) {
 	sessionToken := uuid.New().String()
 	createdAt := time.Now().Format("2006-01-02 15:04:05")

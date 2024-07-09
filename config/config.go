@@ -48,8 +48,11 @@ func createTables() error {
 		username TEXT,
 		email TEXT,
 		password TEXT,
+		name TEXT,
+		surname TEXT,
 		created_at DATETIME,
 		updated_at DATETIME
+
 	);`
 	_, err := DB.Exec(createUserTable)
 	if err != nil {
