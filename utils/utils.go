@@ -15,7 +15,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// AuthMiddleware is a middleware function for checking user authentication via session token.
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionToken, err := c.Cookie("session_token")
@@ -33,15 +32,15 @@ func AuthMiddleware() gin.HandlerFunc {
 			} else {
 				log.Println("Error querying session:", err)
 			}
-			c.Redirect(http.StatusFound, "/")
-			c.Abort()
+			// Oturumu sonlandır
+			logoutUser(c, sessionToken)
 			return
 		}
 
 		if session.ExpiresAt.Before(time.Now()) {
 			log.Println("Session expired for token:", sessionToken)
-			c.Redirect(http.StatusFound, "/")
-			c.Abort()
+			// Oturumu sonlandır
+			logoutUser(c, sessionToken)
 			return
 		}
 
@@ -50,11 +49,33 @@ func AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
+// Otomatik çıkış işlemi yapan fonksiyon
+func logoutUser(c *gin.Context, sessionToken string) {
+	// Veritabanından veya hafızadan oturum token'ını sil
+	err := deleteSessionByToken(sessionToken)
+	if err != nil {
+		log.Println("Error deleting session:", err)
+	}
+	// Çerezi temizle
+	c.SetCookie("session_token", "", -1, "/", "", false, true)
+	// Kullanıcıyı anasayfaya yönlendir
+	c.Redirect(http.StatusFound, "/")
+	c.Abort()
+}
+
+// Veritabanından veya hafızadan oturum token'ını silen fonksiyon
+func deleteSessionByToken(token string) error {
+	// SQLite veritabanından oturum token'ını sil
+	_, err := config.DB.Exec("DELETE FROM sessions WHERE token = ?", token)
+	return err
+}
+
 func getSessionByToken(token string) (*models.Session, error) {
 	var session models.Session
 	err := config.DB.QueryRow("SELECT id, user_id, created_at, expires_at FROM sessions WHERE token = ?", token).Scan(&session.ID, &session.UserID, &session.CreatedAt, &session.ExpiresAt)
 	return &session, err
 }
+
 func CreateSession(userID int) (string, error) {
 	sessionToken := uuid.New().String()
 	createdAt := time.Now().Format("2006-01-02 15:04:05")
@@ -92,7 +113,6 @@ func GetUserIDFromSession(c *gin.Context) (int, bool) {
 }
 
 // AuthRequired middleware checks if the user is authenticated
-
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")

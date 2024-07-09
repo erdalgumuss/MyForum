@@ -11,7 +11,11 @@ func ProfileRoutes(router *gin.Engine) {
 	protected := router.Group("/")
 	protected.Use(utils.AuthMiddleware())
 	{
-		protected.GET("/profile", handlers.ShowProfilePage)
+		protected.GET("/models/user", handlers.GetUserProfile) // Yeni endpoint
+
+		// protected.GET("/profile", handlers.ShowProfilePage)
+		 protected.GET("/profile", handlers.ProfileView)
+
 	}
 }
 

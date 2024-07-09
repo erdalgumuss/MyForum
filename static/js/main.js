@@ -1,5 +1,3 @@
-// main.js
-
 document.addEventListener('DOMContentLoaded', () => {
     const loginPopup = document.getElementById('login-popup');
     const registerPopup = document.getElementById('register-popup');
@@ -105,8 +103,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadUser();
 
-    logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('user');
-        toggleUserUI(false);
+    logoutBtn.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                const responseData = await response.json();
+                alert(responseData.message);
+                localStorage.removeItem('user');
+                toggleUserUI(false);
+                window.location.href = "/";  // Logout işleminden sonra anasayfaya yönlendirin
+            } else {
+                const responseData = await response.json();
+                alert(responseData.error);
+            }
+        } catch (error) {
+            console.error('Logout request failed:', error);
+        }
     });
 });

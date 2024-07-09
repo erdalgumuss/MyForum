@@ -19,11 +19,7 @@ func ShowLoginPage(c *gin.Context) {
 		"Title": "Login",
 	})
 }
-func ShowProfilePage(c *gin.Context) {
-	c.HTML(http.StatusOK, "profile.html", gin.H{
-		"Title": "Profile",
-	})
-}
+
 
 
 func ProcessLogin(c *gin.Context) {

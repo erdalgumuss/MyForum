@@ -11,6 +11,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetUserProfile(c *gin.Context) {
+	// Oturum açmış kullanıcıyı al
+	userID, ok := utils.GetUserIDFromSession(c)
+	if !ok {
+		log.Println("Kullanıcı kimliği oturumda bulunamadı")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Yetkisiz"})
+		return
+	}
+
+	// Kullanıcı bilgilerini veritabanından al
+	var user models.User
+	err := config.DB.QueryRow("SELECT id, email, username, name, surname FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Email, &user.Username, &user.Name, &user.Surname)
+	if err != nil {
+		log.Println("Kullanıcı profilini getirme başarısız oldu:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Kullanıcı profilini getirme başarısız oldu"})
+		return
+	}
+
+	log.Println("Kullanıcı profili getirildi, Kullanıcı ID:", user.ID)
+	c.JSON(http.StatusOK, gin.H{
+		"id":       user.ID,
+		"email":    user.Email,
+		"username": user.Username,
+		"name":     user.Name,
+		"surname":  user.Surname,
+	})
+}
+
 func ProfileView(c *gin.Context) {
 	userID, ok := utils.GetUserIDFromSession(c)
 	if !ok {
@@ -31,33 +59,6 @@ func ProfileView(c *gin.Context) {
 	c.HTML(http.StatusOK, "profile.html", gin.H{
 		"user": user,
 	})
-}
-func GetUserProfile(c *gin.Context) {
-    // Oturum açmış kullanıcıyı al
-    userID, ok := utils.GetUserIDFromSession(c)
-    if !ok {
-        log.Println("Kullanıcı kimliği oturumda bulunamadı")
-        c.JSON(http.StatusUnauthorized, gin.H{"error": "Yetkisiz"})
-        return
-    }
-
-    // Kullanıcı bilgilerini veritabanından al
-    var user models.User
-    err := config.DB.QueryRow("SELECT id, email, username, name, surname FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Email, &user.Username, &user.Name, &user.Surname)
-    if err != nil {
-        log.Println("Kullanıcı profilini getirme başarısız oldu:", err)
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Kullanıcı profilini getirme başarısız oldu"})
-        return
-    }
-
-    log.Println("Kullanıcı profili getirildi, Kullanıcı ID:", user.ID)
-    c.JSON(http.StatusOK, gin.H{
-        "id":       user.ID,
-        "email":    user.Email,
-        "username": user.Username,
-        "name":     user.Name,
-        "surname":  user.Surname,
-    })
 }
 
 /*func ProfileUpdate(c *gin.Context) {
