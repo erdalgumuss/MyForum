@@ -92,6 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 toggleUserUI(true);
                 userNameElement.textContent = `${user.name} ${user.surname}`;
                 userEmailElement.textContent = user.email;
+                // Eğer profile.html sayfasındaysanız bilgileri yerleştirin
+                if (window.location.pathname === '/profile.html') {
+                    document.getElementById('profile-name').textContent = `${user.name} ${user.surname}`;
+                    document.getElementById('profile-email').textContent = user.email;
+                }
             } else {
                 toggleUserUI(false);
             }
@@ -126,5 +131,4 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Logout request failed:', error);
         }
     });
-    
 });

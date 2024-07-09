@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FIXIT FORUM</title>
+    <title>{{.Title}}</title>
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
 </head>
 <body>
@@ -25,21 +25,7 @@
     </header>
 
     <main id="content">
-        <h2>Forum Anasayfa</h2>
-        <div id="filter">
-            <input type="text" id="search" placeholder="Ara...">
-            <button id="search-btn">Ara</button>
-        </div>
-
-        <!-- Örnek gönderiler -->
-        <div class="post">
-            <h3 class="post-title">İlk Gönderi</h3>
-            <p>Bu, forumdaki ilk gönderinin içeriğidir.</p>
-        </div>
-        <div class="post">
-            <h3 class="post-title">İkinci Gönderi</h3>
-            <p>Bu, forumdaki ikinci gönderinin içeriğidir.</p>
-        </div>
+        {{template "content" .}}
     </main>
 
     <!-- Giriş Yap Pop-up -->

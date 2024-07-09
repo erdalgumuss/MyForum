@@ -13,7 +13,7 @@ import (
 
 func GetUserProfile(c *gin.Context) {
 	// Oturum açmış kullanıcıyı al
-	userID, ok := utils.GetUserIDFromSession(c)
+	userID, ok := c.Get("userID")
 	if !ok {
 		log.Println("Kullanıcı kimliği oturumda bulunamadı")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Yetkisiz"})
