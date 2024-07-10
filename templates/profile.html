@@ -6,16 +6,10 @@
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <header>
-        <h1>FIXIT FORUM</h1>
-        <nav>
-            <ul>
-                <li><a href="/">Anasayfa</a></li>
-                <li><a href="/profile">Profil</a></li>
-                <li><a href="/logout" id="logout-btn">Çıkış</a></li>
-            </ul>
-        </nav>
-    </header>
+   
+    <main id="content">
+        {{ block "content" . }}{{ end }}
+    </main>
 
     <main id="content">
         <h2>Kullanıcı Profili</h2>

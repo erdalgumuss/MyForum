@@ -7,22 +7,9 @@
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
 </head>
 <body>
-    <header>
-        <h1>FIXIT FORUM</h1>
-        <nav>
-            <ul>
-                <li><a href="/">Anasayfa</a></li>
-                <li><a href="/profile">Profil</a></li>
-                <li><a href="#" id="login-btn">Giriş Yap</a></li>
-                <li><a href="#" id="register-btn">Kayıt Ol</a></li>
-                <li><a href="#" id="logout-btn" style="display: none;">Çıkış</a></li>
-                <li id="user-info" style="display: none;">
-                    <span id="user-name"></span> | 
-                    <span id="user-email"></span>
-                </li>
-            </ul>
-        </nav>
-    </header>
+    <main id="content">
+        {{ block "content" . }}{{ end }}
+    </main>
 
     <main id="content">
         <h2>Forum Anasayfa</h2>
@@ -77,6 +64,7 @@
             </form>
         </div>
     </div>
+    
 
     <footer>
         <p>&copy; 2024 FIXIT FORUM</p>
