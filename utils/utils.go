@@ -12,7 +12,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func AuthMiddleware() gin.HandlerFunc {
@@ -110,33 +109,4 @@ func GetUserIDFromSession(c *gin.Context) (int, bool) {
 	}
 
 	return id, true
-}
-
-// AuthRequired middleware checks if the user is authenticated
-func AuthRequired() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		token := c.GetHeader("Authorization")
-		if token == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization token required"})
-			c.Abort()
-			return
-		}
-
-		var userID int
-		err := config.DB.QueryRow("SELECT user_id FROM sessions WHERE token = ?", token).Scan(&userID)
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
-			c.Abort()
-			return
-		}
-
-		c.Set("user_id", userID)
-		c.Next()
-	}
-}
-
-// CheckPasswordHash compares a password with its hashed value.
-func CheckPasswordHash(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
 }

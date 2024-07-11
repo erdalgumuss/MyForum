@@ -7,7 +7,8 @@ import (
 )
 
 func ForumRoutes(r *gin.Engine) {
-	r.GET("/", handlers.ShowForumPage)
+	r.GET("/forum", handlers.ShowForumPage)
+
 	r.GET("/getpost", handlers.GetPosts)  // controllers yerine handlers
 	r.GET("/posts/:id", handlers.GetPost) // controllers yerine handlers
 	r.POST("/posts", handlers.CreatePost) // controllers yerine handlers

@@ -14,14 +14,6 @@ func ShowIndexPage(c *gin.Context) {
 	})
 }
 
-func ShowLoginPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "login.html", gin.H{
-		"Title": "Login",
-	})
-}
-
-
-
 func ProcessLogin(c *gin.Context) {
 	controllers.Login(c)
 }

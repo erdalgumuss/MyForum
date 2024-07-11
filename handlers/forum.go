@@ -7,8 +7,8 @@ import (
 )
 
 func ShowForumPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "/forum.html", gin.H{
-		"Title": "Forum",
+	c.HTML(http.StatusOK, "forum.html", gin.H{
+		"Title": "Home",
 	})
 }
 
