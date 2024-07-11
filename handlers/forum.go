@@ -70,7 +70,7 @@ func CreatePost(c *gin.Context) {
 		controllers.CreatePostWithPost(c, input)
 	}
 }
-
+//
 func GetPosts(c *gin.Context) {
 	log.Println("GetPosts function called")
 
