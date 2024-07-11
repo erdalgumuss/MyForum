@@ -7,6 +7,10 @@
     <!-- CSS dosyalarını buraya bağlayabilirsiniz -->
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+<main id="content">
+    {{ block "content" . }}{{ end }}
+</main>
+
 <body>
     <div class="post">
         <h2>Post Başlığı</h2>
