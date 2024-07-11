@@ -17,7 +17,7 @@ func ShowForumPage(c *gin.Context) {
 }
 
 // HandleForumPost handles POST requests to /forum
-func HandleForumPost(c *gin.Context) {
+func HandleForumPage(c *gin.Context) {
 	// Handle form submission or other POST data processing here
 	// For now, just render the forum page as a placeholder
 	c.HTML(http.StatusOK, "forum.html", gin.H{
@@ -28,6 +28,18 @@ func HandleForumPost(c *gin.Context) {
 
 func RenderCreatePostPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "create_post.html", nil)
+}
+
+func GalleryPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "gallery.html", gin.H{
+		"Title": "Galeri",
+	})
+}
+
+func RulesPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "rules.html", gin.H{
+		"Title": "Kurallar",
+	})
 }
 
 func CreatePost(c *gin.Context) {
