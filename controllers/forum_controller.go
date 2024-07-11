@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	"MyForum/config"
@@ -9,28 +10,74 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreatePost handles the creation of a new post
-func CreatePost(c *gin.Context) {
-	var input models.Post
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+func CreatePostWithPost(c *gin.Context, input models.Post) {
+	log.Println("CreatePostWithPost function called in controllers")
+
+	if config.DB == nil {
+		log.Println("Database connection is nil in controller")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database connection is nil"})
 		return
 	}
+	log.Println("Database connection is OK in controller")
 
 	stmt, err := config.DB.Prepare("INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)")
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
+		log.Println("Failed to prepare statement in controller:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement: " + err.Error()})
 		return
 	}
 	defer stmt.Close()
+	log.Println("SQL statement prepared in controller")
 
 	_, err = stmt.Exec(input.Title, input.Content, input.UserID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create post"})
+		log.Println("Failed to execute statement in controller:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute statement: " + err.Error()})
 		return
 	}
+	log.Println("SQL statement executed in controller")
 
 	c.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
+	log.Println("Post created successfully in controller")
+}
+
+func CreatePost(c *gin.Context) {
+	log.Println("CreatePost function called in controllers")
+
+	var input models.Post
+	if err := c.ShouldBindJSON(&input); err != nil {
+		log.Println("JSON binding error in controller:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input: " + err.Error()})
+		return
+	}
+	log.Println("JSON binding successful in controller:", input)
+
+	if config.DB == nil {
+		log.Println("Database connection is nil in controller")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database connection is nil"})
+		return
+	}
+	log.Println("Database connection is OK in controller")
+
+	stmt, err := config.DB.Prepare("INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)")
+	if err != nil {
+		log.Println("Failed to prepare statement in controller:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement: " + err.Error()})
+		return
+	}
+	defer stmt.Close()
+	log.Println("SQL statement prepared in controller")
+
+	_, err = stmt.Exec(input.Title, input.Content, input.UserID)
+	if err != nil {
+		log.Println("Failed to execute statement in controller:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute statement: " + err.Error()})
+		return
+	}
+	log.Println("SQL statement executed in controller")
+
+	c.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
+	log.Println("Post created successfully in controller")
 }
 
 // CreateComment handles the creation of a new comment

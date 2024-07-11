@@ -13,15 +13,75 @@
 
     <main id="content">
         <h1>Create a New Post</h1>
-        <form action="/create-post" method="POST">
-        <label for="title">Title:</label><br>
-        <input type="text" id="title" name="title"><br>
-        <label for="content">Content:</label><br>
-        <textarea id="content" name="content" rows="4" cols="50"></textarea><br><br>
-        <input type="submit" value="Create Post">
-    </form>
+        <form id="createPostForm">
+            <label for="title">Title:</label><br>
+            <input type="text" id="title" name="title"><br>
+            <label for="content">Content:</label><br>
+            <textarea id="content" name="content" rows="4" cols="50"></textarea><br><br>
+            <input type="button" value="Create Post" onclick="submitForm()">
+        </form>
+        <div id="threads" style="margin-top: 20px;">
+            <!-- Threads will be displayed here -->
+        </div>
     </main>
 
     <footer>
         <p>&copy; 2024 Forum Sitesi</p>
     </footer>
+
+    <script>
+        function submitForm() {
+            const form = document.getElementById('createPostForm');
+            const formData = {
+                title: form.title.value,
+                content: form.content.value,
+                user_id: 1 // Assuming a fixed user_id for now
+            };
+
+            fetch('/create-post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                if (data.message === "Post created successfully") {
+                    // Fetch and display threads
+                    fetchThreads();
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function fetchThreads() {
+            fetch('/getpost', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const threadsDiv = document.getElementById('threads');
+                threadsDiv.innerHTML = '';
+                data.forEach(thread => {
+                    const threadDiv = document.createElement('div');
+                    threadDiv.innerHTML = `<h2>${thread.title}</h2><p>${thread.content}</p>`;
+                    threadsDiv.appendChild(threadDiv);
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Fetch threads when the page loads
+        window.onload = fetchThreads;
+    </script>
+</body>
+</html>
