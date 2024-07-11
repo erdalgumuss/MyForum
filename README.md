@@ -1,51 +1,51 @@
-├── DockerFile
-├── MyForum
-├── README.md
-├── config
-│   └── config.go
-├── controllers
-│   ├── auth_controller.go
-│   ├── forum_controller.go
-│   └── profile_controller.go
-├── docker-compose.yml
-├── forum.db
-├── go.mod
-├── go.sum
-├── handlers
-│   ├── auth.go
-│   ├── forum.go
-│   └── profile.go
-├── main.go
-├── models
-│   ├── category.go
-│   ├── comment.go
-│   ├── post.go
-│   ├── profile.go
-│   ├── session.go
-│   ├── topic.go
-│   └── user.go
-├── routes
-│   ├── auth_routes.go
-│   ├── forum_routes.go
-│   └── profile_routes.go
-├── static
-│   ├── css
-│   │   └── style.css
-│   ├── images
-│   │   ├── Sonny_Barger.jpg
-│   │   ├── hells.jpg
-│   │   ├── never_stop_riding.jpg
-│   │   └── soa.jpg
-│   └── js
-│       └── main.js
-├── templates
-│   ├── base.html
-│   ├── comment.html
-│   ├── create_post.html
-│   ├── forum.html
-│   ├── gallery.html
-│   ├── index.html
-│   ├── profile.html
-│   └── rules.html
-└── utils
-    └── utils.go
+<br>├── DockerFile
+<br>├── MyForum
+<br>├── README.md
+<br>├── config
+<br>│   └── config.go
+<br>├── controllers
+<br>│   ├── auth_controller.go
+<br>│   ├── forum_controller.go
+<br>│   └── profile_controller.go
+<br>├── docker-compose.yml
+<br>├── forum.db
+<br>├── go.mod
+<br>├── go.sum
+<br>├── handlers
+<br>│   ├── auth.go
+<br>│   ├── forum.go
+<br>│   └── profile.go
+<br>├── main.go
+<br>├── models
+<br>│   ├── category.go
+<br>│   ├── comment.go
+<br>│   ├── post.go
+<br>│   ├── profile.go
+<br>│   ├── session.go
+<br>│   ├── topic.go
+<br>│   └── user.go
+<br>├── routes
+<br>│   ├── auth_routes.go
+<br>│   ├── forum_routes.go
+<br>│   └── profile_routes.go
+<br>├── static
+<br>│   ├── css
+<br>│   │   └── style.css
+<br>│   ├── images
+<br>│   │   ├── Sonny_Barger.jpg
+<br>│   │   ├── hells.jpg
+<br>│   │   ├── never_stop_riding.jpg
+<br>│   │   └── soa.jpg
+<br>│   └── js
+<br>│       └── main.js
+<br>├── templates
+<br>│   ├── base.html
+<br>│   ├── comment.html
+<br>│   ├── create_post.html
+<br>│   ├── forum.html
+<br>│   ├── gallery.html
+<br>│   ├── index.html
+<br>│   ├── profile.html
+<br>│   └── rules.html
+<br>└── utils
+<br>    └── utils.go
