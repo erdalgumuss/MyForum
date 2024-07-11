@@ -7,13 +7,13 @@ import (
 )
 
 func ForumRoutes(r *gin.Engine) {
-	r.GET("/forum", handlers.ShowForumPage)
-
 	r.GET("/getpost", handlers.GetPosts)  // controllers yerine handlers
 	r.GET("/posts/:id", handlers.GetPost) // controllers yerine handlers
 	r.POST("/posts", handlers.CreatePost) // controllers yerine handlers
 	r.POST("/create-post", handlers.CreatePost)
 	r.GET("/create-post", handlers.RenderCreatePostPage)
+	r.GET("/forum", handlers.ShowForumPage)
+	r.POST("/forum", handlers.HandleForumPost)
 	r.POST("/comments", handlers.CreateComment)              // controllers yerine handlers
 	r.POST("/posts/:id/like", handlers.LikePost)             // controllers yerine handlers
 	r.POST("/posts/:id/dislike", handlers.DislikePost)       // controllers yerine handlers

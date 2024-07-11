@@ -11,8 +11,18 @@ import (
 )
 
 func ShowForumPage(c *gin.Context) {
-	c.HTML(http.StatusOK, "/forum.html", gin.H{
+	c.HTML(http.StatusOK, "forum.html", gin.H{
 		"Title": "Forum",
+	})
+}
+
+// HandleForumPost handles POST requests to /forum
+func HandleForumPost(c *gin.Context) {
+	// Handle form submission or other POST data processing here
+	// For now, just render the forum page as a placeholder
+	c.HTML(http.StatusOK, "forum.html", gin.H{
+		"title":   "Forum",
+		"message": "Post received",
 	})
 }
 
