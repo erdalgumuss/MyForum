@@ -186,3 +186,21 @@ footer {
     width: 100%;
     display: block;
 }
+
+.ad-left, .ad-right {
+    position: absolute;
+    top: 25px;
+    width: 250px; /* Adjust width as needed */
+    height: 75vh; /* Set height as needed */
+    background-color: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto; /* Enable vertical scroll if content exceeds height */
+}
+.ad-left {
+    left: 45px;
+}
+.ad-right {
+    right: 45px;
+}
