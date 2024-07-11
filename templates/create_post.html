@@ -1,0 +1,27 @@
+!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Profil</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <main id="content">
+        {{ block "content" . }}{{ end }}
+    </main>
+
+    <main id="content">
+        <h1>Create a New Post</h1>
+        <form action="/create-post" method="POST">
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title"><br>
+        <label for="content">Content:</label><br>
+        <textarea id="content" name="content" rows="4" cols="50"></textarea><br><br>
+        <input type="submit" value="Create Post">
+    </form>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Forum Sitesi</p>
+    </footer>

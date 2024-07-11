@@ -12,6 +12,10 @@ func ShowForumPage(c *gin.Context) {
 	})
 }
 
+func RenderCreatePostPage(c *gin.Context) {
+	c.HTML(http.StatusOK, "create_post.html", nil)
+}
+
 func GetPosts(c *gin.Context) {
 }
 
