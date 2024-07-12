@@ -3,6 +3,7 @@ package controllers
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"MyForum/config"
 	"MyForum/models"
@@ -20,7 +21,7 @@ func CreatePostWithPost(c *gin.Context, input models.Post) {
 	}
 	log.Println("Database connection is OK in controller")
 
-	stmt, err := config.DB.Prepare("INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)")
+	stmt, err := config.DB.Prepare("INSERT INTO posts (title, content, user_id, created_at) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Failed to prepare statement in controller:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement: " + err.Error()})
@@ -29,7 +30,7 @@ func CreatePostWithPost(c *gin.Context, input models.Post) {
 	defer stmt.Close()
 	log.Println("SQL statement prepared in controller")
 
-	_, err = stmt.Exec(input.Title, input.Content, input.UserID)
+	_, err = stmt.Exec(input.Title, input.Content, input.UserID, time.Now())
 	if err != nil {
 		log.Println("Failed to execute statement in controller:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute statement: " + err.Error()})
