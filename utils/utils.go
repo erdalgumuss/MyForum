@@ -20,8 +20,6 @@ import (
 
 var googleOauthConfig *oauth2.Config
 
-// Müşteri kimliği: 397755739769-baln1i86quijj17ftfqvfkbgqkkqu19b.apps.googleusercontent.com
-// Müşteri sırrı: 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
 
 func InitGoogleOAuth(clientID, clientSecret, redirectURL string) {
 	googleOauthConfig = &oauth2.Config{
