@@ -98,7 +98,7 @@ func GetPosts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Rows error"})
 		return
 	}
-
+//
 	c.JSON(http.StatusOK, posts)
 }
 
