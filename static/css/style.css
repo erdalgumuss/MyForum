@@ -102,7 +102,7 @@ footer {
     width: 100%;
 }
 
-/* Popup Styles */
+/* General Popup Styles */
 .popup {
     position: fixed;
     top: 50%;
@@ -115,11 +115,11 @@ footer {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     border-radius: 10px;
     z-index: 1000;
-    display: none; /* Varsayılan olarak gizli */
+    display: none; /* Hidden by default */
 }
 
 .popup.active {
-    display: block; /* Popup aktif olduğunda göster */
+    display: block; /* Show when active */
 }
 
 .popup-content {
@@ -131,18 +131,44 @@ footer {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
-.popup-header {
-    font-size: 1.5em;
+.popup-content form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.popup-content label {
+    margin: 10px 0 5px;
+    color: #E0E0E0;
+}
+
+.popup-content input[type="text"],
+.popup-content input[type="email"],
+.popup-content input[type="password"] {
+    width: 100%;
+    padding: 8px;
     margin-bottom: 10px;
-    color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
 }
 
-.popup-content {
-    margin-bottom: 20px;
-    color: #ccc;
+.popup-content button {
+    width: 100%;
+    padding: 10px;
+    background-color: #6200EE;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-.popup-close {
+.popup-content button:hover {
+    background-color: #3700B3;
+}
+
+.close-btn {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -150,6 +176,7 @@ footer {
     color: #E53935;
     font-size: 1.2em;
 }
+
 
 /* Button Styles */
 button {
