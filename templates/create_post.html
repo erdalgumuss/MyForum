@@ -71,7 +71,7 @@
                 threadsDiv.innerHTML = '';
                 data.forEach(thread => {
                     const threadDiv = document.createElement('div');
-                    threadDiv.innerHTML = `<h2>${thread.title}</h2><p>${thread.content}</p>`;
+                    threadDiv.innerHTML = `<h2><a href="/posts/${thread.id}">${thread.title}</a></h2><p>${thread.content}</p>`;
                     threadsDiv.appendChild(threadDiv);
                 });
             })

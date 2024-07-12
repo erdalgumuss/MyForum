@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{.Post.Title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <main id="content">
+        {{ block "content" . }}{{ end }}
+    </main>
+
+    <main id="content">
+        <div id="post-container">
+            <h1>{{.Post.Title}}</h1>
+            <p>{{.Post.Content}}</p>
+            <p>Likes: {{.Post.Likes}}</p>
+            <p>Dislikes: {{.Post.Dislikes}}</p>
+            <p>Posted by User ID: {{.Post.UserID}}</p>
+        </div>
+    </main>
+    </main>
+
+
+    <footer>
+        <p>&copy; 2024 FIXIT FORUM</p>
+    </footer>

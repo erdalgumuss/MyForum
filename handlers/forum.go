@@ -70,7 +70,7 @@ func CreatePost(c *gin.Context) {
 		controllers.CreatePostWithPost(c, input)
 	}
 }
-//
+
 func GetPosts(c *gin.Context) {
 	log.Println("GetPosts function called")
 
@@ -102,7 +102,9 @@ func GetPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, posts)
 }
 
+// GetPostHandler handles the request and calls the controller function
 func GetPost(c *gin.Context) {
+	controllers.GetPost(c)
 }
 
 func DislikePost(c *gin.Context) {
