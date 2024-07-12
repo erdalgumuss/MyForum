@@ -1,18 +1,31 @@
 package controllers
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 
 	"MyForum/config"
 	"MyForum/models"
 	"MyForum/utils"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/idtoken"
 )
+
+// Google OAuth 2.0 configuration
+var googleOauthConfig = &oauth2.Config{
+	ClientID:     "YOUR_GOOGLE_CLIENT_ID",
+	ClientSecret: "YOUR_GOOGLE_CLIENT_SECRET",
+	RedirectURL:  "http://localhost:8080/auth/google/callback",
+	Endpoint:     google.Endpoint,
+	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+}
 
 // Register handles user registration.
 func Register(c *gin.Context) {
@@ -83,6 +96,7 @@ func Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 }
 
+// Login handles user login.
 func Login(c *gin.Context) {
 	var input struct {
 		Email    string `json:"email"`
@@ -125,6 +139,72 @@ func Login(c *gin.Context) {
 			"email":   user.Email,
 		},
 	})
+}
+
+// GoogleLogin handles the Google login redirection.
+func GoogleLogin(c *gin.Context) {
+	url := googleOauthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	c.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+// GoogleCallback handles the callback from Google OAuth 2.0.
+func GoogleCallback(c *gin.Context) {
+	code := c.Query("code")
+	token, err := googleOauthConfig.Exchange(context.Background(), code)
+	if err != nil {
+		log.Println("Failed to exchange token:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to exchange token"})
+		return
+	}
+
+	idToken, ok := token.Extra("id_token").(string)
+	if !ok {
+		log.Println("No id_token field in oauth2 token")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No id_token field in oauth2 token"})
+		return
+	}
+
+	payload, err := idtoken.Validate(context.Background(), idToken, googleOauthConfig.ClientID)
+	if err != nil {
+		log.Println("Failed to validate id token:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate id token"})
+		return
+	}
+
+	userID := payload.Subject
+	email := payload.Claims["email"].(string)
+	name := payload.Claims["name"].(string)
+
+	var user models.User
+	err = config.DB.QueryRow("SELECT id FROM users WHERE google_id = ?", userID).Scan(&user.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			_, err = config.DB.Exec("INSERT INTO users (google_id, email, username) VALUES (?, ?, ?)", userID, email, name)
+			if err != nil {
+				log.Println("Failed to create user:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+				return
+			}
+			err = config.DB.QueryRow("SELECT id FROM users WHERE google_id = ?", userID).Scan(&user.ID)
+			if err != nil {
+				log.Println("Failed to retrieve new user:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+				return
+			}
+		} else {
+			log.Println("Failed to query user:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+	}
+
+	sessionToken, err := utils.CreateSession(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
+		return
+	}
+	c.SetCookie("session_token", sessionToken, 3600*24, "/", "", false, true)
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
 }
 
 func getUserByEmail(email string) (*models.User, error) {

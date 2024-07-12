@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -12,7 +13,25 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/idtoken"
 )
+
+var googleOauthConfig *oauth2.Config
+
+// Müşteri kimliği: 397755739769-baln1i86quijj17ftfqvfkbgqkkqu19b.apps.googleusercontent.com
+// Müşteri sırrı: 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
+
+func InitGoogleOAuth(clientID, clientSecret, redirectURL string) {
+	googleOauthConfig = &oauth2.Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		RedirectURL:  redirectURL,
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+		Endpoint:     google.Endpoint,
+	}
+}
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -76,7 +95,7 @@ func getSessionByToken(token string) (*models.Session, error) {
 }
 
 func CreateSession(userID int) (string, error) {
-	sessionToken := uuid.New().String()
+	sessionToken := uuid.NewString()
 	createdAt := time.Now().Format("2006-01-02 15:04:05")
 	updatedAt := createdAt
 	expiresAt := time.Now().Add(24 * time.Hour).Format("2006-01-02 15:04:05") // 24 saat sonra
@@ -104,9 +123,61 @@ func GetUserIDFromSession(c *gin.Context) (int, bool) {
 	// Type assertion with check
 	id, ok := userID.(int)
 	if !ok {
-		log.Println("UserID found in context is not of type uint")
+		log.Println("UserID found in context is not of type int")
 		return 0, false
 	}
 
 	return id, true
+}
+
+func GoogleCallback(c *gin.Context) {
+	credential := struct {
+		Credential string `json:"credential"`
+	}{}
+	if err := c.BindJSON(&credential); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	token, err := idtoken.Validate(context.Background(), credential.Credential, googleOauthConfig.ClientID)
+	if err != nil {
+		log.Println("Invalid token:", err)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	userID := token.Subject
+
+	var user models.User
+	err = config.DB.QueryRow("SELECT id FROM users WHERE google_id = ?", userID).Scan(&user.ID)
+	if err != nil {
+		// User not found, create a new user
+		_, err = config.DB.Exec("INSERT INTO users (google_id, email, username) VALUES (?, ?, ?)", userID, token.Claims["email"], token.Claims["name"])
+		if err != nil {
+			log.Println("Failed to create user:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+		err = config.DB.QueryRow("SELECT id FROM users WHERE google_id = ?", userID).Scan(&user.ID)
+		if err != nil {
+			log.Println("Failed to retrieve new user:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+			return
+		}
+	}
+
+	// Set the session token
+	sessionToken := uuid.NewString()
+	expiresAt := time.Now().Add(24 * time.Hour)
+
+	_, err = config.DB.Exec("INSERT INTO sessions (token, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)", sessionToken, user.ID, time.Now(), expiresAt)
+	if err != nil {
+		log.Println("Failed to create session:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		return
+	}
+
+	c.SetCookie("session_token", sessionToken, 3600*24, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }

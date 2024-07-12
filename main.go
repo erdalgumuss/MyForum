@@ -3,6 +3,7 @@ package main
 import (
 	"MyForum/config"
 	"MyForum/routes"
+	"MyForum/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,6 +11,7 @@ import (
 func main() {
 	// Initialize database
 	config.InitDB()
+	utils.InitGoogleOAuth("YOUR_GOOGLE_CLIENT_ID", "YOUR_GOOGLE_CLIENT_SECRET", "http://localhost:8080/auth/google/callback")
 
 	// Create a new Gin router
 	r := gin.Default()
