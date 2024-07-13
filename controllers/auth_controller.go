@@ -31,7 +31,7 @@ var googleOauthConfig = &oauth2.Config{
 func Register(c *gin.Context) {
 	var input models.User
 	if err := c.BindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON provided"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON provided"})//
 		fmt.Println("Invalid JSON provided:", err)
 		return
 	}
