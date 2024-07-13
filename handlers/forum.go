@@ -74,7 +74,7 @@ func CreatePost(c *gin.Context) {
 func GetPosts(c *gin.Context) {
 	log.Println("GetPosts function called")
 
-	rows, err := config.DB.Query("SELECT id, title, content, user_id, likes, dislikes FROM posts")
+	rows, err := config.DB.Query("SELECT id, username, title, content, user_id, likes, dislikes FROM posts")
 	if err != nil {
 		log.Println("Failed to query posts:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query posts"})
@@ -85,7 +85,7 @@ func GetPosts(c *gin.Context) {
 	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.UserID, &post.Likes, &post.Dislikes); err != nil {
+		if err := rows.Scan(&post.ID, &post.Username, &post.Title, &post.Content, &post.UserID, &post.Likes, &post.Dislikes); err != nil {
 			log.Println("Failed to scan post:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan post"})
 			return
@@ -98,7 +98,7 @@ func GetPosts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Rows error"})
 		return
 	}
-//
+	//
 	c.JSON(http.StatusOK, posts)
 }
 

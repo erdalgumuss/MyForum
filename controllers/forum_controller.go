@@ -21,7 +21,7 @@ func CreatePostWithPost(c *gin.Context, input models.Post) {
 	}
 	log.Println("Database connection is OK in controller")
 
-	stmt, err := config.DB.Prepare("INSERT INTO posts (title, content, user_id, created_at) VALUES (?, ?, ?, ?)")
+	stmt, err := config.DB.Prepare("INSERT INTO posts (title, content, user_id, username, created_at) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Failed to prepare statement in controller:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement: " + err.Error()})
@@ -30,7 +30,7 @@ func CreatePostWithPost(c *gin.Context, input models.Post) {
 	defer stmt.Close()
 	log.Println("SQL statement prepared in controller")
 
-	_, err = stmt.Exec(input.Title, input.Content, input.UserID, time.Now())
+	_, err = stmt.Exec(input.Title, input.Content, input.UserID, input.Username, time.Now())
 	if err != nil {
 		log.Println("Failed to execute statement in controller:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute statement: " + err.Error()})
@@ -60,7 +60,7 @@ func CreatePost(c *gin.Context) {
 	}
 	log.Println("Database connection is OK in controller")
 
-	stmt, err := config.DB.Prepare("INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)")
+	stmt, err := config.DB.Prepare("INSERT INTO posts (title, content, user_id, username) VALUES (?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Failed to prepare statement in controller:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement: " + err.Error()})
@@ -69,7 +69,7 @@ func CreatePost(c *gin.Context) {
 	defer stmt.Close()
 	log.Println("SQL statement prepared in controller")
 
-	_, err = stmt.Exec(input.Title, input.Content, input.UserID)
+	_, err = stmt.Exec(input.Title, input.Content, input.UserID, input.Username)
 	if err != nil {
 		log.Println("Failed to execute statement in controller:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to execute statement: " + err.Error()})
@@ -179,7 +179,7 @@ func DislikeComment(c *gin.Context) {
 
 // GetPosts retrieves all posts
 func GetPosts(c *gin.Context) {
-	rows, err := config.DB.Query("SELECT id, title, content, likes, dislikes, user_id FROM posts")
+	rows, err := config.DB.Query("SELECT id, title, content, likes, dislikes, user_id, username FROM posts")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
 		return
@@ -189,7 +189,7 @@ func GetPosts(c *gin.Context) {
 	var posts []models.Post
 	for rows.Next() {
 		var post models.Post
-		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID); err != nil {
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.Username); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan post"})
 			return
 		}
@@ -203,12 +203,14 @@ func GetPosts(c *gin.Context) {
 func GetPost(c *gin.Context) {
 	id := c.Param("id")
 	var post models.Post
-	err := config.DB.QueryRow("SELECT id, title, content, likes, dislikes, user_id, created_at FROM posts WHERE id = ?", id).
-		Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.CreatedAt)
+	err := config.DB.QueryRow("SELECT id, title, content, likes, dislikes, user_id, username, created_at FROM posts WHERE id = ?", id).
+		Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.Username, &post.CreatedAt)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
+
+	log.Printf("Retrieved Post: %+v\n", post) // Log the post data
 
 	c.HTML(http.StatusOK, "post.html", gin.H{"Post": post})
 }
