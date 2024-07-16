@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"database/sql"
+	"log"
 	"net/http"
 
 	"MyForum/config"
@@ -14,21 +14,31 @@ import (
 
 // GetUserProfile retrieves user profile details
 func GetUserProfile(c *gin.Context) {
-	var user models.User
-	err := config.DB.QueryRow("SELECT id, username, email FROM users WHERE id = ?", c.Param("id")).Scan(&user.ID, &user.Username, &user.Email)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user"})
-		}
+	// Get the logged-in user ID from the context
+	userID, ok := c.Get("userID")
+	if !ok {
+		log.Println("User ID not found in session")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
+	// Fetch user information from the database
+	var user models.User
+	err := config.DB.QueryRow("SELECT id, email, username, name, surname FROM users WHERE id = ?", userID).Scan(
+		&user.ID, &user.Email, &user.Username, &user.Name, &user.Surname)
+	if err != nil {
+		log.Println("Failed to fetch user profile:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user profile"})
+		return
+	}
+
+	log.Println("User profile fetched successfully, User ID:", user.ID)
 	c.JSON(http.StatusOK, gin.H{
 		"id":       user.ID,
-		"username": user.Username,
 		"email":    user.Email,
+		"username": user.Username.String,
+		"name":     user.Name.String,
+		"surname":  user.Surname.String,
 	})
 }
 

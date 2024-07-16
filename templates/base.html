@@ -7,8 +7,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .title }}</title>
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
-    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        .google-login-btn {
+            display: inline-block;
+            background: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 10px 20px;
+            text-align: center;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .google-login-btn img {
+            height: 20px;
+            width: 20px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .google-login-btn:hover {
+            background: #357AE8;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -23,7 +47,7 @@
                     <li><a href="/gallery">Galeri</a></li>
                     <li><a href="/rules">Kurallar</a></li>
                     <li><a href="/profile">Profil</a></li>
-                    <li><a href="/create-post">Konu Olustur</a></li>
+                    <li><a href="/create-post">Konu Oluştur</a></li>
                     <li><a href="#" id="login-btn">Giriş Yap</a></li>
                     <li><a href="#" id="register-btn">Kayıt Ol</a></li>
                     <li><a href="#" id="logout-btn" style="display: none;">Çıkış</a></li>
@@ -43,13 +67,13 @@
             <h2>Giriş Yap</h2>
             <form id="login-form" method="POST" action="/login">
                 <label for="login-email">Email:</label>
-                <input type="text" id="login-email" name="email" required>
+                <input type="email" id="login-email" name="email" required>
                 <label for="login-password">Şifre:</label>
                 <input type="password" id="login-password" name="password" required>
                 <button type="submit">Giriş Yap</button>
             </form>
-            <a href="/auth/google/login">
-                <button type="button">Login with Google</button>
+            <a href="/auth/google/login" class="google-login-btn">
+                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo">Google ile Giriş Yap
             </a>
         </div>
     </div>
@@ -75,18 +99,18 @@
         </div>
     </div>
 
-    <!-- ads -->
+    <!-- Reklamlar -->
     <div class="ad-left">
         <h3>REKLAMLAR</h3><br>
-        <img src="/static/images/hells.jpg" width="250" /><br><br>  
-        <img src="/static/images/never_stop_riding.jpg" width="250" />
+        <img src="/static/images/hells.jpg" alt="Reklam 1" width="250"><br><br>  
+        <img src="/static/images/never_stop_riding.jpg" alt="Reklam 2" width="250">
     </div>
     <div class="ad-right">
         <h3>REKLAMLAR</h3><br>
-        <img src="/static/images/Sonny_Barger.jpg" width="250" /><br><br> 
-        <img src="/static/images/soa.jpg" width="250" />
+        <img src="/static/images/Sonny_Barger.jpg" alt="Reklam 3" width="250"><br><br> 
+        <img src="/static/images/soa.jpg" alt="Reklam 4" width="250">
     </div>
-    <!-- ads -->
+    <!-- Reklamlar -->
 
     <footer>
         <p>&copy; 2024 FIXIT FORUM</p>
@@ -105,7 +129,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    window.location.href = '/profile';
+                    window.location.href = '/';
                 } else {
                     console.error('Login failed:', data.error);
                 }
