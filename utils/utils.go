@@ -107,6 +107,5 @@ func GetUserIDFromSession(c *gin.Context) (int, bool) {
 		log.Println("UserID found in context is not of type int")
 		return 0, false
 	}
-
 	return id, true
 }

@@ -19,19 +19,19 @@ type User struct {
 }
 
 type GoogleUserInfo struct {
-    ID    string
-    Name  string
-    Email string
+	ID    string
+	Name  string
+	Email string
 }
 
 type GitHubUserInfo struct {
-    ID    int
-    Login string
-    Email string
+	ID    int
+	Login string
+	Email string
 }
 
 type FacebookUserInfo struct {
-    ID    string
-    Name  string
-    Email string
+	ID    string
+	Name  string
+	Email string
 }
