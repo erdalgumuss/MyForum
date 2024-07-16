@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"MyForum/controllers"
 	"MyForum/handlers"
 
 	"github.com/gin-gonic/gin"
@@ -13,5 +12,6 @@ func AuthRoutes(r *gin.Engine) {
 	r.POST("/login", handlers.ProcessLogin)
 	r.POST("/register", handlers.ProcessRegister)
 	r.POST("/logout", handlers.Logout)
-	r.POST("/auth/google/callback", controllers.GoogleCallback)
+	r.GET("/auth/google/login", handlers.GoogleLogin)
+	r.GET("/auth/google/callback", handlers.GoogleCallback)
 }

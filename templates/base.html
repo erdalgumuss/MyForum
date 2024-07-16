@@ -8,6 +8,7 @@
     <title>{{ .title }}</title>
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
     <header>
@@ -35,19 +36,21 @@
         </div>
     </header>
 
-   
     <!-- Giriş Yap Pop-up -->
     <div id="login-popup" class="popup">
         <div class="popup-content">
             <span class="close-btn" id="close-login">&times;</span>
             <h2>Giriş Yap</h2>
-            <form id="login-form">
-                <label for="login-email">Email:&nbsp;&nbsp;&nbsp;&nbsp;</label>
+            <form id="login-form" method="POST" action="/login">
+                <label for="login-email">Email:</label>
                 <input type="text" id="login-email" name="email" required>
-                <label for="login-password">Şifre:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <label for="login-password">Şifre:</label>
                 <input type="password" id="login-password" name="password" required>
                 <button type="submit">Giriş Yap</button>
             </form>
+            <a href="/auth/google/login">
+                <button type="button">Login with Google</button>
+            </a>
         </div>
     </div>
 
@@ -56,16 +59,16 @@
         <div class="popup-content">
             <span class="close-btn" id="close-register">&times;</span>
             <h2>Kayıt Ol</h2>
-            <form id="register-form">
+            <form id="register-form" method="POST" action="/register">
                 <label for="register-username">Kullanıcı Adı:</label>
                 <input type="text" id="register-username" name="username" required><br>
-                <label for="register-email">Email:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <label for="register-email">Email:</label>
                 <input type="email" id="register-email" name="email" required><br>
-                <label for="register-password">Şifre:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <label for="register-password">Şifre:</label>
                 <input type="password" id="register-password" name="password" required><br>
-                <label for="register-name">İsim:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <label for="register-name">İsim:</label>
                 <input type="text" id="register-name" name="name" required><br>
-                <label for="register-surname">Soyisim:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <label for="register-surname">Soyisim:</label>
                 <input type="text" id="register-surname" name="surname" required><br>
                 <button type="submit">Kayıt Ol</button>
             </form>
@@ -90,21 +93,6 @@
     </footer>
 
     <script src="/static/js/main.js"></script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login with Google</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-</head>
-<body>
-    <div id="g_id_onload">
-
-    </div>
-    <div class="g_id_signin" data-type="standard"></div>
-
     <script>
         function handleCredentialResponse(response) {
             fetch('/auth/google/callback', {

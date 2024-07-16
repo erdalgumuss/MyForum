@@ -9,9 +9,24 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
-var DB *sql.DB
+var (
+	DB                *sql.DB
+	GoogleOAuthConfig *oauth2.Config
+)
+
+func InitOAuthConfig(clientID, clientSecret, redirectURL string) {
+    GoogleOAuthConfig = &oauth2.Config{
+        ClientID:     clientID,
+        ClientSecret: clientSecret,
+        RedirectURL:  redirectURL,
+        Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+        Endpoint:     google.Endpoint,
+    }
+}
 
 func InitDB() error {
 	// .env dosyasını yükle
