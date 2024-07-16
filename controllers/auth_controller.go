@@ -3,35 +3,74 @@ package controllers
 import (
 	"context"
 	"database/sql"
+	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"MyForum/config"
 	"MyForum/models"
 	"MyForum/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/facebook"
+	"golang.org/x/oauth2/github"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/idtoken"
 )
 
-// Google OAuth 2.0 configuration
-var googleOauthConfig = &oauth2.Config{
-	ClientID:     "YOUR_GOOGLE_CLIENT_ID",
-	ClientSecret: "YOUR_GOOGLE_CLIENT_SECRET",
-	RedirectURL:  "http://localhost:8080/auth/google/callback",
-	Endpoint:     google.Endpoint,
-	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+var (
+	googleOauthConfig   *oauth2.Config
+	githubOauthConfig   oauth2.Config
+	facebookOauthConfig oauth2.Config
+)
+
+func init() {
+	gob.Register(models.User{})
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file %v", err)
+	}
+
+	googleOauthConfig = &oauth2.Config{
+		RedirectURL:  "http://localhost:8080/auth/google/callback",
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		Scopes:       []string{"profile", "email"},
+		Endpoint:     google.Endpoint,
+	}
+	githubOauthConfig = &oauth2.Config{
+		RedirectURL:  "http://localhost:8080/auth/github/callback",
+		ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
+		ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
+		Scopes:       []string{"user:email"},
+		Endpoint:     github.Endpoint,
+	}
+	facebookOauthConfig = &oauth2.Config{
+		ClientID:     os.Getenv("FACEBOOK_KEY"),
+		ClientSecret: os.Getenv("FACEBOOK_SECRET"),
+		RedirectURL:  "http://localhost:8080/auth/facebook/callback",
+		Endpoint:     facebook.Endpoint,
+		Scopes:       []string{"email"},
+	}
+	// SESSION_SECRET'ın doğru yüklendiğini kontrol edelim
+	sessionSecret := os.Getenv("SESSION_SECRET")
+	if sessionSecret == "" {
+		log.Fatal("SESSION_SECRET is not set")
+	}
 }
 
 // Register handles user registration.
 func Register(c *gin.Context) {
 	var input models.User
 	if err := c.BindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON provided"})////git  
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON provided"}) ////git
 		fmt.Println("Invalid JSON provided:", err)
 		return
 	}
@@ -205,6 +244,69 @@ func GoogleCallback(c *gin.Context) {
 	}
 	c.SetCookie("session_token", sessionToken, 3600*24, "/", "", false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+}
+
+func GitHubCallback(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	if code == "" {
+		http.Error(w, "Code not found", http.StatusBadRequest)
+		log.Println("Code not found in URL")
+		return
+	}
+	token, err := githubOauthConfig.Exchange(r.Context(), code)
+	if err != nil {
+		http.Error(w, "Failed to exchange GitHub token", http.StatusInternalServerError)
+		log.Printf("GitHub token exchange error: %v", err)
+		return
+	}
+
+	client := githubOauthConfig.Client(r.Context(), token)
+	resp, err := client.Get("https://api.github.com/user")
+	if err != nil {
+		http.Error(w, "Failed to get GitHub user info", http.StatusInternalServerError)
+		log.Printf("GitHub user info error: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	var githubUserInfo map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&githubUserInfo); err != nil {
+		http.Error(w, "Failed to decode GitHub user info", http.StatusInternalServerError)
+		log.Printf("GitHub user info decode error: %v", err)
+		return
+	}
+
+	user := models.GitHubUserInfo{
+		Login: githubUserInfo["login"].(string),
+		Email: "",
+	}
+	if email, ok := githubUserInfo["email"].(string); ok {
+		user.Email = email
+	}
+	session, err := store.Get(r, "session-name")
+	if err != nil {
+		http.Error(w, "Failed to get session", http.StatusInternalServerError)
+		log.Printf("Session error: %v", err)
+		return
+	}
+	session.Values["username"] = user.Login
+	session.Values["authenticated"] = true
+	if err := session.Save(r, w); err != nil {
+		http.Error(w, "Failed to save session", http.StatusInternalServerError)
+		log.Printf("Session save error: %v", err)
+		return
+	}
+
+	// Kullanıcıyı veritabanında kontrol et ve ekle/güncelle
+	_, err = config.DB.Query(`INSERT INTO users (username, email, password) VALUES (?, ?, 'oauth')
+                               ON CONFLICT(email) DO UPDATE SET username=excluded.username`, user.Login, user.Email)
+	if err != nil {
+		http.Error(w, "Failed to insert/update user", http.StatusInternalServerError)
+		log.Printf("Database error: %v", err)
+		return
+	}
+
+	http.Redirect(w, r, "/index", http.StatusSeeOther)
 }
 
 func getUserByEmail(email string) (*models.User, error) {
