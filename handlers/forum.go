@@ -58,6 +58,10 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 
+	// Bind form data explicitly
+	input.Title = c.PostForm("title")
+	input.Content = c.PostForm("content")
+
 	// Handle file upload
 	file, err := c.FormFile("image")
 	if err == nil {
@@ -68,15 +72,11 @@ func CreatePost(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Dosya kaydedilemedi"})
 			return
 		}
-		input.ImageURL = filepath
+		input.ImageURL = "/uploads/" + filename // Ensure this matches the URL path
 		log.Printf("File uploaded successfully: %s\n", filepath)
 	} else {
 		log.Println("No file uploaded")
 	}
-
-	// Bind form data explicitly
-	input.Title = c.PostForm("title")
-	input.Content = c.PostForm("content")
 
 	// Add user ID and timestamps
 	input.UserID = userID.(int)

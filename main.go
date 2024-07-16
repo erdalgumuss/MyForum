@@ -16,6 +16,7 @@ func main() {
 
 	// Serve static files
 	r.Static("/static", "./static")
+	r.Static("/uploads", "./uploads")
 
 	// Load HTML templates
 	r.LoadHTMLGlob("templates/*")
