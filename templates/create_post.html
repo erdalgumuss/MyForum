@@ -7,17 +7,19 @@
 </head>
 <body>
 
-    <main id="content">
+    <main id="profile-content">
         {{ block "content" . }}{{ end }}
     </main>
 
-    <main id="content">
+    <main id="post-content">
         <h1>Create a New Post</h1>
-        <form id="createPostForm">
+        <form id="createPostForm" enctype="multipart/form-data">
             <label for="title">Title:</label><br>
             <input type="text" id="title" name="title"><br>
             <label for="content">Content:</label><br>
-            <textarea id="content" name="content" rows="4" cols="50"></textarea><br><br>
+            <textarea id="content" name="content" rows="4" cols="50"></textarea><br>
+            <label for="image">Upload Image:</label><br>
+            <input type="file" id="image" name="image"><br><br>
             <input type="button" value="Create Post" onclick="submitForm()">
         </form>
         <div id="threads" style="margin-top: 20px;">
@@ -30,37 +32,30 @@
     </footer>
 
     <script>
-        function submitForm() {
-            const form = document.getElementById('createPostForm');
-            const formData = {
-                title: form.title.value,
-                content: form.content.value,
-                user_id: 1 // Assuming a fixed user_id for now
-            };
+       function submitForm() {
+    const form = document.getElementById('createPostForm');
+    const formData = new FormData(form);
 
-            fetch('/create-post', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                if (data.message === "Post created successfully") {
-                    // Fetch and display threads
-                    fetchThreads();
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+    fetch('/create-post', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+        if (data.message === "Post başarıyla oluşturuldu") {
+            fetchThreads();
         }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 
         function fetchThreads() {
             fetch('/getpost', {
-                method: 'GET',  
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json'
                 }

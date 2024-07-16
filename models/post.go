@@ -8,6 +8,7 @@ type Post struct {
 	Username   string     `json:"username"`
 	Content    string     `json:"content"`
 	UserID     int        `json:"user_id"`
+	ImageURL   string     `json:"image_url"` // Yeni alan
 	Likes      int        `json:"likes"`
 	Dislikes   int        `json:"dislikes"`
 	Categories []Category `json:"categories"`

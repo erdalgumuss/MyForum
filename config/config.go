@@ -70,7 +70,8 @@ func createTables() error {
 		likes INTEGER DEFAULT 0,
 		dislikes INTEGER DEFAULT 0,
 		created_at DATETIME,
-		updated_at DATETIME
+		updated_at DATETIME,
+		image_url TEXT
 	);`
 	_, err = DB.Exec(createPostTable)
 	if err != nil {

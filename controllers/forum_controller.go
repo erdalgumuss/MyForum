@@ -3,7 +3,6 @@ package controllers
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"MyForum/config"
 	"MyForum/models"
@@ -12,14 +11,12 @@ import (
 )
 
 func CreatePostWithPost(post models.Post) error {
-	post.CreatedAt = time.Now() // CreatedAt alanını güncelle
-
 	query := `
-	INSERT INTO posts (user_id, title, content, created_at )
-	VALUES (?, ?, ?, ?)
+	INSERT INTO posts (user_id, title, content, image_url, created_at)
+	VALUES (?, ?, ?, ?, ?)
 	`
 
-	_, err := config.DB.Exec(query, post.UserID, post.Title, post.Content, post.CreatedAt)
+	_, err := config.DB.Exec(query, post.UserID, post.Title, post.Content, post.ImageURL, post.CreatedAt)
 	if err != nil {
 		log.Println("Veritabanına post kaydedilirken hata:", err)
 		return err

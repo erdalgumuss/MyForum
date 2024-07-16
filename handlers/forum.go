@@ -3,6 +3,7 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"MyForum/config"
@@ -49,7 +50,7 @@ func CreatePost(c *gin.Context) {
 
 	var input models.Post
 
-	// Kullanıcı kimliğini context'ten al
+	// Get user ID from context
 	userID, ok := c.Get("userID")
 	if !ok {
 		log.Println("Kullanıcı kimliği post oturumda bulunamadı")
@@ -57,28 +58,34 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 
-	// Content-Type'a göre veriyi bağla
-	if c.ContentType() == "application/x-www-form-urlencoded" {
-		if err := c.ShouldBind(&input); err != nil {
-			log.Println("Form verisi bağlama hatası:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Geçersiz giriş: " + err.Error()})
+	// Handle file upload
+	file, err := c.FormFile("image")
+	if err == nil {
+		filename := filepath.Base(file.Filename)
+		filepath := filepath.Join("uploads", filename)
+		if err := c.SaveUploadedFile(file, filepath); err != nil {
+			log.Println("Dosya kaydedilirken hata:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Dosya kaydedilemedi"})
 			return
 		}
-		log.Println("Form verisi başarılı şekilde bağlandı:", input)
+		input.ImageURL = filepath
+		log.Printf("File uploaded successfully: %s\n", filepath)
 	} else {
-		if err := c.ShouldBindJSON(&input); err != nil {
-			log.Println("JSON bağlama hatası:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Geçersiz giriş: " + err.Error()})
-			return
-		}
-		log.Println("JSON verisi başarılı şekilde bağlandı:", input)
+		log.Println("No file uploaded")
 	}
 
-	// Posta kullanıcı kimliğini ve diğer bilgileri ekle
+	// Bind form data explicitly
+	input.Title = c.PostForm("title")
+	input.Content = c.PostForm("content")
+
+	// Add user ID and timestamps
 	input.UserID = userID.(int)
 	input.CreatedAt = time.Now()
+	input.Username = "YourUsernameHere" // Replace with the actual method to get the username
 
-	// Controller fonksiyonunu çağır
+	log.Printf("Form data bound successfully: %+v\n", input)
+
+	// Call controller function
 	if err := controllers.CreatePostWithPost(input); err != nil {
 		log.Println("Post oluşturulurken hata:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Post oluşturulamadı"})
