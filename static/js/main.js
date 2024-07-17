@@ -144,6 +144,12 @@ document.addEventListener('DOMContentLoaded', () => {
         registerBtn.style.display = isLoggedIn ? 'none' : 'inline';
         logoutBtn.style.display = isLoggedIn ? 'inline' : 'none';
         userInfoContainer.style.display = isLoggedIn ? 'inline' : 'none';
+
+        // Show or hide the profile link
+        const profileLink = document.getElementById('profile-link');
+        if (profileLink) {
+            profileLink.style.display = isLoggedIn ? 'inline' : 'none';
+        }
     };
 
     const loadUser = async () => {
@@ -158,6 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.location.pathname === '/profile.html') {
                     document.getElementById('profile-name').textContent = `${user.name} ${user.surname}`;
                     document.getElementById('profile-email').textContent = user.email;
+
+                    // Load user-specific content
+                    loadUserPosts(user.id);
+                    loadUserLikes(user.id);
+                    loadUserComments(user.id);
                 }
             } else {
                 toggleUserUI(false);
@@ -165,6 +176,60 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error loading user:', error);
             toggleUserUI(false);
+        }
+    };
+
+    const loadUserPosts = async (userId) => {
+        try {
+            const response = await fetch(`/user/${userId}/posts`);
+            const posts = await response.json();
+            const postsContainer = document.getElementById('posts-container');
+            postsContainer.innerHTML = ''; // Mevcut içeriği temizle
+            posts.forEach(post => {
+                const postElement = document.createElement('div');
+                postElement.classList.add('post');
+                postElement.innerHTML = `
+                    <h4>${post.title}</h4>
+                    <p>${post.content}</p>
+                `;
+                postsContainer.appendChild(postElement);
+            });
+        } catch (error) {
+            console.error('Error loading user posts:', error);
+        }
+    };
+
+    const loadUserLikes = async (userId) => {
+        try {
+            const response = await fetch(`/user/${userId}/likes`);
+            const likes = await response.json();
+            const likesList = document.getElementById('likes-list');
+            likesList.innerHTML = ''; // Mevcut içeriği temizle
+            likes.forEach(like => {
+                const likeElement = document.createElement('li');
+                likeElement.textContent = like.postTitle;
+                likesList.appendChild(likeElement);
+            });
+        } catch (error) {
+            console.error('Error loading user likes:', error);
+        }
+    };
+
+    const loadUserComments = async (userId) => {
+        try {
+            const response = await fetch(`/user/${userId}/comments`);
+            const comments = await response.json();
+            const commentsList = document.getElementById('comments-list');
+            commentsList.innerHTML = ''; // Mevcut içeriği temizle
+            comments.forEach(comment => {
+                const commentElement = document.createElement('li');
+                commentElement.innerHTML = `
+                    <strong>${comment.postTitle}</strong>: ${comment.content}
+                `;
+                commentsList.appendChild(commentElement);
+            });
+        } catch (error) {
+            console.error('Error loading user comments:', error);
         }
     };
 

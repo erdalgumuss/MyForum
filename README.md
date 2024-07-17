@@ -1,16 +1,20 @@
 <br>**Yapilacaklar:**
 <br>
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
+<br>Yeni konular ustten bastirilsin
 <br>Ana Sayfa ayarlansin
 <br>Filtreleme
 <br>Comment
-<br>Like/Dislike
+<br>Like/Dislik
+<br>Dublicating functions; such as:<br/>
+GetUserProfile in handlers/profile.go and in controller profile_controller.go
 <br><br>
+Might improve:
+<br>CSS problems --such as the structure dissappearing in the footer.<br><br>
 
 > Profilde::: <br><br>
 > kullanici adi<br>
 > email<br>
-> konular<br>
 > yorumlar<br>
 > liked/disliked<br>
 > EKLENSIN

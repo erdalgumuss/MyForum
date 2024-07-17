@@ -61,6 +61,59 @@ func ProfileView(c *gin.Context) {
 	})
 }
 
+func GetUserPosts(c *gin.Context) {
+	userID := c.Param("id")
+	var posts []models.Post
+
+	rows, err := config.DB.Query("SELECT id, title, categories, content, user_id, image_url, likes, dislikes FROM posts WHERE user_id = ?", userID)
+	if err != nil {
+		log.Println("Error fetching user posts:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user posts"})
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var post models.Post
+		if err := rows.Scan(&post.ID, &post.Title, &post.Categories, &post.Content, &post.UserID, &post.ImageURL, &post.Likes, &post.Dislikes); err != nil {
+			log.Println("Error scanning post row:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user posts"})
+			return
+		}
+		posts = append(posts, post)
+	}
+
+	c.JSON(http.StatusOK, posts)
+}
+
+/*func GetUserLikes(c *gin.Context) {
+	userID := c.Param("id")
+	var likes []models.Like
+
+	err := config.DB.Select(&likes, "SELECT * FROM likes WHERE user_id = ?", userID)
+	if err != nil {
+		log.Println("Error fetching user likes:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user likes"})
+		return
+	}
+
+	c.JSON(http.StatusOK, likes)
+}
+
+func GetUserComments(c *gin.Context) {
+	userID := c.Param("id")
+	var comments []models.Comment
+
+	err := config.DB.Select(&comments, "SELECT * FROM comments WHERE user_id = ?", userID)
+	if err != nil {
+		log.Println("Error fetching user comments:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user comments"})
+		return
+	}
+
+	c.JSON(http.StatusOK, comments)
+}*/
+
 /*func ProfileUpdate(c *gin.Context) {
 	userID := utils.GetUserIDFromSession(c)
 
