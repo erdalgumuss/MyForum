@@ -1,3 +1,65 @@
+function fetchThreads() {
+    fetch('/getpost', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch threads');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const threadsDiv = document.getElementById('threads');
+        threadsDiv.innerHTML = '';
+        data.forEach(thread => {
+            const threadDiv = document.createElement('div');
+            threadDiv.innerHTML = `<h2><a href="/posts/${thread.id}">${thread.title}</a></h2><p>${thread.content}</p>`;
+            threadsDiv.appendChild(threadDiv);
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching threads:', error);
+        alert('Error fetching threads. Please try again later.'); // Display error to user
+    });
+}
+
+function submitForm() {
+    const form = document.getElementById('createPostForm');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    const formData = new FormData(form);
+
+    // Convert selected categories into an array
+    const selectedCategories = Array.from(formData.getAll('categories'));
+
+    // Update formData with categories as JSON
+    formData.delete('categories');
+    formData.append('categories', JSON.stringify(selectedCategories));
+
+    fetch('/create-post', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+        if (data.message === "Post başarıyla oluşturuldu") {
+            if (window.location.pathname === '/forum') {
+                fetchThreads();
+            }
+            form.reset(); // Optionally reset the form after successful submission
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginPopup = document.getElementById('login-popup');
     const registerPopup = document.getElementById('register-popup');
@@ -60,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     if (form.id === 'login-form') {
                         localStorage.setItem('user', JSON.stringify(responseData));
-                        loadUser(); // Kullanıcı bilgilerini yeniden yükle
+                        loadUser(); // Reload user information
                         togglePopup(loginPopup, 'close');
                     } else if (form.id === 'register-form') {
                         togglePopup(registerPopup, 'close');
@@ -92,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 toggleUserUI(true);
                 userNameElement.textContent = `${user.name} ${user.surname}`;
                 userEmailElement.textContent = user.email;
-                // Eğer profile.html sayfasındaysanız bilgileri yerleştirin
+                // If on profile.html, update profile information
                 if (window.location.pathname === '/profile.html') {
                     document.getElementById('profile-name').textContent = `${user.name} ${user.surname}`;
                     document.getElementById('profile-email').textContent = user.email;
@@ -108,6 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadUser();
 
+    // Fetch threads only if on the forum page
+    if (window.location.pathname === '/forum') {
+        fetchThreads();
+    }
+
     logoutBtn.addEventListener('click', async () => {
         try {
             const response = await fetch('/logout', {
@@ -122,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert(responseData.message);
                 localStorage.removeItem('user');
                 toggleUserUI(false);
-                window.location.href = "/";  // Logout işleminden sonra anasayfaya yönlendirin
+                window.location.href = "/";  // Redirect to homepage after logout
             } else {
                 const responseData = await response.json();
                 alert(responseData.error);

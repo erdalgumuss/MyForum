@@ -15,15 +15,15 @@
         <h1>Create a New Post</h1>
         <form id="createPostForm" enctype="multipart/form-data">
             <label for="title">Title:</label><br>
-            <input type="text" id="title" name="title"><br>
-            <label for="title">Category:</label><br>
-            <select name="categories" multiple required>
+            <input type="text" id="title" name="title" required><br>
+            <label for="categories">Category:</label><br>
+            <select id="categories" name="categories" multiple required>
                 <option value="Tamir">Tamir</option>
                 <option value="Bakim Onarim">Bakim Onarim</option>
                 <option value="Yedek Parca">Yedek Parca</option>
             </select><br>
             <label for="content">Content:</label><br>
-            <textarea id="content" name="content" rows="4" cols="50"></textarea><br>
+            <textarea id="content" name="content" rows="4" cols="50" required></textarea><br>
             <label for="image">Upload Image:</label><br>
             <input type="file" id="image" name="image"><br><br>
             <input type="button" value="Create Post" onclick="submitForm()">
@@ -37,59 +37,7 @@
         <p>&copy; 2024 Forum Sitesi</p>
     </footer>
 
-    <script>
-       function submitForm() {
-            const form = document.getElementById('createPostForm');
-            const formData = new FormData(form);
+    <script src="/static/js/main.js"></script>
 
-            // Convert selected categories into an array
-            const selectedCategories = Array.from(formData.getAll('categories'));
-
-             // Update formData with categories as JSON
-            formData.delete('categories');
-            formData.append('categories', JSON.stringify(selectedCategories));
-            console.log(formData);
-            fetch('/create-post', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                if (data.message === "Post başarıyla oluşturuldu") {
-                    fetchThreads();
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        }
-
-
-        function fetchThreads() {
-            fetch('/getpost', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                const threadsDiv = document.getElementById('threads');
-                threadsDiv.innerHTML = '';
-                data.forEach(thread => {
-                    const threadDiv = document.createElement('div');
-                    threadDiv.innerHTML = `<h2><a href="/posts/${thread.id}">${thread.title}</a></h2><p>${thread.content}</p>`;
-                    threadsDiv.appendChild(threadDiv);
-                });
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        }
-
-        // Fetch threads when the page loads
-        window.onload = fetchThreads;
-    </script>
 </body>
 </html>
