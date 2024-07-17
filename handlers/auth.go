@@ -14,12 +14,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/facebook"
 	"golang.org/x/oauth2/github"
 	"google.golang.org/api/idtoken"
 )
 
-var githubOauthConfig *oauth2.Config
-
+var (
+	facebookOauthConfig *oauth2.Config
+	githubOauthConfig   *oauth2.Config
+)
 
 func ShowIndexPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", gin.H{
@@ -102,19 +105,6 @@ func GoogleCallback(c *gin.Context) {
 	c.Redirect(http.StatusFound, "/")
 }
 
-
-
-func init() {
-	config.LoadConfig()
-	githubOauthConfig = &oauth2.Config{
-		ClientID:     config.GithubClientID,
-		ClientSecret: config.GithubClientSecret,
-		RedirectURL:  config.GithubRedirectURL,
-		Scopes:       []string{"user:email"},
-		Endpoint:     github.Endpoint,
-	}
-}
-
 func GitHubLogin(c *gin.Context) {
 	url := githubOauthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	c.Redirect(http.StatusTemporaryRedirect, url)
@@ -160,6 +150,90 @@ func GitHubCallback(c *gin.Context) {
 				return
 			}
 			err = config.DB.QueryRow("SELECT id FROM users WHERE githubid = ?", userInfo.ID).Scan(&user.ID)
+			if err != nil {
+				log.Println("Failed to retrieve new user:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve new user"})
+				return
+			}
+		} else {
+			log.Println("Failed to query user:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			return
+		}
+	}
+
+	sessionToken, err := utils.CreateSession(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
+		return
+	}
+	c.SetCookie("session_token", sessionToken, 3600*24, "/", "localhost", false, true)
+	c.Redirect(http.StatusFound, "/")
+}
+
+func init() {
+	config.LoadConfig()
+	githubOauthConfig = &oauth2.Config{
+		ClientID:     config.GithubClientID,
+		ClientSecret: config.GithubClientSecret,
+		RedirectURL:  config.GithubRedirectURL,
+		Scopes:       []string{"user:email"},
+		Endpoint:     github.Endpoint,
+	}
+	facebookOauthConfig = &oauth2.Config{
+		ClientID:     config.FacebookClientID,
+		ClientSecret: config.FacebookClientSecret,
+		RedirectURL:  config.FacebookRedirectURL,
+		Scopes:       []string{"public_profile", "email"},
+		Endpoint:     facebook.Endpoint,
+	}
+}
+
+func FacebookLogin(c *gin.Context) {
+	url := facebookOauthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	c.Redirect(http.StatusTemporaryRedirect, url)
+}
+
+func FacebookCallback(c *gin.Context) {
+	code := c.Query("code")
+	token, err := facebookOauthConfig.Exchange(context.Background(), code)
+	if err != nil {
+		log.Println("Failed to exchange token:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to exchange token"})
+		return
+	}
+
+	client := facebookOauthConfig.Client(context.Background(), token)
+	response, err := client.Get("https://graph.facebook.com/me?fields=id,name,email")
+	if err != nil {
+		log.Println("Failed to get user info:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user info"})
+		return
+	}
+	defer response.Body.Close()
+
+	var userInfo struct {
+		ID    string `json:"id"`
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
+	if err := json.NewDecoder(response.Body).Decode(&userInfo); err != nil {
+		log.Println("Failed to decode user info:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode user info"})
+		return
+	}
+
+	var user models.User
+	err = config.DB.QueryRow("SELECT id FROM users WHERE facebookid = ?", userInfo.ID).Scan(&user.ID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			_, err = config.DB.Exec("INSERT INTO users (email, username, facebookid) VALUES (?, ?, ?)", userInfo.Email, userInfo.Name, userInfo.ID)
+			if err != nil {
+				log.Println("Failed to create user:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+				return
+			}
+			err = config.DB.QueryRow("SELECT id FROM users WHERE facebookid = ?", userInfo.ID).Scan(&user.ID)
 			if err != nil {
 				log.Println("Failed to retrieve new user:", err)
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve new user"})

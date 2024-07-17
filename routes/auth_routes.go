@@ -16,4 +16,6 @@ func AuthRoutes(r *gin.Engine) {
 	r.GET("/auth/google/callback", handlers.GoogleCallback)
 	r.GET("/auth/github/login", handlers.GitHubLogin)
     r.GET("/auth/github/callback", handlers.GitHubCallback)
+	r.GET("/auth/facebook/login", handlers.FacebookLogin)
+	r.GET("/auth/facebook/callback", handlers.FacebookCallback)
 }

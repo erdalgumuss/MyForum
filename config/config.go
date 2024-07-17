@@ -23,6 +23,11 @@ var (
 	GithubClientSecret string
 	GithubRedirectURL  string
 )
+var (
+	FacebookClientID     string
+	FacebookClientSecret string
+	FacebookRedirectURL  string
+)
 
 func LoadConfig() {
 	err := godotenv.Load()
@@ -33,6 +38,9 @@ func LoadConfig() {
 	GithubClientID = os.Getenv("GITHUB_CLIENT_ID")
 	GithubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
 	GithubRedirectURL = os.Getenv("GITHUB_REDIRECT_URL")
+	FacebookClientID = os.Getenv("FACEBOOK_CLIENT_ID")
+	FacebookClientSecret = os.Getenv("FACEBOOK_CLIENT_SECRET")
+	FacebookRedirectURL = os.Getenv("FACEBOOK_REDIRECT_URL")
 }
 
 func InitOAuthConfig(clientID, clientSecret, redirectURL string) {
