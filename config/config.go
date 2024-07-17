@@ -104,6 +104,7 @@ func createTables() error {
 	CREATE TABLE IF NOT EXISTS posts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title TEXT,
+		categories TEXT,
 		content TEXT,
 		user_id INTEGER,
 		username, TEXT,

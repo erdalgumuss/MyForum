@@ -60,6 +60,7 @@ func CreatePost(c *gin.Context) {
 
 	// Bind form data explicitly
 	input.Title = c.PostForm("title")
+	input.Categories = c.PostForm("categories")
 	input.Content = c.PostForm("content")
 
 	// Handle file upload

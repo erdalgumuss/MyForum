@@ -12,11 +12,11 @@ import (
 
 func CreatePostWithPost(post models.Post) error {
 	query := `
-	INSERT INTO posts (user_id, title, content, image_url, created_at)
-	VALUES (?, ?, ?, ?, ?)
+	INSERT INTO posts (user_id, title, categories, content, image_url, created_at)
+	VALUES (?, ?, ?, ?, ?, ?)
 	`
 
-	_, err := config.DB.Exec(query, post.UserID, post.Title, post.Content, post.ImageURL, post.CreatedAt)
+	_, err := config.DB.Exec(query, post.UserID, post.Title, post.Categories, post.Content, post.ImageURL, post.CreatedAt)
 	if err != nil {
 		log.Println("Veritabanına post kaydedilirken hata:", err)
 		return err
@@ -146,8 +146,8 @@ func GetPosts(c *gin.Context) {
 func GetPost(c *gin.Context) {
 	id := c.Param("id")
 	var post models.Post
-	err := config.DB.QueryRow("SELECT id, title, content, likes, dislikes, user_id, image_url FROM posts WHERE id = ?", id).
-		Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.ImageURL)
+	err := config.DB.QueryRow("SELECT id, title, categories, content, likes, dislikes, user_id, image_url FROM posts WHERE id = ?", id).
+		Scan(&post.ID, &post.Title, &post.Categories, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.ImageURL)
 	if err != nil {
 		log.Println("Error fetching post:", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})

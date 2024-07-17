@@ -1,99 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forum</title>
+    <title>FIXIT</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
-
-<main id="content">
-    {{ block "content" . }}{{ end }}
-</main>
-
 <body>
-    <main id="content">
-        <div class="forum-container">
-            <div class="forum-header">
-                <h1>M.T. - Moto Kafe</h1>
-            </div>
-            <div class="forum-category">
-                <h2>Motosiklet Sohbetleri</h2>
-                <ul>
-                    <li>
-                        <h3>Moto Sohbet</h3>
-                        <p>Genel Motosiklet Sohbetleri</p>
-                        <span>Konular: 81,032 | Mesajlar: 1,436,116</span>
-                        <a href="#">Son Mesaj</a>
-                    </li>
-                    <li>
-                        <h3>Tanışma</h3>
-                        <p>Yeni üyeler! Bu forumda kendinizi tanıtabilirsiniz.</p>
-                        <span>Konular: 10,252 | Mesajlar: 141,375</span>
-                        <a href="#">Son Mesaj</a>
-                    </li>
-                    <li>
-                        <h3>Barış Şuşt MT İl Grupları</h3>
-                        <p>Şehir Şehir Motosiklet.net Grupları, Kendi ilinizdeki MT Grupları ile Buradan Haberleşebilirsiniz.</p>
-                        <span>Konular: 91 | Mesajlar: 223,065</span>
-                        <a href="#">Son Mesaj</a>
-                    </li>
-                    <li>
-                        <h3>Moto Kamp</h3>
-                        <p>Kamp ve doğa tutkunu motorcuların bilgi paylaşım forumu.</p>
-                        <span>Konular: 169 | Mesajlar: 1,442</span>
-                        <a href="#">Son Mesaj</a>
-                    </li>
-                    <li>
-                        <h3>Anketler</h3>
-                        <p>Motosiklet konulu anketler</p>
-                        <span>Konular: 93 | Mesajlar: 9,960</span>
-                        <a href="#">Son Mesaj</a>
-                    </li>
-                    <li>
-                        <h3>MT Tüketici Köşesi</h3>
-                        <p>Firma, ürün ve kurumlara yönelik şikayetlerinizi bu forumda dile getirebilirsiniz.</p>
-                        <span>Konular: 25 | Mesajlar: 204</span>
-                        <a href="#">Son Mesaj</a>
-                    </li>
-                    <li>
-                        <h3>Kaza Raporu</h3>
-                        <p>Yapılan kazalar üzerine analiz ve çıkarılan dersleri bu foruma yazabilirsiniz.</p>
-                        <span>Konular: 888 | Mesajlar: 16,062</span>
-                        <a href="#">Son Mesaj</a>
-                    </li>
-                    <li>
-                        <h3>Tebrik Ve Kutlamalar</h3>
-                        <p>Yeni alınan motor duyuruları, tebrik ve doğum günü gibi kutlama içerikli mesajlar.</p>
-                        <span>Konular: 2,945 | Mesajlar: 133,910</span>
-                        <a href="#">Son Mesaj</a>
-                    </li>
-                    <li>
-                        <h3>Taziye</h3>
-                        <p>Taziye - Geçmiş Olsun Dilekleri</p>
-                        <span>Konular: 128 | Mesajlar: 4,096</span>
-                        <a href="#">Son Mesaj</a>
-                    </li>
-                    <li>
-                        <h3>Onlar Hep Bizimle Birlikteler</h3>
-                        <p>Hayatını iki teker üzerinde kaybeden arkadaşlarımızı rahmetle anıyoruz. Sizi Unutmayacağız.</p>
-                        <span>Konular: 37 | Mesajlar: 3,365</span>
-                        <a href="#">Son Mesaj</a>
-                    </li>
-                    <li>
-                        <h3>Konu Dışı</h3>
-                        <p>Diğer forumlar dışında bir konuda konuşmak isteyenler için...</p>
-                        <span>Konular: 13,968 | Mesajlar: 308,680</span>
-                        <a href="#">Son Mesaj</a><br><br><br><br>
-                        <p>Duyurular: Gezi, festival, kan ihtiyaçları, çalıntı motosiklet duyuruları ve tüm etkinlik fotoğrafları.</p>
-                    </li>
-                </ul>
-            </div>
+
+    <main id="profile-content">
+        {{ block "content" . }}{{ end }}
+    </main>
+
+    <main id="post-content">
+        <h1>Create a New Post</h1>
+        <form id="createPostForm" enctype="multipart/form-data">
+            <label for="title">Title:</label><br>
+            <input type="text" id="title" name="title"><br>
+            <label for="title">Category:</label><br>
+            <select name="categories" multiple required>
+                <option value="Tamir">Tamir</option>
+                <option value="Bakim Onarim">Bakim Onarim</option>
+                <option value="Yedek Parca">Yedek Parca</option>
+            </select><br>
+            <label for="content">Content:</label><br>
+            <textarea id="content" name="content" rows="4" cols="50"></textarea><br>
+            <label for="image">Upload Image:</label><br>
+            <input type="file" id="image" name="image"><br><br>
+            <input type="button" value="Create Post" onclick="submitForm()">
+        </form>
+        <div id="threads" style="margin-top: 20px;">
+            <!-- Threads will be displayed here -->
         </div>
-    </main><br><br><br><br><br>
+    </main><br><br><br><br>
+
     <footer>
-        <p>&copy; 2024 FIXIT FORUM</p>
+        <p>&copy; 2024 Forum Sitesi</p>
     </footer>
-    <script src="/static/js/main.js"></script>
+
+    <script>
+       function submitForm() {
+    const form = document.getElementById('createPostForm');
+    const formData = new FormData(form);
+
+    fetch('/create-post', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Success:', data);
+        if (data.message === "Post başarıyla oluşturuldu") {
+            fetchThreads();
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+
+        function fetchThreads() {
+            fetch('/getpost', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const threadsDiv = document.getElementById('threads');
+                threadsDiv.innerHTML = '';
+                data.forEach(thread => {
+                    const threadDiv = document.createElement('div');
+                    threadDiv.innerHTML = `<h2><a href="/posts/${thread.id}">${thread.title}</a></h2><p>${thread.content}</p>`;
+                    threadsDiv.appendChild(threadDiv);
+                });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Fetch threads when the page loads
+        window.onload = fetchThreads;
+    </script>
 </body>
 </html>
