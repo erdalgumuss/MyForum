@@ -147,10 +147,19 @@ func GetPosts(c *gin.Context) {
 }
 
 func GetPost(c *gin.Context) {
+	// Extract post ID from URL parameter
 	id := c.Param("id")
+
 	var post models.Post
-	err := config.DB.QueryRow("SELECT id, title, categories, content, likes, dislikes, user_id, image_url FROM posts WHERE id = ?", id).
-		Scan(&post.ID, &post.Title, &post.Categories, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.ImageURL)
+
+	// Query to fetch post details including username from users table
+	err := config.DB.QueryRow(`
+		SELECT p.id, p.title, p.categories, p.content, p.likes, p.dislikes, p.user_id, p.image_url, u.username
+		FROM posts p
+		INNER JOIN users u ON p.user_id = u.id
+		WHERE p.id = ?
+	`, id).Scan(&post.ID, &post.Title, &post.Categories, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.ImageURL, &post.Username)
+
 	if err != nil {
 		log.Println("Error fetching post:", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
