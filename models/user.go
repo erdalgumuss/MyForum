@@ -35,15 +35,15 @@ func (ns JSONNullString) MarshalJSON() ([]byte, error) {
 type User struct {
 	ID         int            `json:"id"`    // Unique identifier for the user
 	Email      string         `json:"email"` // Email of the user
-	Name       sql.NullString `json:"name"`
-	Surname    sql.NullString `json:"surname"`
-	Username   sql.NullString `json:"username"` // Username of the user
+	Name       JSONNullString `json:"name"`
+	Surname    JSONNullString `json:"surname"`
+	Username   JSONNullString `json:"username"` // Username of the user
 	Password   string         `json:"password"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
-	GoogleID   sql.NullString `json:"googleid"`
+	GoogleID   JSONNullString `json:"googleid"`
 	GitHubID   sql.NullInt64  `json:"githubid"`
-	FacebookID sql.NullString `json:"facebookid"`
+	FacebookID JSONNullString `json:"facebookid"`
 }
 
 type GoogleUserInfo struct {

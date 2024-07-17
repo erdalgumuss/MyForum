@@ -42,11 +42,6 @@ nav.navigation ul li {
     align-items: center;
 }
 
-nav {
-    display: flex;
-    align-items: center;
-}
-
 nav ul {
     list-style: none;
     margin: 0;
@@ -177,7 +172,6 @@ footer {
     font-size: 1.2em;
 }
 
-
 /* Button Styles */
 button {
     background-color: #6200EE;
@@ -264,4 +258,50 @@ button:hover {
 
 .ad-right {
     right: 45px; 
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    header .container, main, footer {
+        padding: 10px;
+    }
+
+    header .container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    nav ul {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    nav ul li {
+        margin: 5px 0;
+    }
+
+    .ad-left, .ad-right {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .popup {
+        width: 90%;
+    }
+
+    .popup-content input[type="text"],
+    .popup-content input[type="email"],
+    .popup-content input[type="password"] {
+        padding: 6px;
+    }
+
+    .popup-content button {
+        padding: 8px;
+    }
+
+    button {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
 }
