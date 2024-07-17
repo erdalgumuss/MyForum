@@ -18,14 +18,31 @@ var (
 	GoogleOAuthConfig *oauth2.Config
 )
 
+var (
+	GithubClientID     string
+	GithubClientSecret string
+	GithubRedirectURL  string
+)
+
+func LoadConfig() {
+	err := godotenv.Load()
+	if err != nil {
+		panic("Error loading .env file")
+	}
+
+	GithubClientID = os.Getenv("GITHUB_CLIENT_ID")
+	GithubClientSecret = os.Getenv("GITHUB_CLIENT_SECRET")
+	GithubRedirectURL = os.Getenv("GITHUB_REDIRECT_URL")
+}
+
 func InitOAuthConfig(clientID, clientSecret, redirectURL string) {
-    GoogleOAuthConfig = &oauth2.Config{
-        ClientID:     clientID,
-        ClientSecret: clientSecret,
-        RedirectURL:  redirectURL,
-        Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
-        Endpoint:     google.Endpoint,
-    }
+	GoogleOAuthConfig = &oauth2.Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		RedirectURL:  redirectURL,
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+		Endpoint:     google.Endpoint,
+	}
 }
 
 func InitDB() error {
@@ -66,8 +83,8 @@ func createTables() error {
 		name TEXT,
 		surname TEXT,
 		created_at DATETIME,
-		updated_at DATETIME
-
+		updated_at DATETIME,
+		githubid INTEGER
 	);`
 	_, err := DB.Exec(createUserTable)
 	if err != nil {
