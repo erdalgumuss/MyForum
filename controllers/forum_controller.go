@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"MyForum/config"
 	"MyForum/models"
@@ -151,6 +153,7 @@ func GetPost(c *gin.Context) {
 	id := c.Param("id")
 
 	var post models.Post
+	var categoriesJSON string
 
 	// Query to fetch post details including username from users table
 	err := config.DB.QueryRow(`
@@ -158,13 +161,23 @@ func GetPost(c *gin.Context) {
 		FROM posts p
 		INNER JOIN users u ON p.user_id = u.id
 		WHERE p.id = ?
-	`, id).Scan(&post.ID, &post.Title, &post.Categories, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.ImageURL, &post.Username)
+	`, id).Scan(&post.ID, &post.Title, &categoriesJSON, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.ImageURL, &post.Username)
 
 	if err != nil {
 		log.Println("Error fetching post:", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
 		return
 	}
+
+	// Convert JSON array of categories to a comma-separated string
+	var categories []string
+	err = json.Unmarshal([]byte(categoriesJSON), &categories)
+	if err != nil {
+		log.Println("Error parsing categories:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error parsing categories"})
+		return
+	}
+	post.Categories = strings.Join(categories, ", ")
 
 	c.HTML(http.StatusOK, "post.html", gin.H{"Post": post})
 }

@@ -1,3 +1,21 @@
+<br>Yapilacaklar:
+<br>
+<br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
+<br>Ana Sayfa ayarlansin
+<br>Filtreleme
+<br>Comment
+<br>Like/Dislike
+<br>
+<br>`
+<br>Profilde 
+<br>kullanici adi
+<br>email
+<br>konular
+<br>yorumlar
+<br>liked/disliked
+<br>EKLENSIN
+<br>`
+
 <br>├── DockerFile
 <br>├── MyForum
 <br>├── README.md
