@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -62,6 +64,9 @@ func CreatePost(c *gin.Context) {
 	input.Title = c.PostForm("title")
 	input.Categories = c.PostForm("categories")
 	input.Content = c.PostForm("content")
+	input.Username = c.PostForm("username")
+	input.UserID = userID.(int)
+	input.CreatedAt = time.Now()
 
 	// Handle file upload
 	file, err := c.FormFile("image")
@@ -79,11 +84,6 @@ func CreatePost(c *gin.Context) {
 		log.Println("No file uploaded")
 	}
 
-	// Add user ID and timestamps
-	input.UserID = userID.(int)
-	input.CreatedAt = time.Now()
-	input.Username = "YourUsernameHere" // Replace with the actual method to get the username
-
 	log.Printf("Form data bound successfully: %+v\n", input)
 
 	// Call controller function
@@ -94,6 +94,22 @@ func CreatePost(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Post başarıyla oluşturuldu"})
+}
+
+func getCategoryIDByName(categoryName string) (int, error) {
+	var categoryID int
+	query := "SELECT id FROM categories WHERE name = ?"
+
+	err := config.DB.QueryRow(query, categoryName).Scan(&categoryID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, fmt.Errorf("category '%s' not found", categoryName)
+		}
+		log.Printf("Error fetching category ID for '%s': %v\n", categoryName, err)
+		return 0, err
+	}
+
+	return categoryID, nil
 }
 
 func GetPosts(c *gin.Context) {

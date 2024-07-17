@@ -106,8 +106,8 @@ func createTables() error {
 		title TEXT,
 		categories TEXT,
 		content TEXT,
+		username TEXT,
 		user_id INTEGER,
-		username, TEXT,
 		likes INTEGER DEFAULT 0,
 		dislikes INTEGER DEFAULT 0,
 		created_at DATETIME,
@@ -137,7 +137,7 @@ func createTables() error {
 		return fmt.Errorf("failed to create comments table: %v", err)
 	}
 
-	createCategoryTable := `
+	/*createCategoryTable := `
 	CREATE TABLE IF NOT EXISTS categories (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT UNIQUE NOT NULL
@@ -159,7 +159,7 @@ func createTables() error {
 	if err != nil {
 		log.Fatalf("Failed to create post_categories table: %v", err)
 		return fmt.Errorf("failed to create post_categories table: %v", err)
-	}
+	}*/
 
 	createSessionTable := `
 	CREATE TABLE IF NOT EXISTS sessions (

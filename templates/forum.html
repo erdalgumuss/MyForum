@@ -39,24 +39,31 @@
 
     <script>
        function submitForm() {
-    const form = document.getElementById('createPostForm');
-    const formData = new FormData(form);
+            const form = document.getElementById('createPostForm');
+            const formData = new FormData(form);
 
-    fetch('/create-post', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-        if (data.message === "Post başarıyla oluşturuldu") {
-            fetchThreads();
+            // Convert selected categories into an array
+            const selectedCategories = Array.from(formData.getAll('categories'));
+
+             // Update formData with categories as JSON
+            formData.delete('categories');
+            formData.append('categories', JSON.stringify(selectedCategories));
+            console.log(formData);
+            fetch('/create-post', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                if (data.message === "Post başarıyla oluşturuldu") {
+                    fetchThreads();
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
         }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
-}
 
 
         function fetchThreads() {

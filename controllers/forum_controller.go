@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -16,7 +17,9 @@ func CreatePostWithPost(post models.Post) error {
 	VALUES (?, ?, ?, ?, ?, ?)
 	`
 
+	// Insert into posts table
 	_, err := config.DB.Exec(query, post.UserID, post.Title, post.Categories, post.Content, post.ImageURL, post.CreatedAt)
+	fmt.Print(post.Categories)
 	if err != nil {
 		log.Println("Veritabanına post kaydedilirken hata:", err)
 		return err
