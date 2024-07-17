@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"MyForum/config"
 	"MyForum/controllers"
@@ -53,7 +54,9 @@ func GoogleLogin(c *gin.Context) {
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
+// Handle callback from Google OAuth after user approves access
 func GoogleCallback(c *gin.Context) {
+	// Exchange authorization code for OAuth token
 	code := c.Query("code")
 	token, err := config.GoogleOAuthConfig.Exchange(context.Background(), code)
 	if err != nil {
@@ -62,6 +65,7 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
+	// Extract ID token from OAuth token
 	idToken, ok := token.Extra("id_token").(string)
 	if !ok {
 		log.Println("No id_token field in oauth2 token")
@@ -69,6 +73,7 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
+	// Validate ID token to get user information
 	payload, err := idtoken.Validate(context.Background(), idToken, config.GoogleOAuthConfig.ClientID)
 	if err != nil {
 		log.Println("Failed to validate id token:", err)
@@ -76,18 +81,35 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
+	// Extract user details from the validated payload
 	email := payload.Claims["email"].(string)
-	name := payload.Claims["name"].(string)
+	name := ""    // Initialize name as empty string
+	surname := "" // Initialize surname as empty string
 
+	// Extract name if available
+	if val, ok := payload.Claims["name"].(string); ok {
+		names := strings.Split(val, " ")
+		if len(names) > 1 {
+			name = names[0]
+			surname = names[1]
+		} else {
+			name = val
+		}
+	}
+
+	// Check if the user already exists in the database
 	var user models.User
 	err = config.DB.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&user.ID)
 	if err != nil {
-		_, err = config.DB.Exec("INSERT INTO users (email, username) VALUES (?, ?)", email, name)
+		// If user doesn't exist, create a new user
+		_, err = config.DB.Exec("INSERT INTO users (email, username, name, surname) VALUES (?, ?, ?, ?)", email, name+" "+surname, name, surname)
 		if err != nil {
 			log.Println("Failed to create user:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 			return
 		}
+
+		// Retrieve the newly created user's ID
 		err = config.DB.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&user.ID)
 		if err != nil {
 			log.Println("Failed to retrieve new user:", err)
@@ -96,12 +118,17 @@ func GoogleCallback(c *gin.Context) {
 		}
 	}
 
+	// Create a session token for the user
 	sessionToken, err := utils.CreateSession(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
 		return
 	}
+
+	// Set session token as a cookie
 	c.SetCookie("session_token", sessionToken, 3600*24, "/", "localhost", false, true)
+
+	// Redirect user to the desired page after successful login
 	c.Redirect(http.StatusFound, "/")
 }
 
