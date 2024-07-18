@@ -1,12 +1,28 @@
 version: '3.8'
 
 services:
-  forum:
-    build: .
+  backend:
+    build: ./backend
+    volumes:
+      - ./backend:/app
     ports:
       - "8080:8080"
-    volumes:
-      - .:/app
     environment:
-      - DB_PATH=/app/forum.db
-    command: ["./main"]
+      - DB_PATH=/data/forum.db
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend/static:/usr/share/nginx/html:ro
+    ports:
+      - "80:80"
+
+  db:
+    image: sqlite
+    volumes:
+      - ./data:/data
+
+volumes:
+  data:
