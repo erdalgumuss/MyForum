@@ -24,8 +24,9 @@ SQL MÜQ
 > yorumlar<br>
 > liked/disliked<br>
 > EKLENSIN
+<br>
 
-<br>## MyForum
+## MyForum
 <br>MyForum/
 <br>├── backend
 <br>│   ├── config
@@ -35,6 +36,7 @@ SQL MÜQ
 <br>│   │   ├── forum_controller.go
 <br>│   │   └── profile_controller.go
 <br>│   ├── DockerFile
+<br>│   ├── .env
 <br>│   ├── forum.db
 <br>│   ├── go.mod
 <br>│   ├── go.sum
@@ -91,7 +93,7 @@ SQL MÜQ
 <br>│       ├── WIN_20231009_16_47_03_Pro.jpg
 <br>│       ├── WIN_20231012_01_56_53_Pro.jpg
 <br>│       └── WIN_20231018_16_45_51_Pro.jpg
-<br>├── MyForum
+<br>├── .gitattributes
 <br>└── README.md
 <br>
-<br>15 directories, 52 files
+<br>15 directories, 53 files
