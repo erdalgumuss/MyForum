@@ -281,3 +281,4 @@ func FacebookCallback(c *gin.Context) {
 	c.SetCookie("session_token", sessionToken, 3600*24, "/", "localhost", false, true)
 	c.Redirect(http.StatusFound, "/")
 }
+//
