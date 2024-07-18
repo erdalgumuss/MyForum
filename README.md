@@ -1,21 +1,25 @@
 <br>**Yapilacaklar:**
 <br>
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
-<br>Yeni konular ustten bastirilsin
 <br>Ana Sayfa ayarlansin
 <br>Filtreleme
 <br>Comment
 <br>Like/Dislike
+
+*Dublicating Stuff:*
 <br>Dublicating functions; such as:<br/>
 GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
 createPost ve getPost, getPosts <br/>
+<br>
 
-**handlers/GetPosts kullaniliyor, digeri degil ki bu sorun yaratti biraz**
+**handlers/GetPosts kullaniliyor, digeri degil ki bu sorun yaratti biraz**<br/>
+controller/getPosts yorum satirina alindi<br/>
+
 
 <br><br>
 Might improve:
 <br>CSS problems --such as the structure dissappearing in the footer.<br><br>
-modes/topic.go ihtiyac var mi ?<br/>
+modes/topic.go ihtiyac var mi ? -- yorum satirina alindi <br/>
 SQL MÜQ
 
 > Profilde::: <br><br>
