@@ -34,12 +34,14 @@ function submitForm() {
     }
     const formData = new FormData(form);
 
-    // Convert selected categories into an array
+    // Convert selected categories into an array of strings
     const selectedCategories = Array.from(formData.getAll('categories'));
 
-    // Update formData with categories as JSON
+    // Add each selected category individually to formData
     formData.delete('categories');
-    formData.append('categories', JSON.stringify(selectedCategories));
+    selectedCategories.forEach(category => {
+        formData.append('categories', category);
+    });
 
     fetch('/create-post', {
         method: 'POST',
@@ -59,6 +61,7 @@ function submitForm() {
         console.error('Error:', error);
     });
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginPopup = document.getElementById('login-popup');

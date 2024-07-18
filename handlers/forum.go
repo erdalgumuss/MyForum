@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"MyForum/config"
@@ -62,11 +63,14 @@ func CreatePost(c *gin.Context) {
 
 	// Bind form data explicitly
 	input.Title = c.PostForm("title")
-	input.Categories = c.PostForm("categories")
+	categoryNames := c.PostFormArray("categories") // Expecting an array of category names
 	input.Content = c.PostForm("content")
 	input.Username = c.PostForm("username")
 	input.UserID = userID.(int)
 	input.CreatedAt = time.Now()
+
+	// Debug: log the received categories
+	log.Printf("Received categories: %v\n", categoryNames)
 
 	// Handle file upload
 	file, err := c.FormFile("image")
@@ -83,6 +87,21 @@ func CreatePost(c *gin.Context) {
 	} else {
 		log.Println("No file uploaded")
 	}
+
+	// Convert category names to IDs
+	var categoryIDs []int
+	for _, categoryName := range categoryNames {
+		categoryName = strings.TrimSpace(categoryName)
+		var categoryID int
+		err := config.DB.QueryRow("SELECT id FROM categories WHERE name = ?", categoryName).Scan(&categoryID)
+		if err != nil {
+			log.Println("Invalid category name:", categoryName)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid category name: " + categoryName})
+			return
+		}
+		categoryIDs = append(categoryIDs, categoryID)
+	}
+	input.CategoryIDs = categoryIDs
 
 	log.Printf("Form data bound successfully: %+v\n", input)
 

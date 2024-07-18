@@ -8,3 +8,5 @@ type Topic struct {
 	Category string `json:"category"`
 	UserID   int    `json:"user_id"`
 }
+
+// is this needed ?

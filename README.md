@@ -11,6 +11,9 @@ GetUserProfile in handlers/profile.go and in controller profile_controller.go
 <br><br>
 Might improve:
 <br>CSS problems --such as the structure dissappearing in the footer.<br><br>
+modes/topic.go ihtiyac var mi ?<br/>
+createPost ve getPost, getPosts tekrarliyo--dublicate<br/>
+sql de hem categories hem post_categories gerekli mi ?<br/>
 
 > Profilde::: <br><br>
 > kullanici adi<br>

@@ -3,6 +3,8 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"MyForum/config"
 	"MyForum/models"
@@ -65,7 +67,15 @@ func GetUserPosts(c *gin.Context) {
 	userID := c.Param("id")
 	var posts []models.Post
 
-	rows, err := config.DB.Query("SELECT id, title, categories, content, user_id, image_url, likes, dislikes FROM posts WHERE user_id = ?", userID)
+	// Query to fetch posts and their category IDs
+	rows, err := config.DB.Query(`
+		SELECT p.id, p.title, p.content, p.user_id, p.image_url, p.likes, p.dislikes, 
+			GROUP_CONCAT(pc.category_id) AS category_ids
+		FROM posts p
+		LEFT JOIN post_categories pc ON p.id = pc.post_id
+		WHERE p.user_id = ?
+		GROUP BY p.id, p.title, p.content, p.user_id, p.image_url, p.likes, p.dislikes
+	`, userID)
 	if err != nil {
 		log.Println("Error fetching user posts:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user posts"})
@@ -75,11 +85,23 @@ func GetUserPosts(c *gin.Context) {
 
 	for rows.Next() {
 		var post models.Post
-		if err := rows.Scan(&post.ID, &post.Title, &post.Categories, &post.Content, &post.UserID, &post.ImageURL, &post.Likes, &post.Dislikes); err != nil {
+		var categoryIDs string
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.UserID, &post.ImageURL, &post.Likes, &post.Dislikes, &categoryIDs); err != nil {
 			log.Println("Error scanning post row:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user posts"})
 			return
 		}
+
+		// Convert the comma-separated category IDs string to a slice of integers
+		if categoryIDs != "" {
+			for _, idStr := range strings.Split(categoryIDs, ",") {
+				id, err := strconv.Atoi(idStr)
+				if err == nil {
+					post.CategoryIDs = append(post.CategoryIDs, id)
+				}
+			}
+		}
+
 		posts = append(posts, post)
 	}
 

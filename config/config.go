@@ -104,7 +104,6 @@ func createTables() error {
 	CREATE TABLE IF NOT EXISTS posts (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title TEXT,
-		categories TEXT,
 		content TEXT,
 		username TEXT,
 		user_id INTEGER,
@@ -137,7 +136,7 @@ func createTables() error {
 		return fmt.Errorf("failed to create comments table: %v", err)
 	}
 
-	/*createCategoryTable := `
+	createCategoryTable := `
 	CREATE TABLE IF NOT EXISTS categories (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT UNIQUE NOT NULL
@@ -153,13 +152,23 @@ func createTables() error {
 		post_id INTEGER,
 		category_id INTEGER,
 		FOREIGN KEY (post_id) REFERENCES posts(id),
-		FOREIGN KEY (category_id) REFERENCES categories(id)
+		FOREIGN KEY (category_id) REFERENCES categories(id),
+		PRIMARY KEY (post_id, category_id)
 	);`
 	_, err = DB.Exec(createPostCategoriesTable)
 	if err != nil {
 		log.Fatalf("Failed to create post_categories table: %v", err)
 		return fmt.Errorf("failed to create post_categories table: %v", err)
-	}*/
+	}
+
+	// Insert initial categories
+	initialCategories := []string{"Tamir", "Bakim Onarim", "Yedek Parca"}
+	for _, category := range initialCategories {
+		_, err := DB.Exec("INSERT OR IGNORE INTO categories (name) VALUES (?)", category)
+		if err != nil {
+			log.Fatalf("Error inserting initial categories: %v", err)
+		}
+	}
 
 	createSessionTable := `
 	CREATE TABLE IF NOT EXISTS sessions (
