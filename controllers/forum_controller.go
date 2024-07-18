@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -53,31 +52,6 @@ func CreatePostWithPost(post models.Post) error {
 	}
 
 	return nil
-}
-
-// GetPosts retrieves all posts
-func GetPosts(c *gin.Context) {
-	query := "SELECT id, title, content, likes, dislikes, user_id, username, image_url, created_at FROM posts ORDER BY created_at DESC"
-	fmt.Println("SQL Query:", query) // Print SQL query for debugging
-
-	rows, err := config.DB.Query(query)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
-		return
-	}
-	defer rows.Close()
-
-	var posts []models.Post
-	for rows.Next() {
-		var post models.Post
-		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.Username, &post.ImageURL, &post.CreatedAt); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan post"})
-			return
-		}
-		posts = append(posts, post)
-	}
-
-	c.JSON(http.StatusOK, gin.H{"posts": posts})
 }
 
 func GetPost(c *gin.Context) {
@@ -233,4 +207,26 @@ func DislikeComment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Comment disliked"})
+}
+
+// GetPosts retrieves all posts
+func GetPosts(c *gin.Context) {
+	rows, err := config.DB.Query("SELECT id, title, content, likes, dislikes, user_id, username FROM posts")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
+		return
+	}
+	defer rows.Close()
+
+	var posts []models.Post
+	for rows.Next() {
+		var post models.Post
+		if err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.Username); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan post"})
+			return
+		}
+		posts = append(posts, post)
+	}
+
+	c.HTML(http.StatusOK, "index.html", gin.H{"Posts": posts})
 }
