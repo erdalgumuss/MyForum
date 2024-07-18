@@ -10,8 +10,8 @@ type Post struct {
 	Content   string    `json:"content"`
 	Username  string    `json:"username"`
 	UserID    int       `json:"user_id"`
-	ImageURL  string    `json:"image_url"` // Yeni alan
 	Likes     int       `json:"likes"`
 	Dislikes  int       `json:"dislikes"`
+	ImageURL  string    `json:"image_url"` // Yeni alan
 	CreatedAt time.Time `json:"created_at"`
 }

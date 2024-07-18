@@ -5,15 +5,18 @@
 <br>Ana Sayfa ayarlansin
 <br>Filtreleme
 <br>Comment
-<br>Like/Dislik
+<br>Like/Dislike
 <br>Dublicating functions; such as:<br/>
-GetUserProfile in handlers/profile.go and in controller profile_controller.go
+GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
+createPost ve getPost, getPosts <br/>
+
+**handlers/GetPosts kullaniliyor, digeri degil ki bu sorun yaratti biraz**
+
 <br><br>
 Might improve:
 <br>CSS problems --such as the structure dissappearing in the footer.<br><br>
 modes/topic.go ihtiyac var mi ?<br/>
-createPost ve getPost, getPosts tekrarliyo--dublicate<br/>
-sql de hem categories hem post_categories gerekli mi ?<br/>
+SQL MÜQ
 
 > Profilde::: <br><br>
 > kullanici adi<br>
