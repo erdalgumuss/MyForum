@@ -7,6 +7,8 @@ import (
 	"MyForum/config"
 	"MyForum/routes"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -29,6 +31,10 @@ func main() {
 	// Create a new Gin router
 	r := gin.Default()
 
+	// Session middleware
+	store := cookie.NewStore([]byte("secret"))
+	r.Use(sessions.Sessions("mysession", store))
+
 	// Serve static files
 	r.Static("/static", "./static")
 	r.Static("/uploads", "./uploads")
@@ -40,6 +46,8 @@ func main() {
 	routes.AuthRoutes(r)
 	routes.ForumRoutes(r)
 	routes.ProfileRoutes(r)
+	routes.AdminRoutes(r)
+	routes.ModeratorRoutes(r)
 
 	// Start the server
 	r.Run(":8080")

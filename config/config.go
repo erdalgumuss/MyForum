@@ -23,6 +23,7 @@ var (
 	GithubClientSecret string
 	GithubRedirectURL  string
 )
+
 var (
 	FacebookClientID     string
 	FacebookClientSecret string
@@ -194,6 +195,21 @@ func createTables() error {
 	if err != nil && !strings.Contains(err.Error(), "duplicate column name") {
 		log.Fatalf("Failed to alter sessions table: %v", err)
 		return fmt.Errorf("failed to alter sessions table: %v", err)
+	}
+	// Create moderator_requests table if not exists
+	createModeratorRequestTable := `
+CREATE TABLE IF NOT EXISTS moderator_requests (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INT NOT NULL,
+	status VARCHAR(20) DEFAULT 'pending',
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (user_id) REFERENCES users(id)
+);
+`
+	_, err = DB.Exec(createModeratorRequestTable)
+	if err != nil {
+		log.Fatalf("Failed to create moderator table: %v", err)
+		return fmt.Errorf("failed to create moderator table: %v", err)
 	}
 
 	return nil

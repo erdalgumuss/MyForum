@@ -13,6 +13,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+/*INSERT INTO users (username, email, password, name, surname, created_at, updated_at, githubid, role) VALUES (
+	'admin',
+	'admin@example.com',
+	'efaa948ea3425eca1978671c8c1b9d2d',
+	'Admin',
+	'User',
+	DATETIME('now'),
+	DATETIME('now'),
+	NULL,
+	'admin'
+);
+*/
 // Register handles user registration.
 func Register(c *gin.Context) {
 	var input models.User
@@ -134,3 +146,5 @@ func getUserByEmail(email string) (*models.User, error) {
 	err := config.DB.QueryRow("SELECT id, password FROM users WHERE email = ?", email).Scan(&user.ID, &user.Password)
 	return &user, err
 }
+
+

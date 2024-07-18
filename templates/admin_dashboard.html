@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        /* Basic CSS styles */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .user-list, .request-list {
+            margin-top: 20px;
+        }
+        .user-item, .request-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .user-item h3, .request-item h3 {
+            margin-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Admin Dashboard</h1>
+    <p>You are logged in as: {{ .username }} ({{ .role }})</p>
+
+    <h2>User Management</h2>
+
+    <!-- List Users -->
+    <div class="user-list">
+        <h3>User List</h3>
+        {{ range .users }}
+        <div class="user-item">
+            <h3>{{ .Username }}</h3>
+            <p>Email: {{ .Email }}</p>
+            <p>Role: {{ .Role }}</p>
+            <form action="/admin/edit_user" method="POST" class="edit-role-form">
+                <input type="hidden" name="user_id" value="{{ .ID }}">
+                <div class="form-group">
+                    <label for="role-{{ .ID }}">Role:</label>
+                    <select id="role-{{ .ID }}" name="role">
+                        <option value="user" {{ if eq .Role "user" }} selected {{ end }}>User</option>
+                        <option value="moderator" {{ if eq .Role "moderator" }} selected {{ end }}>Moderator</option>
+                        <option value="admin" {{ if eq .Role "admin" }} selected {{ end }}>Admin</option>
+                    </select>
+                </div>
+                <button type="submit">Update Role</button>
+            </form>
+            <form action="/admin/assign_moderator" method="POST" class="assign-moderator-form">
+                <input type="hidden" name="user_id" value="{{ .ID }}">
+                <button type="submit">Assign as Moderator</button>
+            </form>
+            <form action="/admin/delete_user" method="POST" class="delete-user-form">
+                <input type="hidden" name="user_id" value="{{ .ID }}">
+                <button type="submit">Delete User</button>
+            </form>
+            <a href="/admin/user/{{ .ID }}">View Profile</a>
+        </div>
+        {{ end }}
+    </div>
+
+    <h2>Moderator Requests</h2>
+
+    <!-- List Moderator Requests -->
+    <div class="request-list">
+        <h3>Pending Moderator Requests</h3>
+        {{ range .requests }}
+        <div class="request-item">
+            <h3>User ID: {{ .UserID }}</h3>
+            <p>Status: {{ .Status }}</p>
+            <p>Requested at: {{ .CreatedAt }}</p>
+            <form action="/admin/approve_moderator_request" method="POST" class="approve-request-form">
+                <input type="hidden" name="request_id" value="{{ .ID }}">
+                <button type="submit">Approve Request</button>
+            </form>
+            <form action="/admin/reject_moderator_request" method="POST" class="reject-request-form">
+                <input type="hidden" name="request_id" value="{{ .ID }}">
+                <button type="submit">Reject Request</button>
+            </form>
+        </div>
+        {{ end }}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const editRoleForms = document.querySelectorAll('.edit-role-form');
+            const assignModeratorForms = document.querySelectorAll('.assign-moderator-form');
+            const deleteUserForms = document.querySelectorAll('.delete-user-form');
+            const approveRequestForms = document.querySelectorAll('.approve-request-form');
+            const rejectRequestForms = document.querySelectorAll('.reject-request-form');
+
+            const handleSubmit = (event, form) => {
+                event.preventDefault();
+                const formData = new FormData(form);
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Operation successful.');
+                        window.location.reload();
+                    } else {
+                        alert('Operation failed.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            };
+
+            editRoleForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    handleSubmit(event, form);
+                });
+            });
+
+            assignModeratorForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    handleSubmit(event, form);
+                });
+            });
+
+            deleteUserForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    handleSubmit(event, form);
+                });
+            });
+
+            approveRequestForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    handleSubmit(event, form);
+                });
+            });
+
+            rejectRequestForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    handleSubmit(event, form);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

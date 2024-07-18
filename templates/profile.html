@@ -41,6 +41,10 @@
                 <!-- Kullanıcının yaptığı yorumlar burada listelenecek -->
             </ul>
         </div><br><br>
+        
+        <div id="moderator-request">
+            <button id="request-moderator-btn">Moderatörlük İsteğinde Bulun</button>
+        </div>
     </main><br><br><br><br><br><br><br>
 
     <footer>
@@ -57,6 +61,8 @@
             const postsContainer = document.getElementById('posts-container');
             const likesList = document.getElementById('likes-list');
             const commentsList = document.getElementById('comments-list');
+            const requestModeratorBtn = document.getElementById('request-moderator-btn');
+            const moderatorRequestDiv = document.getElementById('moderator-request');
 
             const toggleUserUI = (isLoggedIn) => {
                 logoutBtn.style.display = isLoggedIn ? 'inline' : 'none';
@@ -78,6 +84,11 @@
                         loadUserLikes(user.id);
                         // Kullanıcının yorumlarını yükle
                         loadUserComments(user.id);
+
+                        // Kullanıcının rolünü kontrol et ve moderatör ise yönlendir
+                        if (user.role === 'moderator') {
+                            window.location.href = '/moderator/dashboard';
+                        }
                     } else {
                         toggleUserUI(false);
                     }
@@ -137,6 +148,28 @@
                     console.error('Error loading user comments:', error);
                 }
             };
+
+            const requestModerator = async () => {
+                try {
+                    const response = await fetch('/user/request_moderator', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (response.ok) {
+                        alert('Moderator request submitted successfully.');
+                        moderatorRequestDiv.style.display = 'none';
+                    } else {
+                        alert('Failed to submit moderator request.');
+                    }
+                } catch (error) {
+                    console.error('Error submitting moderator request:', error);
+                }
+            };
+
+            requestModeratorBtn.addEventListener('click', requestModerator);
 
             loadUser();
 

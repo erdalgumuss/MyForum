@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"MyForum/config"
 	"MyForum/models"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -44,6 +46,43 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		c.Set("userID", session.UserID)
+		c.Next()
+	}
+}
+
+func AdminOnly() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userRole := c.GetString("role")
+		if userRole != "admin" {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			return
+		}
+		c.Next()
+	}
+}
+
+func AdminRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+		role := session.Get("role")
+		if role == nil || role != "admin" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
+func ModeratorOnly() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+		role := session.Get("role")
+		if role == nil || role != "moderator" {
+			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
+			c.Abort()
+			return
+		}
 		c.Next()
 	}
 }
@@ -108,4 +147,18 @@ func GetUserIDFromSession(c *gin.Context) (int, bool) {
 		return 0, false
 	}
 	return id, true
+}
+
+var forbiddenWords = []string{
+	"küfür1", "küfür2", "illegal1", "illegal2", // Eklemek istediğiniz diğer kelimeler
+}
+
+func ContainsForbiddenContent(content string) bool {
+	content = strings.ToLower(content)
+	for _, word := range forbiddenWords {
+		if strings.Contains(content, word) {
+			return true
+		}
+	}
+	return false
 }
