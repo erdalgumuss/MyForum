@@ -132,34 +132,33 @@ func getCategoryIDByName(categoryName string) (int, error) {
 }
 
 func GetPosts(c *gin.Context) {
-	log.Println("GetPosts function called")
-
 	var posts []models.Post
 
-	rows, err := config.DB.Query("SELECT id, COALESCE(username, '') AS username, title, content, user_id, likes, dislikes, created_at FROM posts")
+	// Query posts with sorting by created_at descending
+	rows, err := config.DB.Query("SELECT id, COALESCE(username, '') AS username, title, content, user_id, likes, dislikes, created_at FROM posts ORDER BY created_at DESC")
 	if err != nil {
-		log.Println("Veritabanından postlar alınırken hata:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Postlar alınamadı"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
 		return
 	}
 	defer rows.Close()
 
+	// Iterate over rows and scan into Post structs
 	for rows.Next() {
 		var post models.Post
 		if err := rows.Scan(&post.ID, &post.Username, &post.Title, &post.Content, &post.UserID, &post.Likes, &post.Dislikes, &post.CreatedAt); err != nil {
-			log.Println("Failed to scan post:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Postlar alınamadı"})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan posts"})
 			return
 		}
 		posts = append(posts, post)
 	}
 
+	// Handle any iteration errors
 	if err := rows.Err(); err != nil {
-		log.Println("Row iteration error:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Postlar alınamadı"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error iterating through posts"})
 		return
 	}
 
+	// Return posts as JSON response
 	c.JSON(http.StatusOK, posts)
 }
 

@@ -92,7 +92,8 @@ func createTables() error {
 		surname TEXT,
 		created_at DATETIME,
 		updated_at DATETIME,
-		githubid INTEGER
+		githubid INTEGER,
+		role TEXT DEFAULT 'user'
 	);`
 	_, err := DB.Exec(createUserTable)
 	if err != nil {
