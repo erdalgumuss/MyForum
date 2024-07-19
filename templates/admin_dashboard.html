@@ -92,59 +92,33 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const editRoleForms = document.querySelectorAll('.edit-role-form');
-            const assignModeratorForms = document.querySelectorAll('.assign-moderator-form');
-            const deleteUserForms = document.querySelectorAll('.delete-user-form');
-            const approveRequestForms = document.querySelectorAll('.approve-request-form');
-            const rejectRequestForms = document.querySelectorAll('.reject-request-form');
+            const forms = document.querySelectorAll('form');
 
-            const handleSubmit = (event, form) => {
+            const handleSubmit = async (event) => {
                 event.preventDefault();
+                const form = event.target;
                 const formData = new FormData(form);
-                fetch(form.action, {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
                         alert('Operation successful.');
                         window.location.reload();
                     } else {
-                        alert('Operation failed.');
+                        alert(data.error || 'Operation failed.');
                     }
-                })
-                .catch(error => console.error('Error:', error));
+                } catch (error) {
+                    console.error('Error:', error);
+                }
             };
 
-            editRoleForms.forEach(form => {
-                form.addEventListener('submit', function (event) {
-                    handleSubmit(event, form);
-                });
-            });
-
-            assignModeratorForms.forEach(form => {
-                form.addEventListener('submit', function (event) {
-                    handleSubmit(event, form);
-                });
-            });
-
-            deleteUserForms.forEach(form => {
-                form.addEventListener('submit', function (event) {
-                    handleSubmit(event, form);
-                });
-            });
-
-            approveRequestForms.forEach(form => {
-                form.addEventListener('submit', function (event) {
-                    handleSubmit(event, form);
-                });
-            });
-
-            rejectRequestForms.forEach(form => {
-                form.addEventListener('submit', function (event) {
-                    handleSubmit(event, form);
-                });
+            forms.forEach(form => {
+                form.addEventListener('submit', handleSubmit);
             });
         });
     </script>
