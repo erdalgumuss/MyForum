@@ -171,18 +171,13 @@ func DislikePost(c *gin.Context) {
 }
 
 func CreateComment(c *gin.Context) {
-	var input struct {
-		Content string `json:"content"`
-		PostID  int    `json:"post_id"`
-		UserID  int    `json:"user_id"`
-	}
-
+	var input models.Comment
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	stmt, err := config.DB.Prepare("INSERT INTO comments (content, user_id, post_id) VALUES (?, ?, ?)")
+	stmt, err := config.DB.Prepare("INSERT INTO comments (content, user_id, post_id, created_at, updated_at) VALUES (?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
 		return
@@ -200,13 +195,17 @@ func CreateComment(c *gin.Context) {
 
 func GetComments(c *gin.Context) {
 	postID := c.Param("id")
-	log.Println("Fetching comments for post ID:", postID) // Add this line
+	log.Println("Fetching comments for post ID:", postID)
 
+	// Simplified query without JOIN
 	rows, err := config.DB.Query(`
-        SELECT id, content, user_id, post_id, likes, dislikes, created_at, updated_at 
-        FROM comments 
-        WHERE post_id = ?`, postID)
+		SELECT id, content, post_id, likes, dislikes, created_at, updated_at 
+		FROM comments
+		WHERE post_id = ?
+		ORDER BY created_at DESC
+	`, postID)
 	if err != nil {
+		log.Println("Failed to fetch comments from DB:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch comments"})
 		return
 	}
@@ -215,21 +214,23 @@ func GetComments(c *gin.Context) {
 	var comments []models.Comment
 	for rows.Next() {
 		var comment models.Comment
-		log.Println("Scanning comment") // Add this line
-		if err := rows.Scan(&comment.ID, &comment.Content, &comment.UserID, &comment.PostID, &comment.Likes, &comment.Dislikes, &comment.CreatedAt, &comment.UpdatedAt); err != nil {
-			log.Println("Failed to scan comment:", err) // Add this line
+		err := rows.Scan(&comment.ID, &comment.Content, &comment.PostID, &comment.Likes, &comment.Dislikes, &comment.CreatedAt, &comment.UpdatedAt)
+		if err != nil {
+			log.Println("Failed to scan comment:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan comment"})
 			return
 		}
+		log.Println("Comment fetched:", comment)
 		comments = append(comments, comment)
 	}
 
 	if err := rows.Err(); err != nil {
+		log.Println("Failed to iterate comments:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to iterate comments"})
 		return
 	}
 
-	log.Println("Comments fetched:", comments) // Add this line
+	log.Println("Comments fetched:", comments)
 	c.JSON(http.StatusOK, comments)
 }
 

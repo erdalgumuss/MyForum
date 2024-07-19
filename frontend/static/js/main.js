@@ -107,11 +107,11 @@ function loadComments(postId) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log("Fetched comments data:", data); // Add this line
+        console.log("Fetched comments data:", data); // Debugging statement
         const commentsDiv = document.getElementById('comments');
         commentsDiv.innerHTML = ''; // Clear previous comments
 
-        if (!Array.isArray(data) || data.length === 0) {
+        if (!data || data.length === 0) {
             commentsDiv.textContent = 'No comments yet.';
             return;
         }
@@ -125,7 +125,8 @@ function loadComments(postId) {
             commentContainer.appendChild(contentElement);
 
             const authorElement = document.createElement('p');
-            authorElement.textContent = `Posted by User ID: ${comment.user_id} on ${new Date(comment.created_at).toLocaleString()}`;
+            const createdAt = comment.created_at.Valid ? new Date(comment.created_at.Time).toLocaleString() : 'Unknown';
+            authorElement.textContent = `Posted by ${comment.username} on ${createdAt}`;
             commentContainer.appendChild(authorElement);
 
             commentsDiv.appendChild(commentContainer);

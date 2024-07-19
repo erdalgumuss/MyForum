@@ -128,8 +128,8 @@ func createTables() error {
 		post_id INTEGER,
 		likes INTEGER DEFAULT 0,
 		dislikes INTEGER DEFAULT 0,
-		created_at DATETIME,
-		updated_at DATETIME
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 	_, err = DB.Exec(createCommentTable)
 	if err != nil {

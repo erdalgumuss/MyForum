@@ -7,6 +7,7 @@ type Comment struct {
 	Content   string       `json:"content"`
 	PostID    uint         `json:"post_id"`
 	UserID    int          `json:"user_id"`
+	Username  string       `json:"username"`
 	Likes     int          `json:"likes"`
 	Dislikes  int          `json:"dislikes"`
 	CreatedAt sql.NullTime `json:"created_at"`
