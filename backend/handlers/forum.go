@@ -200,11 +200,12 @@ func CreateComment(c *gin.Context) {
 
 func GetComments(c *gin.Context) {
 	postID := c.Param("id")
+	log.Println("Fetching comments for post ID:", postID) // Add this line
 
 	rows, err := config.DB.Query(`
-		SELECT id, content, user_id, post_id, likes, dislikes, created_at, updated_at 
-		FROM comments 
-		WHERE post_id = ?`, postID)
+        SELECT id, content, user_id, post_id, likes, dislikes, created_at, updated_at 
+        FROM comments 
+        WHERE post_id = ?`, postID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch comments"})
 		return
@@ -214,7 +215,9 @@ func GetComments(c *gin.Context) {
 	var comments []models.Comment
 	for rows.Next() {
 		var comment models.Comment
+		log.Println("Scanning comment") // Add this line
 		if err := rows.Scan(&comment.ID, &comment.Content, &comment.UserID, &comment.PostID, &comment.Likes, &comment.Dislikes, &comment.CreatedAt, &comment.UpdatedAt); err != nil {
+			log.Println("Failed to scan comment:", err) // Add this line
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan comment"})
 			return
 		}
@@ -226,6 +229,7 @@ func GetComments(c *gin.Context) {
 		return
 	}
 
+	log.Println("Comments fetched:", comments) // Add this line
 	c.JSON(http.StatusOK, comments)
 }
 

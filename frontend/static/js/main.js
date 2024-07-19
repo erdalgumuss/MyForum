@@ -107,6 +107,7 @@ function loadComments(postId) {
     })
     .then(response => response.json())
     .then(data => {
+        console.log("Fetched comments data:", data); // Add this line
         const commentsDiv = document.getElementById('comments');
         commentsDiv.innerHTML = ''; // Clear previous comments
 
@@ -136,6 +137,7 @@ function loadComments(postId) {
         console.error('Error fetching comments:', error);
     });
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const commentForm = document.getElementById('commentForm');
