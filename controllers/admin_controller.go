@@ -3,6 +3,7 @@ package controllers
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 
 	"MyForum/config"
@@ -280,10 +281,11 @@ func EditUserRole(c *gin.Context) {
 		return
 	}
 
-	// Kullanıcı rolünü güncellemek için gerekli veritabanı işlemleri burada yapılmalı
-	// Örneğin:
-	// query := "UPDATE users SET role = ? WHERE id = ?"
-	// _, err := config.DB.Exec(query, input.Role, input.UserID)
+	_, err := config.DB.Exec("UPDATE users SET role = ? WHERE id = ?", input.Role, input.UserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user role"})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }
@@ -363,17 +365,37 @@ func ApproveModeratorRequest(c *gin.Context) {
 
 func RejectModeratorRequest(c *gin.Context) {
 	var input struct {
-		RequestID int `json:"request_id" binding:"required"`
+		RequestID int `form:"request_id" binding:"required"`
 	}
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data: " + err.Error()})
+	// Bind form data or JSON based on the content type
+	contentType := c.GetHeader("Content-Type")
+	if contentType == "application/json" {
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data: " + err.Error()})
+			return
+		}
+	} else {
+		if err := c.ShouldBind(&input); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data: " + err.Error()})
+			return
+		}
+	}
+
+	// Log the input for debugging
+	log.Printf("RejectModeratorRequest input: %+v\n", input)
+
+	// Update the request status to rejected
+	result, err := config.DB.Exec("UPDATE moderator_requests SET status = 'rejected' WHERE id = ?", input.RequestID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update request status: " + err.Error()})
 		return
 	}
 
-	_, err := config.DB.Exec("UPDATE moderator_requests SET status = 'rejected' WHERE id = ?", input.RequestID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update request status: " + err.Error()})
+	// Check how many rows were affected
+	rowsAffected, err := result.RowsAffected()
+	if err != nil || rowsAffected == 0 {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update request status or request not found"})
 		return
 	}
 
