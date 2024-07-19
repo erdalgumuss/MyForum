@@ -2,7 +2,10 @@
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
 <br>Ana Sayfa ayarlansin
 <br>Filtreleme
-<br>Comment
+<br>Comment::
+user_id 0 gorunuyo comments tableda.<br/>
+js kodunda id elde edemedigi goruluypo debugda<br/>
+username bastirmaya calisiyoruz postedby<br/>
 <br>Like/Dislike
 <br>User registered(created_at)
 <br>Resim boyutu max 20mb, only jpg, png, gif allowed
