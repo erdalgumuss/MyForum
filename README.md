@@ -1,6 +1,6 @@
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
-<br>createPost go yerine !js! kullaniyo.
+
 <br>Ana Sayfa ayarlansin
 <br>Filtreleme
 <br>Comment::
@@ -9,25 +9,27 @@ js kodunda id elde edemedigi goruluypo debugda<br/>
 username bastirmaya calisiyoruz postedby<br/>
 <br>Like/Dislike
 <br>User registered(created_at)
+<br>Post created_at
 <br>Resim boyutu max 20mb, only jpg, png, gif allowed
 <br>Js optimize:<br/>
 Konu olmadiginda error fetching hatasi donduruyo<br/>
 ana sayfada F12 console da problemler var<br/>
 
 # Dublicating Stuff:
-<br/>
-
-**handlers/GetPosts kullaniliyor, digeri degil ki bu sorun yaratti biraz**
-<br/>controller/getPosts yorum satirina alindi
-<br><br><br><br>
-GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
-createPost ve getPost, getPosts <br/>
 
 <br><br>
+GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
+createPost<br/>
+<br><br>
+
+# Tidy:
+forum_controller/getPosts ve forum_controller/getPosts -- `silindi`<br/>
+modes/topic.go ihtiyac var mi ? -- `yorum satirina alindi`<br/>
+<br>createPost go yerine !js! kullaniyo.<br><br>
 
 # Might improve:
 <br>CSS problems --such as the structure dissappearing in the footer.<br><br>
-modes/topic.go ihtiyac var mi ? -- `yorum satirina alindi` <br><br><br><br>
+<br><br><br><br>
 
 > Profilde::: <br><br>
 > kullanici adi<br>

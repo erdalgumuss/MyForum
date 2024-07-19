@@ -108,6 +108,20 @@ func GetUserPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, posts)
 }
 
+/*func GetUserComments(c *gin.Context) {
+	userID := c.Param("id")
+	var comments []models.Comment
+
+	err := config.DB.Select(&comments, "SELECT * FROM comments WHERE user_id = ?", userID)
+	if err != nil {
+		log.Println("Error fetching user comments:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user comments"})
+		return
+	}
+
+	c.JSON(http.StatusOK, comments)
+}*/
+
 /*func GetUserLikes(c *gin.Context) {
 	userID := c.Param("id")
 	var likes []models.Like
@@ -120,20 +134,6 @@ func GetUserPosts(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, likes)
-}
-
-func GetUserComments(c *gin.Context) {
-	userID := c.Param("id")
-	var comments []models.Comment
-
-	err := config.DB.Select(&comments, "SELECT * FROM comments WHERE user_id = ?", userID)
-	if err != nil {
-		log.Println("Error fetching user comments:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user comments"})
-		return
-	}
-
-	c.JSON(http.StatusOK, comments)
 }*/
 
 /*func ProfileUpdate(c *gin.Context) {
@@ -152,7 +152,7 @@ func GetUserComments(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Profile updated successfully"})
-}
+}*/
 
 /*func ChangePassword(c *gin.Context) {
 	userID := utils.GetUserIDFromSession(c)

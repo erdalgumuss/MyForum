@@ -25,14 +25,19 @@
             <p>Likes: {{.Post.Likes}} || Dislikes: {{.Post.Dislikes}}</p>
             <p>Posted by User: {{.Post.Username}}</p>
         </div>
-        <form id="commentForm" method="POST">
+        <form action="/create-comment" method="POST">
             <textarea name="content" placeholder="Write a comment..." required></textarea>
             <input type="hidden" id="post_id" name="post_id" value="{{.Post.ID}}">
-            <input type="hidden" id="user_id" name="user_id" value="{{.UserID}}"><!-- Ensure user_id is correctly set -->
             <button type="submit">Post Comment</button>
         </form>
         <div id="comments">
-            <!-- Comments will be displayed here -->
+            {{range .Comments}}
+            <div class="comment">
+                <p>{{.Content}}</p>
+                <p>Posted by {{.Username}} on {{.CreatedAt}}</p>
+                <p>Likes: {{.Likes}} | Dislikes: {{.Dislikes}}</p>
+            </div>
+            {{end}}
         </div>
     </main><br><br><br><br><br><br><br><br><br><br><br><br>
 

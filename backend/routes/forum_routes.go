@@ -14,7 +14,7 @@ func ForumRoutes(r *gin.Engine) {
 	{
 		authorized.GET("/create-post", handlers.RenderCreatePostPage)
 		authorized.POST("/create-post", handlers.CreatePost)
-		authorized.POST("/comments", handlers.CreateComment)
+		authorized.POST("/create-comment", handlers.CreateComment)
 		authorized.POST("/posts/:id/like", handlers.LikePost)
 		authorized.POST("/posts/:id/dislike", handlers.DislikePost)
 		authorized.POST("/comments/:id/like", handlers.LikeComment)

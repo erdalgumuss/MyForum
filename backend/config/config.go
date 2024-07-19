@@ -126,6 +126,7 @@ func createTables() error {
 		content TEXT,
 		user_id INTEGER,
 		post_id INTEGER,
+		username TEXT,
 		likes INTEGER DEFAULT 0,
 		dislikes INTEGER DEFAULT 0,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
