@@ -1,26 +1,24 @@
-<br>**Yapilacaklar:**
-<br>
+# Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
 <br>Ana Sayfa ayarlansin
 <br>Filtreleme
 <br>Comment
 <br>Like/Dislike
 
-*Dublicating Stuff:*
-<br>Dublicating functions; such as:<br/>
+# Dublicating Stuff:
+<br/>
+
+**handlers/GetPosts kullaniliyor, digeri degil ki bu sorun yaratti biraz**
+<br/>controller/getPosts yorum satirina alindi
+<br><br><br><br>
 GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
 createPost ve getPost, getPosts <br/>
-<br>
-
-**handlers/GetPosts kullaniliyor, digeri degil ki bu sorun yaratti biraz**<br/>
-controller/getPosts yorum satirina alindi<br/>
-
 
 <br><br>
-Might improve:
+
+# Might improve:
 <br>CSS problems --such as the structure dissappearing in the footer.<br><br>
-modes/topic.go ihtiyac var mi ? -- yorum satirina alindi <br/>
-SQL MÜQ
+modes/topic.go ihtiyac var mi ? -- `yorum satirina alindi` <br><br><br><br>
 
 > Profilde::: <br><br>
 > kullanici adi<br>
@@ -31,6 +29,9 @@ SQL MÜQ
 <br>
 
 ## MyForum
+
+SQL MÜQ bro
+
 <br>MyForum/
 <br>├── backend
 <br>│   ├── config
