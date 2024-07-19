@@ -139,7 +139,7 @@ func GetPost(c *gin.Context) {
 }
 
 // CreateComment handles the creation of a new comment
-func CreateComment(c *gin.Context) {
+/*func CreateComment(c *gin.Context) {
 	var input models.Comment
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -160,7 +160,7 @@ func CreateComment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Comment created successfully"})
-}
+}*/
 
 // LikePost handles the liking of a post
 func LikePost(c *gin.Context) {

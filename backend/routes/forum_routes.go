@@ -24,6 +24,7 @@ func ForumRoutes(r *gin.Engine) {
 	// Oturum doğrulaması gerektirmeyen rotalar
 	r.GET("/getpost", handlers.GetPosts)
 	r.GET("/posts/:id", handlers.GetPost)
+	r.GET("/posts/:id/comments", handlers.GetComments)
 	r.GET("/forum", handlers.ShowForumPage)
 	r.GET("/gallery", handlers.GalleryPage)
 	r.GET("/rules", handlers.RulesPage)

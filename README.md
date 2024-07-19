@@ -4,6 +4,8 @@
 <br>Filtreleme
 <br>Comment
 <br>Like/Dislike
+<br>User registered(created_at)
+<br>Resim boyutu max 20mb, only jpg, png, gif allowed
 
 # Dublicating Stuff:
 <br/>

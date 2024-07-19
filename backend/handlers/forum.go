@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -171,6 +172,69 @@ func DislikePost(c *gin.Context) {
 }
 
 func CreateComment(c *gin.Context) {
+	var input struct {
+		Content string `json:"content"`
+		PostID  string `json:"post_id"`
+		UserID  string `json:"user_id"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	postID, err := strconv.Atoi(input.PostID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+		return
+	}
+
+	userID, err := strconv.Atoi(input.UserID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	stmt, err := config.DB.Prepare("INSERT INTO comments (content, user_id, post_id) VALUES (?, ?, ?)")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(input.Content, userID, postID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment in GO"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Comment created successfully"})
+}
+
+func GetComments(c *gin.Context) {
+	postID := c.Param("id")
+
+	rows, err := config.DB.Query(`
+		SELECT id, content, user_id, post_id, likes, dislikes, created_at, updated_at 
+		FROM comments 
+		WHERE post_id = ?`, postID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch comments"})
+		return
+	}
+	defer rows.Close()
+
+	var comments []models.Comment
+	for rows.Next() {
+		var comment models.Comment
+		if err := rows.Scan(&comment.ID, &comment.Content, &comment.UserID, &comment.PostID, &comment.Likes, &comment.Dislikes, &comment.CreatedAt, &comment.UpdatedAt); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan comment"})
+			return
+		}
+		comments = append(comments, comment)
+	}
+
+	c.JSON(http.StatusOK, comments)
 }
 
 func LikePost(c *gin.Context) {

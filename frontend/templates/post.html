@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>{{.Post.Title}}</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <favic icon href="/static/favicon.ico" type="image/x-icon">
 </head>
 <body>
 
@@ -24,10 +25,105 @@
             <p>Likes: {{.Post.Likes}} || Dislikes: {{.Post.Dislikes}}</p>
             <p>Posted by User: {{.Post.Username}}</p>
         </div>
+        <form id="commentForm" method="POST">
+            <input type="hidden" id="post_id" name="post_id" value="{{.Post.ID}}">
+            <input type="hidden" id="user_id" name="user_id" value="{{.UserID}}"><!-- Ensure user_id is correctly set -->
+            <textarea name="content" placeholder="Write a comment..." required></textarea>
+            <button type="submit">Post Comment</button>
+        </form>
+        <div id="comments" style="margin-top: 20px;">
+            <!-- Comments will be displayed here -->
+        </div>
     </main><br><br><br><br><br><br><br><br><br><br><br><br>
 
     <footer>
         <p>&copy; 2024 FIXIT FORUM</p>
     </footer>
+    <script>
+ function submitComment(event) {
+    event.preventDefault();
+
+    const form = document.getElementById('commentForm');
+    const formData = new FormData(form);
+    const commentData = Object.fromEntries(formData);
+
+    fetch('/comments', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            content: commentData.content,
+            post_id: parseInt(commentData.post_id, 10),
+            user_id: parseInt(commentData.user_id, 10)
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === "Comment created successfully") {
+            alert("Comment submitted successfully!");
+            form.reset();
+            loadComments(commentData.post_id);  // Refresh comments section
+        } else {
+            alert("Failed to submit comment: " + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error submitting comment. Please try again later.');
+    });
+}
+
+function loadComments(postId) {
+    fetch(`/posts/${postId}/comments`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const commentsDiv = document.getElementById('comments');
+        commentsDiv.innerHTML = ''; // Clear previous comments
+
+        if (!data || data.length === 0) {
+            commentsDiv.textContent = 'No comments yet.';
+            return;
+        }
+
+        data.forEach(comment => {
+            const commentContainer = document.createElement('div');
+            commentContainer.classList.add('comment');
+
+            const contentElement = document.createElement('p');
+            contentElement.textContent = comment.content;
+            commentContainer.appendChild(contentElement);
+
+            const authorElement = document.createElement('p');
+            authorElement.textContent = `Posted by User ID: ${comment.user_id} on ${new Date(comment.created_at).toLocaleString()}`;
+            commentContainer.appendChild(authorElement);
+
+            commentsDiv.appendChild(commentContainer);
+            const hrElement = document.createElement('hr');
+            commentsDiv.appendChild(hrElement);
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching comments:', error);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const commentForm = document.getElementById('commentForm');
+    if (commentForm) {
+        commentForm.addEventListener('submit', submitComment);
+    }
+
+    // Load comments for the current post
+    const postId = document.getElementById('post_id').value;
+    loadComments(postId);
+});
+
+    </script>
 </body>
 </html>
