@@ -221,6 +221,11 @@ func GetComments(c *gin.Context) {
 		comments = append(comments, comment)
 	}
 
+	if err := rows.Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to iterate comments"})
+		return
+	}
+
 	c.JSON(http.StatusOK, comments)
 }
 
