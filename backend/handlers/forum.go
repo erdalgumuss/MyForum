@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -174,24 +173,12 @@ func DislikePost(c *gin.Context) {
 func CreateComment(c *gin.Context) {
 	var input struct {
 		Content string `json:"content"`
-		PostID  string `json:"post_id"`
-		UserID  string `json:"user_id"`
+		PostID  int    `json:"post_id"`
+		UserID  int    `json:"user_id"`
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	postID, err := strconv.Atoi(input.PostID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
-		return
-	}
-
-	userID, err := strconv.Atoi(input.UserID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
@@ -202,7 +189,7 @@ func CreateComment(c *gin.Context) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(input.Content, userID, postID)
+	_, err = stmt.Exec(input.Content, input.UserID, input.PostID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment in GO"})
 		return
