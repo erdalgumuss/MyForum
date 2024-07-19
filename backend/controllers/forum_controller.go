@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -56,7 +55,7 @@ func CreatePostWithPost(post models.Post) error {
 }
 
 // GetPosts retrieves all posts
-func GetPosts(c *gin.Context) {
+/*func GetPosts(c *gin.Context) {
 	query := "SELECT id, title, content, likes, dislikes, user_id, username, image_url, created_at FROM posts ORDER BY created_at DESC"
 	fmt.Println("SQL Query:", query) // Print SQL query for debugging
 
@@ -78,7 +77,7 @@ func GetPosts(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"posts": posts})
-}
+}*/
 
 func GetPost(c *gin.Context) {
 	// Extract post ID from URL parameter
