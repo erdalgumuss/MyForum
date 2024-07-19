@@ -197,12 +197,12 @@ func GetComments(c *gin.Context) {
 	postID := c.Param("id")
 	log.Println("Fetching comments for post ID:", postID)
 
-	// Simplified query without JOIN
 	rows, err := config.DB.Query(`
-		SELECT id, content, post_id, likes, dislikes, created_at, updated_at 
-		FROM comments
-		WHERE post_id = ?
-		ORDER BY created_at DESC
+		SELECT c.id, c.content, COALESCE(u.username, 'Unknown') AS username, c.post_id, c.likes, c.dislikes, c.created_at, c.updated_at 
+		FROM comments c
+		LEFT JOIN users u ON c.user_id = u.id
+		WHERE c.post_id = ?
+		ORDER BY c.created_at DESC
 	`, postID)
 	if err != nil {
 		log.Println("Failed to fetch comments from DB:", err)
@@ -214,12 +214,14 @@ func GetComments(c *gin.Context) {
 	var comments []models.Comment
 	for rows.Next() {
 		var comment models.Comment
-		err := rows.Scan(&comment.ID, &comment.Content, &comment.PostID, &comment.Likes, &comment.Dislikes, &comment.CreatedAt, &comment.UpdatedAt)
+		var username string
+		err := rows.Scan(&comment.ID, &comment.Content, &username, &comment.PostID, &comment.Likes, &comment.Dislikes, &comment.CreatedAt, &comment.UpdatedAt)
 		if err != nil {
 			log.Println("Failed to scan comment:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan comment"})
 			return
 		}
+		comment.Username = username
 		log.Println("Comment fetched:", comment)
 		comments = append(comments, comment)
 	}
