@@ -16,7 +16,7 @@ import (
 /*INSERT INTO users (username, email, password, name, surname, created_at, updated_at, githubid, role) VALUES (
 	'admin',
 	'admin@example.com',
-	'efaa948ea3425eca1978671c8c1b9d2d',
+	'$2a$10$4bvg9T55V370.Z5mKhc3jeN54.OgnGG9pnjJ6r3y98Cbj02bfAKdm',
 	'Admin',
 	'User',
 	DATETIME('now'),
@@ -146,5 +146,3 @@ func getUserByEmail(email string) (*models.User, error) {
 	err := config.DB.QueryRow("SELECT id, password FROM users WHERE email = ?", email).Scan(&user.ID, &user.Password)
 	return &user, err
 }
-
-

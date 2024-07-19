@@ -331,30 +331,30 @@ func ListModeratorRequests(c *gin.Context) {
 
 func ApproveModeratorRequest(c *gin.Context) {
 	var input struct {
-		RequestID int `json:"request_id" binding:"required"`
+		RequestID int `form:"request_id" binding:"required"`
 	}
 
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := c.ShouldBind(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data: " + err.Error()})
 		return
 	}
 
 	var userID int
 	err := config.DB.QueryRow("SELECT user_id FROM moderator_requests WHERE id = ?", input.RequestID).Scan(&userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Request not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Request not found: " + err.Error()})
 		return
 	}
 
 	_, err = config.DB.Exec("UPDATE users SET role = 'moderator' WHERE id = ?", userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user role"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user role: " + err.Error()})
 		return
 	}
 
 	_, err = config.DB.Exec("UPDATE moderator_requests SET status = 'approved' WHERE id = ?", input.RequestID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update request status"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update request status: " + err.Error()})
 		return
 	}
 
@@ -367,13 +367,13 @@ func RejectModeratorRequest(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request data: " + err.Error()})
 		return
 	}
 
 	_, err := config.DB.Exec("UPDATE moderator_requests SET status = 'rejected' WHERE id = ?", input.RequestID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update request status"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update request status: " + err.Error()})
 		return
 	}
 
