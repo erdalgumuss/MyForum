@@ -52,8 +52,8 @@ func AuthMiddleware() gin.HandlerFunc {
 
 func AdminOnly() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		userRole := c.GetString("role")
-		if userRole != "admin" {
+		Role := c.GetString("role")
+		if Role != "admin" {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 			return
 		}

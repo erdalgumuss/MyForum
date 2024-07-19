@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"log"
 	"net/http"
 
 	"MyForum/config"
@@ -90,6 +91,8 @@ func RequestModerator(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
+
+	log.Printf("Requesting moderator status for user ID: %v\n", userID)
 
 	_, err := config.DB.Exec("INSERT INTO moderator_requests (user_id, status) VALUES (?, 'pending')", userID)
 	if err != nil {
