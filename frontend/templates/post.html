@@ -33,12 +33,13 @@
         <div id="comments">
             {{range .Comments}}
             <div class="comment">
-                <p>{{.Content}}</p>
-                <p>Posted by {{.Username}} on {{.CreatedAt}}</p>
-                <p>Likes: {{.Likes}} | Dislikes: {{.Dislikes}}</p>
+                <p>{{.content}}</p>
+                <p>Posted by {{.username}} on {{.created_at}}</p>
+                <p>Likes: {{.likes}} | Dislikes: {{.dislikes}}</p>
             </div>
             {{end}}
         </div>
+
     </main><br><br><br><br><br><br><br><br><br><br><br><br>
 
     <footer>

@@ -178,19 +178,41 @@ func GetComments(c *gin.Context) {
 	}
 	defer rows.Close()
 
-	var comments []models.Comment
+	var comments []map[string]interface{}
 	for rows.Next() {
 		var comment models.Comment
 		var username string
-		err := rows.Scan(&comment.ID, &comment.Content, &username, &comment.PostID, &comment.Likes, &comment.Dislikes, &comment.CreatedAt, &comment.UpdatedAt)
+		var createdAt, updatedAt sql.NullTime
+		err := rows.Scan(&comment.ID, &comment.Content, &username, &comment.PostID, &comment.Likes, &comment.Dislikes, &createdAt, &updatedAt)
 		if err != nil {
 			log.Println("Failed to scan comment:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan comment"})
 			return
 		}
 		comment.Username = username
-		log.Println("Comment fetched:", comment)
-		comments = append(comments, comment)
+
+		formattedCreatedAt := "Unknown"
+		if createdAt.Valid {
+			formattedCreatedAt = createdAt.Time.Format("January 2, 2006 at 3:04pm")
+		}
+
+		formattedUpdatedAt := "Unknown"
+		if updatedAt.Valid {
+			formattedUpdatedAt = updatedAt.Time.Format("January 2, 2006 at 3:04pm")
+		}
+
+		formattedComment := map[string]interface{}{
+			"id":         comment.ID,
+			"content":    comment.Content,
+			"username":   comment.Username,
+			"post_id":    comment.PostID,
+			"likes":      comment.Likes,
+			"dislikes":   comment.Dislikes,
+			"created_at": formattedCreatedAt,
+			"updated_at": formattedUpdatedAt,
+			"user_id":    comment.UserID,
+		}
+		comments = append(comments, formattedComment)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -272,8 +294,60 @@ func GetPost(c *gin.Context) {
 		return
 	}
 
-	// Query to fetch category IDs and names
+	// Query to fetch comments for the post
 	rows, err := config.DB.Query(`
+		SELECT c.id, c.content, COALESCE(u.username, 'Unknown') AS username, c.post_id, c.likes, c.dislikes, c.created_at, c.updated_at 
+		FROM comments c
+		LEFT JOIN users u ON c.user_id = u.id
+		WHERE c.post_id = ?
+		ORDER BY c.created_at DESC
+	`, id)
+	if err != nil {
+		log.Println("Failed to fetch comments from DB:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch comments"})
+		return
+	}
+	defer rows.Close()
+
+	var comments []map[string]interface{}
+	for rows.Next() {
+		var comment models.Comment
+		var username string
+		var createdAt, updatedAt sql.NullTime
+		err := rows.Scan(&comment.ID, &comment.Content, &username, &comment.PostID, &comment.Likes, &comment.Dislikes, &createdAt, &updatedAt)
+		if err != nil {
+			log.Println("Failed to scan comment:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan comment"})
+			return
+		}
+		comment.Username = username
+
+		formattedCreatedAt := "Unknown"
+		if createdAt.Valid {
+			formattedCreatedAt = createdAt.Time.Format("January 2, 2006 at 3:04pm")
+		}
+
+		formattedUpdatedAt := "Unknown"
+		if updatedAt.Valid {
+			formattedUpdatedAt = updatedAt.Time.Format("January 2, 2006 at 3:04pm")
+		}
+
+		formattedComment := map[string]interface{}{
+			"id":         comment.ID,
+			"content":    comment.Content,
+			"username":   comment.Username,
+			"post_id":    comment.PostID,
+			"likes":      comment.Likes,
+			"dislikes":   comment.Dislikes,
+			"created_at": formattedCreatedAt,
+			"updated_at": formattedUpdatedAt,
+			"user_id":    comment.UserID,
+		}
+		comments = append(comments, formattedComment)
+	}
+
+	// Query to fetch category IDs and names
+	rows, err = config.DB.Query(`
 		SELECT c.id, c.name
 		FROM categories c
 		INNER JOIN post_categories pc ON c.id = pc.category_id
@@ -303,33 +377,6 @@ func GetPost(c *gin.Context) {
 	// Convert category names slice to a comma-separated string for display purposes
 	categoriesString := strings.Join(categoryNames, ", ")
 
-	// Fetch comments for the post
-	commentRows, err := config.DB.Query(`
-		SELECT id, content, username, post_id, likes, dislikes, created_at, updated_at 
-		FROM comments
-		WHERE post_id = ?
-		ORDER BY created_at DESC
-	`, post.ID)
-	if err != nil {
-		log.Println("Failed to fetch comments from DB:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch comments"})
-		return
-	}
-	defer commentRows.Close()
-
-	var comments []models.Comment
-	for commentRows.Next() {
-		var comment models.Comment
-		err := commentRows.Scan(&comment.ID, &comment.Content, &comment.Username, &comment.PostID, &comment.Likes, &comment.Dislikes, &comment.CreatedAt, &comment.UpdatedAt)
-		if err != nil {
-			log.Println("Failed to scan comment:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan comment"})
-			return
-		}
-		comments = append(comments, comment)
-	}
-
-	// Render the template with post and comments
 	c.HTML(http.StatusOK, "post.html", gin.H{
 		"Post":       post,
 		"Categories": categoriesString,

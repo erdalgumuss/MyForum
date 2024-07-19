@@ -62,6 +62,12 @@ function submitForm() {
     });
 }
 
+// CREATED AT IN COMMENTS
+
+
+
+// CREATED AT IN COMMENTS
+
 document.addEventListener('DOMContentLoaded', () => {
     const loginPopup = document.getElementById('login-popup');
     const registerPopup = document.getElementById('register-popup');
