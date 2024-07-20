@@ -13,6 +13,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+/*INSERT INTO users (username, email, password, name, surname, created_at, updated_at, githubid, role) VALUES (
+	'admin',
+	'admin@example.com',
+	'$2a$10$4bvg9T55V370.Z5mKhc3jeN54.OgnGG9pnjJ6r3y98Cbj02bfAKdm',
+	'Admin',
+	'User',
+	DATETIME('now'),
+	DATETIME('now'),
+	NULL,
+	'admin'
+);
+*/
 // Register handles user registration.
 func Register(c *gin.Context) {
 	var input models.User
