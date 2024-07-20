@@ -3,7 +3,6 @@
 
 <br>Ana Sayfa ayarlansin
 <br>Filtreleme
-<br>Like/Dislike
 <br>User registered(created_at)
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>Resim boyutu max 20mb, only jpg, png, gif allowed
@@ -21,7 +20,9 @@ createPost<br/>
 # Tidy:
 forum_controller/getPosts ve forum_controller/getPosts -- `silindi`<br/>
 modes/topic.go ihtiyac var mi ? -- `yorum satirina alindi`<br/>
-<br>createPost go yerine !js! kullaniyo.<br><br>
+likePost, dislikePost, likeComment, dislikeComment -- `controllersdan silindi`<br/>
+handlers'dan kullaniliyor<br/>
+<br><br>
 
 # Might improve:
 <br>CSS problems --such as the structure dissappearing in the footer.<br><br>

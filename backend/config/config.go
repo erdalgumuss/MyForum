@@ -173,6 +173,24 @@ func createTables() error {
 		}
 	}
 
+	createUser_LikesTable := `
+	CREATE TABLE IF NOT EXISTS user_likes (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INTEGER,
+		post_id INTEGER DEFAULT NULL,
+		comment_id INTEGER DEFAULT NULL,
+		action TEXT, -- 'like' or 'dislike'
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		UNIQUE(user_id, post_id, comment_id)
+	);
+	`
+	_, err = DB.Exec(createUser_LikesTable)
+	if err != nil {
+		log.Fatalf("Failed to create sessions table: %v", err)
+		return fmt.Errorf("failed to create sessions table: %v", err)
+	}
+
 	createSessionTable := `
 	CREATE TABLE IF NOT EXISTS sessions (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -199,30 +217,14 @@ func createTables() error {
 	}
 	// Create moderator_requests table if not exists
 	createModeratorRequestTable := `
-CREATE TABLE IF NOT EXISTS moderator_requests (
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	user_id INT NOT NULL,
-	status VARCHAR(20) DEFAULT 'pending',
-	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (user_id) REFERENCES users(id)
+	CREATE TABLE IF NOT EXISTS moderator_requests (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		user_id INT NOT NULL,
+		status VARCHAR(20) DEFAULT 'pending',
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id)
 );
 `
-	_, err = DB.Exec(createModeratorRequestTable)
-	if err != nil {
-		log.Fatalf("Failed to create moderator table: %v", err)
-		return fmt.Errorf("failed to create moderator table: %v", err)
-	}
-
-	// Create moderator_requests table if not exists
-	createModeratorRequestTable := `
-		CREATE TABLE IF NOT EXISTS moderator_requests (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			user_id INT NOT NULL,
-			status VARCHAR(20) DEFAULT 'pending',
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (user_id) REFERENCES users(id)
-		);
-		`
 	_, err = DB.Exec(createModeratorRequestTable)
 	if err != nil {
 		log.Fatalf("Failed to create moderator table: %v", err)

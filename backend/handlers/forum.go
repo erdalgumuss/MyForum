@@ -403,14 +403,294 @@ func getCategoryIDByName(categoryName string) (int, error) {
 	return categoryID, nil
 }
 
-func DislikePost(c *gin.Context) {
-}
-
+// LikePost handles the liking of a post
 func LikePost(c *gin.Context) {
+	postID := c.Param("id")
+	userID, ok := utils.GetUserIDFromSession(c)
+	if !ok {
+		log.Println("User ID not found in session")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var action string
+	err := config.DB.QueryRow(`
+		SELECT action 
+		FROM user_likes 
+		WHERE user_id = ? AND post_id = ? AND comment_id IS NULL
+	`, userID, postID).Scan(&action)
+	if err != nil && err != sql.ErrNoRows {
+		log.Println("Failed to check user like status:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	tx, err := config.DB.Begin()
+	if err != nil {
+		log.Println("Failed to start transaction:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	if action == "like" {
+		// User already liked the post
+		c.JSON(http.StatusOK, gin.H{"message": "Post already liked"})
+		return
+	}
+
+	if action == "dislike" {
+		// User disliked the post, remove dislike
+		_, err = tx.Exec("UPDATE posts SET dislikes = dislikes - 1 WHERE id = ?", postID)
+		if err != nil {
+			log.Println("Failed to remove dislike:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
+	}
+
+	_, err = tx.Exec("UPDATE posts SET likes = likes + 1 WHERE id = ?", postID)
+	if err != nil {
+		log.Println("Failed to like post:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	if action == "" {
+		_, err = tx.Exec("INSERT INTO user_likes (user_id, post_id, action) VALUES (?, ?, 'like')", userID, postID)
+	} else {
+		_, err = tx.Exec("UPDATE user_likes SET action = 'like' WHERE user_id = ? AND post_id = ? AND comment_id IS NULL", userID, postID)
+	}
+	if err != nil {
+		log.Println("Failed to record like:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Post liked"})
 }
 
+// DislikePost handles the disliking of a post
+func DislikePost(c *gin.Context) {
+	postID := c.Param("id")
+	userID, ok := utils.GetUserIDFromSession(c)
+	if !ok {
+		log.Println("User ID not found in session")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var action string
+	err := config.DB.QueryRow(`
+		SELECT action 
+		FROM user_likes 
+		WHERE user_id = ? AND post_id = ? AND comment_id IS NULL
+	`, userID, postID).Scan(&action)
+	if err != nil && err != sql.ErrNoRows {
+		log.Println("Failed to check user like status:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	tx, err := config.DB.Begin()
+	if err != nil {
+		log.Println("Failed to start transaction:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	if action == "dislike" {
+		// User already disliked the post
+		c.JSON(http.StatusOK, gin.H{"message": "Post already disliked"})
+		return
+	}
+
+	if action == "like" {
+		// User liked the post, remove like
+		_, err = tx.Exec("UPDATE posts SET likes = likes - 1 WHERE id = ?", postID)
+		if err != nil {
+			log.Println("Failed to remove like:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
+	}
+
+	_, err = tx.Exec("UPDATE posts SET dislikes = dislikes + 1 WHERE id = ?", postID)
+	if err != nil {
+		log.Println("Failed to dislike post:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	if action == "" {
+		_, err = tx.Exec("INSERT INTO user_likes (user_id, post_id, action) VALUES (?, ?, 'dislike')", userID, postID)
+	} else {
+		_, err = tx.Exec("UPDATE user_likes SET action = 'dislike' WHERE user_id = ? AND post_id = ? AND comment_id IS NULL", userID, postID)
+	}
+	if err != nil {
+		log.Println("Failed to record dislike:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Post disliked"})
+}
+
+// LikeComment handles the liking of a comment
 func LikeComment(c *gin.Context) {
+	commentID := c.Param("id")
+	userID, ok := utils.GetUserIDFromSession(c)
+	if !ok {
+		log.Println("User ID not found in session")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var action string
+	err := config.DB.QueryRow(`
+		SELECT action 
+		FROM user_likes 
+		WHERE user_id = ? AND comment_id = ? AND post_id IS NULL
+	`, userID, commentID).Scan(&action)
+	if err != nil && err != sql.ErrNoRows {
+		log.Println("Failed to check user like status:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	tx, err := config.DB.Begin()
+	if err != nil {
+		log.Println("Failed to start transaction:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	if action == "like" {
+		// User already liked the comment
+		c.JSON(http.StatusOK, gin.H{"message": "Comment already liked"})
+		return
+	}
+
+	if action == "dislike" {
+		// User disliked the comment, remove dislike
+		_, err = tx.Exec("UPDATE comments SET dislikes = dislikes - 1 WHERE id = ?", commentID)
+		if err != nil {
+			log.Println("Failed to remove dislike:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
+	}
+
+	_, err = tx.Exec("UPDATE comments SET likes = likes + 1 WHERE id = ?", commentID)
+	if err != nil {
+		log.Println("Failed to like comment:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	if action == "" {
+		_, err = tx.Exec("INSERT INTO user_likes (user_id, comment_id, action) VALUES (?, ?, 'like')", userID, commentID)
+	} else {
+		_, err = tx.Exec("UPDATE user_likes SET action = 'like' WHERE user_id = ? AND comment_id = ? AND post_id IS NULL", userID, commentID)
+	}
+	if err != nil {
+		log.Println("Failed to record like:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Comment liked"})
 }
 
+// DislikeComment handles the disliking of a comment
 func DislikeComment(c *gin.Context) {
+	commentID := c.Param("id")
+	userID, ok := utils.GetUserIDFromSession(c)
+	if !ok {
+		log.Println("User ID not found in session")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	var action string
+	err := config.DB.QueryRow(`
+		SELECT action 
+		FROM user_likes 
+		WHERE user_id = ? AND comment_id = ? AND post_id IS NULL
+	`, userID, commentID).Scan(&action)
+	if err != nil && err != sql.ErrNoRows {
+		log.Println("Failed to check user like status:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	tx, err := config.DB.Begin()
+	if err != nil {
+		log.Println("Failed to start transaction:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+
+	if action == "dislike" {
+		// User already disliked the comment
+		c.JSON(http.StatusOK, gin.H{"message": "Comment already disliked"})
+		return
+	}
+
+	if action == "like" {
+		// User liked the comment, remove like
+		_, err = tx.Exec("UPDATE comments SET likes = likes - 1 WHERE id = ?", commentID)
+		if err != nil {
+			log.Println("Failed to remove like:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
+	}
+
+	_, err = tx.Exec("UPDATE comments SET dislikes = dislikes + 1 WHERE id = ?", commentID)
+	if err != nil {
+		log.Println("Failed to dislike comment:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	if action == "" {
+		_, err = tx.Exec("INSERT INTO user_likes (user_id, comment_id, action) VALUES (?, ?, 'dislike')", userID, commentID)
+	} else {
+		_, err = tx.Exec("UPDATE user_likes SET action = 'dislike' WHERE user_id = ? AND comment_id = ? AND post_id IS NULL", userID, commentID)
+	}
+	if err != nil {
+		log.Println("Failed to record dislike:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Comment disliked"})
 }

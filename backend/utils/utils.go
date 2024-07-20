@@ -96,43 +96,6 @@ func ModeratorOnly() gin.HandlerFunc {
 	}
 }
 
-func AdminOnly() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		Role := c.GetString("role")
-		if Role != "admin" {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "Access denied"})
-			return
-		}
-		c.Next()
-	}
-}
-
-func AdminRequired() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		session := sessions.Default(c)
-		role := session.Get("role")
-		if role == nil || role != "admin" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
-}
-
-func ModeratorOnly() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		session := sessions.Default(c)
-		role := session.Get("role")
-		if role == nil || role != "moderator" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
-}
-
 // Otomatik çıkış işlemi yapan fonksiyon
 func logoutUser(c *gin.Context, sessionToken string) {
 	// Veritabanından veya hafızadan oturum token'ını sil

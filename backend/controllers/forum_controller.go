@@ -2,12 +2,9 @@ package controllers
 
 import (
 	"log"
-	"net/http"
 
 	"MyForum/config"
 	"MyForum/models"
-
-	"github.com/gin-gonic/gin"
 )
 
 func CreatePostWithPost(post models.Post) error {
@@ -51,76 +48,4 @@ func CreatePostWithPost(post models.Post) error {
 	}
 
 	return nil
-}
-
-// LikePost handles the liking of a post
-func LikePost(c *gin.Context) {
-	postID := c.Param("id")
-	result, err := config.DB.Exec("UPDATE posts SET likes = likes + 1 WHERE id = ?", postID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like post"})
-		return
-	}
-
-	rowsAffected, _ := result.RowsAffected()
-	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Post liked"})
-}
-
-// DislikePost handles the disliking of a post
-func DislikePost(c *gin.Context) {
-	postID := c.Param("id")
-	result, err := config.DB.Exec("UPDATE posts SET dislikes = dislikes + 1 WHERE id = ?", postID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to dislike post"})
-		return
-	}
-
-	rowsAffected, _ := result.RowsAffected()
-	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Post disliked"})
-}
-
-// LikeComment handles the liking of a comment
-func LikeComment(c *gin.Context) {
-	commentID := c.Param("id")
-	result, err := config.DB.Exec("UPDATE comments SET likes = likes + 1 WHERE id = ?", commentID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to like comment"})
-		return
-	}
-
-	rowsAffected, _ := result.RowsAffected()
-	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Comment liked"})
-}
-
-// DislikeComment handles the disliking of a comment
-func DislikeComment(c *gin.Context) {
-	commentID := c.Param("id")
-	result, err := config.DB.Exec("UPDATE comments SET dislikes = dislikes + 1 WHERE id = ?", commentID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to dislike comment"})
-		return
-	}
-
-	rowsAffected, _ := result.RowsAffected()
-	if rowsAffected == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Comment disliked"})
 }

@@ -24,10 +24,16 @@
             <br><br>
             <p>Likes: {{.Post.Likes}} || Dislikes: {{.Post.Dislikes}}</p>
             <p>Posted by User: {{.Post.Username}} on {{.CreatedAt}}</p>
-        </div>
+            <form action="/posts/{{.Post.ID}}/like" method="POST">
+                <button type="submit">Like</button>
+            </form>
+            <form action="/posts/{{.Post.ID}}/dislike" method="POST">
+                <button type="submit">Dislike</button>
+            </form>
+        </div><br><br>
         <form action="/create-comment" method="POST">
             <textarea name="content" placeholder="Write a comment..." required></textarea>
-            <input type="hidden" id="post_id" name="post_id" value="{{.Post.ID}}">
+            <input type="hidden" id="post_id" name="post_id" value="{{.Post.ID}}"><br/>
             <button type="submit">Post Comment</button>
         </form>
         <div id="comments">
@@ -36,6 +42,12 @@
                 <p>{{.content}}</p>
                 <p>Posted by {{.username}} on {{.created_at}}</p>
                 <p>Likes: {{.likes}} | Dislikes: {{.dislikes}}</p>
+                <form action="/comments/{{.id}}/like" method="POST">
+                    <button type="submit">Like</button>
+                </form>
+                <form action="/comments/{{.id}}/dislike" method="POST">
+                    <button type="submit">Dislike</button>
+                </form>
             </div>
             {{end}}
         </div>
