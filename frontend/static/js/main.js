@@ -26,48 +26,6 @@ function fetchThreads() {
     });
 }
 
-function submitForm() {
-    const form = document.getElementById('createPostForm');
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-    const formData = new FormData(form);
-
-    // Convert selected categories into an array of strings
-    const selectedCategories = Array.from(formData.getAll('categories'));
-
-    // Add each selected category individually to formData
-    formData.delete('categories');
-    selectedCategories.forEach(category => {
-        formData.append('categories', category);
-    });
-
-    fetch('/create-post', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-        if (data.message === "Post başarıyla oluşturuldu") {
-            if (window.location.pathname === '/forum') {
-                fetchThreads();
-            }
-            form.reset(); // Optionally reset the form after successful submission
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-    });
-}
-
-// CREATED AT IN COMMENTS
-
-
-
-// CREATED AT IN COMMENTS
-
 document.addEventListener('DOMContentLoaded', () => {
     const loginPopup = document.getElementById('login-popup');
     const registerPopup = document.getElementById('register-popup');

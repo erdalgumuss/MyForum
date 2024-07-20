@@ -54,24 +54,32 @@ func CreatePost(c *gin.Context) {
 
 	var input models.Post
 
-	// Get user ID from context
-	userID, ok := c.Get("userID")
+	// Get user ID and username from context
+	userID, ok := utils.GetUserIDFromSession(c)
 	if !ok {
-		log.Println("Kullanıcı kimliği post oturumda bulunamadı")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Yetkisiz"})
+		log.Println("User ID not found in session")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	username, ok := c.Get("username")
+	if !ok {
+		log.Println("Username not found in session")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
 	// Bind form data explicitly
 	input.Title = c.PostForm("title")
-	categoryNames := c.PostFormArray("categories") // Expecting an array of category names
+	categoryNames := c.PostFormArray("categories")
 	input.Content = c.PostForm("content")
-	input.Username = c.PostForm("username")
-	input.UserID = userID.(int)
+	input.Username = username.(string)
+	input.UserID = userID
 	input.CreatedAt = time.Now()
 
-	// Debug: log the received categories
-	log.Printf("Received categories: %v\n", categoryNames)
+	// Log received form data
+	log.Printf("Received form data: Title=%s, Content=%s, Username=%s, UserID=%d, Categories=%v\n",
+		input.Title, input.Content, input.Username, input.UserID, categoryNames)
 
 	// Handle file upload
 	file, err := c.FormFile("image")
@@ -79,11 +87,11 @@ func CreatePost(c *gin.Context) {
 		filename := filepath.Base(file.Filename)
 		filepath := filepath.Join("uploads", filename)
 		if err := c.SaveUploadedFile(file, filepath); err != nil {
-			log.Println("Dosya kaydedilirken hata:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Dosya kaydedilemedi"})
+			log.Println("Error saving file:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "File could not be saved"})
 			return
 		}
-		input.ImageURL = "/uploads/" + filename // Ensure this matches the URL path
+		input.ImageURL = "/uploads/" + filename
 		log.Printf("File uploaded successfully: %s\n", filepath)
 	} else {
 		log.Println("No file uploaded")
@@ -108,12 +116,167 @@ func CreatePost(c *gin.Context) {
 
 	// Call controller function
 	if err := controllers.CreatePostWithPost(input); err != nil {
-		log.Println("Post oluşturulurken hata:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Post oluşturulamadı"})
+		log.Println("Error creating post:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create post"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Post başarıyla oluşturuldu"})
+	c.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
+}
+
+func GetPosts(c *gin.Context) {
+	var posts []models.Post
+
+	// Query posts with sorting by created_at descending
+	rows, err := config.DB.Query("SELECT id, COALESCE(username, '') AS username, title, content, user_id, likes, dislikes, created_at FROM posts ORDER BY created_at DESC")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
+		return
+	}
+	defer rows.Close()
+
+	// Iterate over rows and scan into Post structs
+	for rows.Next() {
+		var post models.Post
+		if err := rows.Scan(&post.ID, &post.Username, &post.Title, &post.Content, &post.UserID, &post.Likes, &post.Dislikes, &post.CreatedAt); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan posts"})
+			return
+		}
+		posts = append(posts, post)
+	}
+
+	// Handle any iteration errors
+	if err := rows.Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error iterating through posts"})
+		return
+	}
+
+	// Return posts as JSON response
+	c.JSON(http.StatusOK, posts)
+}
+
+func GetPost(c *gin.Context) {
+	// Extract post ID from URL parameter
+	id := c.Param("id")
+
+	var post models.Post
+	var categoryIDs []int
+	var categoryNames []string
+	var createdAt sql.NullTime
+
+	// Query to fetch post details including username from users table
+	err := config.DB.QueryRow(`
+		SELECT p.id, p.title, p.content, p.likes, p.dislikes, p.user_id, p.image_url, p.created_at, u.username
+		FROM posts p
+		INNER JOIN users u ON p.user_id = u.id
+		WHERE p.id = ?
+	`, id).Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.ImageURL, &createdAt, &post.Username)
+
+	if err != nil {
+		log.Println("Error fetching post:", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	formattedCreatedAt := "Unknown"
+	if createdAt.Valid {
+		formattedCreatedAt = createdAt.Time.Format("2006-01-02 15:04:05")
+	}
+
+	// Query to fetch comments for the post
+	rows, err := config.DB.Query(`
+		SELECT c.id, c.content, COALESCE(u.username, 'Unknown') AS username, c.post_id, c.likes, c.dislikes, c.created_at, c.updated_at 
+		FROM comments c
+		LEFT JOIN users u ON c.user_id = u.id
+		WHERE c.post_id = ?
+		ORDER BY c.created_at DESC
+	`, id)
+	if err != nil {
+		log.Println("Failed to fetch comments from DB:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch comments"})
+		return
+	}
+	defer rows.Close()
+
+	var comments []map[string]interface{}
+	for rows.Next() {
+		var comment models.Comment
+		var username string
+		var createdAt, updatedAt sql.NullTime
+		err := rows.Scan(&comment.ID, &comment.Content, &username, &comment.PostID, &comment.Likes, &comment.Dislikes, &createdAt, &updatedAt)
+		if err != nil {
+			log.Println("Failed to scan comment:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan comment"})
+			return
+		}
+		comment.Username = username
+
+		formattedCreatedAt := "Unknown"
+		if createdAt.Valid {
+			formattedCreatedAt = createdAt.Time.Format("2006-01-02 15:04:05")
+		}
+
+		formattedUpdatedAt := "Unknown"
+		if updatedAt.Valid {
+			formattedUpdatedAt = updatedAt.Time.Format("2006-01-02 15:04:05")
+		}
+
+		formattedComment := map[string]interface{}{
+			"id":         comment.ID,
+			"content":    comment.Content,
+			"username":   comment.Username,
+			"post_id":    comment.PostID,
+			"likes":      comment.Likes,
+			"dislikes":   comment.Dislikes,
+			"created_at": formattedCreatedAt,
+			"updated_at": formattedUpdatedAt,
+		}
+		comments = append(comments, formattedComment)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Println("Failed to iterate comments:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to iterate comments"})
+		return
+	}
+
+	// Query to fetch category IDs and names
+	rows, err = config.DB.Query(`
+		SELECT c.id, c.name
+		FROM categories c
+		INNER JOIN post_categories pc ON c.id = pc.category_id
+		WHERE pc.post_id = ?
+	`, post.ID)
+	if err != nil {
+		log.Println("Error fetching categories:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching categories"})
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var categoryID int
+		var categoryName string
+		if err := rows.Scan(&categoryID, &categoryName); err != nil {
+			log.Println("Error scanning category:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error scanning categories"})
+			return
+		}
+		categoryIDs = append(categoryIDs, categoryID)
+		categoryNames = append(categoryNames, categoryName)
+	}
+
+	post.CategoryIDs = categoryIDs
+
+	// Convert category names slice to a comma-separated string for display purposes
+	categoriesString := strings.Join(categoryNames, ", ")
+
+	c.HTML(http.StatusOK, "post.html", gin.H{
+		"Post":       post,
+		"Categories": categoriesString,
+		"Comments":   comments,
+		"CreatedAt":  formattedCreatedAt,
+	})
 }
 
 func CreateComment(c *gin.Context) {
@@ -193,12 +356,12 @@ func GetComments(c *gin.Context) {
 
 		formattedCreatedAt := "Unknown"
 		if createdAt.Valid {
-			formattedCreatedAt = createdAt.Time.Format("January 2, 2006 at 3:04pm")
+			formattedCreatedAt = createdAt.Time.Format("2006-01-02 15:04:05")
 		}
 
 		formattedUpdatedAt := "Unknown"
 		if updatedAt.Valid {
-			formattedUpdatedAt = updatedAt.Time.Format("January 2, 2006 at 3:04pm")
+			formattedUpdatedAt = updatedAt.Time.Format("2006-01-02 15:04:05")
 		}
 
 		formattedComment := map[string]interface{}{
@@ -210,7 +373,6 @@ func GetComments(c *gin.Context) {
 			"dislikes":   comment.Dislikes,
 			"created_at": formattedCreatedAt,
 			"updated_at": formattedUpdatedAt,
-			"user_id":    comment.UserID,
 		}
 		comments = append(comments, formattedComment)
 	}
@@ -239,149 +401,6 @@ func getCategoryIDByName(categoryName string) (int, error) {
 	}
 
 	return categoryID, nil
-}
-
-func GetPosts(c *gin.Context) {
-	var posts []models.Post
-
-	// Query posts with sorting by created_at descending
-	rows, err := config.DB.Query("SELECT id, COALESCE(username, '') AS username, title, content, user_id, likes, dislikes, created_at FROM posts ORDER BY created_at DESC")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
-		return
-	}
-	defer rows.Close()
-
-	// Iterate over rows and scan into Post structs
-	for rows.Next() {
-		var post models.Post
-		if err := rows.Scan(&post.ID, &post.Username, &post.Title, &post.Content, &post.UserID, &post.Likes, &post.Dislikes, &post.CreatedAt); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan posts"})
-			return
-		}
-		posts = append(posts, post)
-	}
-
-	// Handle any iteration errors
-	if err := rows.Err(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error iterating through posts"})
-		return
-	}
-
-	// Return posts as JSON response
-	c.JSON(http.StatusOK, posts)
-}
-
-func GetPost(c *gin.Context) {
-	// Extract post ID from URL parameter
-	id := c.Param("id")
-
-	var post models.Post
-	var categoryIDs []int
-	var categoryNames []string
-
-	// Query to fetch post details including username from users table
-	err := config.DB.QueryRow(`
-		SELECT p.id, p.title, p.content, p.likes, p.dislikes, p.user_id, p.image_url, u.username
-		FROM posts p
-		INNER JOIN users u ON p.user_id = u.id
-		WHERE p.id = ?
-	`, id).Scan(&post.ID, &post.Title, &post.Content, &post.Likes, &post.Dislikes, &post.UserID, &post.ImageURL, &post.Username)
-
-	if err != nil {
-		log.Println("Error fetching post:", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
-		return
-	}
-
-	// Query to fetch comments for the post
-	rows, err := config.DB.Query(`
-		SELECT c.id, c.content, COALESCE(u.username, 'Unknown') AS username, c.post_id, c.likes, c.dislikes, c.created_at, c.updated_at 
-		FROM comments c
-		LEFT JOIN users u ON c.user_id = u.id
-		WHERE c.post_id = ?
-		ORDER BY c.created_at DESC
-	`, id)
-	if err != nil {
-		log.Println("Failed to fetch comments from DB:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch comments"})
-		return
-	}
-	defer rows.Close()
-
-	var comments []map[string]interface{}
-	for rows.Next() {
-		var comment models.Comment
-		var username string
-		var createdAt, updatedAt sql.NullTime
-		err := rows.Scan(&comment.ID, &comment.Content, &username, &comment.PostID, &comment.Likes, &comment.Dislikes, &createdAt, &updatedAt)
-		if err != nil {
-			log.Println("Failed to scan comment:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan comment"})
-			return
-		}
-		comment.Username = username
-
-		formattedCreatedAt := "Unknown"
-		if createdAt.Valid {
-			formattedCreatedAt = createdAt.Time.Format("January 2, 2006 at 3:04pm")
-		}
-
-		formattedUpdatedAt := "Unknown"
-		if updatedAt.Valid {
-			formattedUpdatedAt = updatedAt.Time.Format("January 2, 2006 at 3:04pm")
-		}
-
-		formattedComment := map[string]interface{}{
-			"id":         comment.ID,
-			"content":    comment.Content,
-			"username":   comment.Username,
-			"post_id":    comment.PostID,
-			"likes":      comment.Likes,
-			"dislikes":   comment.Dislikes,
-			"created_at": formattedCreatedAt,
-			"updated_at": formattedUpdatedAt,
-			"user_id":    comment.UserID,
-		}
-		comments = append(comments, formattedComment)
-	}
-
-	// Query to fetch category IDs and names
-	rows, err = config.DB.Query(`
-		SELECT c.id, c.name
-		FROM categories c
-		INNER JOIN post_categories pc ON c.id = pc.category_id
-		WHERE pc.post_id = ?
-	`, post.ID)
-	if err != nil {
-		log.Println("Error fetching categories:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching categories"})
-		return
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var categoryID int
-		var categoryName string
-		if err := rows.Scan(&categoryID, &categoryName); err != nil {
-			log.Println("Error scanning category:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error scanning categories"})
-			return
-		}
-		categoryIDs = append(categoryIDs, categoryID)
-		categoryNames = append(categoryNames, categoryName)
-	}
-
-	post.CategoryIDs = categoryIDs
-
-	// Convert category names slice to a comma-separated string for display purposes
-	categoriesString := strings.Join(categoryNames, ", ")
-
-	c.HTML(http.StatusOK, "post.html", gin.H{
-		"Post":       post,
-		"Categories": categoriesString,
-		"Comments":   comments,
-	})
 }
 
 func DislikePost(c *gin.Context) {

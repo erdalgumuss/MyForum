@@ -3,13 +3,9 @@
 
 <br>Ana Sayfa ayarlansin
 <br>Filtreleme
-<br>Comment::
-user_id 0 gorunuyo comments tableda.<br/>
-js kodunda id elde edemedigi goruluypo debugda<br/>
-username bastirmaya calisiyoruz postedby<br/>
 <br>Like/Dislike
 <br>User registered(created_at)
-<br>Post created_at
+<br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>Resim boyutu max 20mb, only jpg, png, gif allowed
 <br>Js optimize:<br/>
 Konu olmadiginda error fetching hatasi donduruyo<br/>

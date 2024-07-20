@@ -20,12 +20,12 @@ func CreatePostWithPost(post models.Post) error {
 
 	// Insert into posts table
 	query := `
-	INSERT INTO posts (user_id, title, content, image_url, created_at)
-	VALUES (?, ?, ?, ?, ?)
+	INSERT INTO posts (user_id, title, content, username, image_url, created_at)
+	VALUES (?, ?, ?, ?, ?, ?)
 	RETURNING id
 	`
 	var postID int
-	err = tx.QueryRow(query, post.UserID, post.Title, post.Content, post.ImageURL, post.CreatedAt).Scan(&postID)
+	err = tx.QueryRow(query, post.UserID, post.Title, post.Content, post.Username, post.ImageURL, post.CreatedAt.Format("2006-01-02 15:04:05")).Scan(&postID)
 	if err != nil {
 		log.Println("Error inserting post:", err)
 		tx.Rollback()

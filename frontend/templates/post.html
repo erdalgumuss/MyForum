@@ -23,7 +23,7 @@
             {{end}}
             <br><br>
             <p>Likes: {{.Post.Likes}} || Dislikes: {{.Post.Dislikes}}</p>
-            <p>Posted by User: {{.Post.Username}}</p>
+            <p>Posted by User: {{.Post.Username}} on {{.CreatedAt}}</p>
         </div>
         <form action="/create-comment" method="POST">
             <textarea name="content" placeholder="Write a comment..." required></textarea>

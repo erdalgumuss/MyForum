@@ -31,19 +31,28 @@ func AuthMiddleware() gin.HandlerFunc {
 			} else {
 				log.Println("Error querying session:", err)
 			}
-			// Oturumu sonlandır
+			// End session
 			logoutUser(c, sessionToken)
 			return
 		}
 
 		if session.ExpiresAt.Before(time.Now()) {
 			log.Println("Session expired for token:", sessionToken)
-			// Oturumu sonlandır
+			// End session
+			logoutUser(c, sessionToken)
+			return
+		}
+
+		var username string
+		err = config.DB.QueryRow("SELECT username FROM users WHERE id = ?", session.UserID).Scan(&username)
+		if err != nil {
+			log.Println("Failed to fetch username:", err)
 			logoutUser(c, sessionToken)
 			return
 		}
 
 		c.Set("userID", session.UserID)
+		c.Set("username", username)
 		c.Next()
 	}
 }
