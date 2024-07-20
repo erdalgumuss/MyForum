@@ -6,7 +6,8 @@
 <br>User registered(created_at)
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>Resim boyutu max 20mb, only jpg, png, gif allowed
-<br>Js optimize:<br/>
+<br>* Js optimize: *<br/>
+like/dislike 4 post/comments has to use js
 Konu olmadiginda error fetching hatasi donduruyo<br/>
 ana sayfada F12 console da problemler var<br/>
 
@@ -45,11 +46,12 @@ SQL MÜQ bro
 <br>│   ├── config
 <br>│   │   └── config.go
 <br>│   ├── controllers
+<br>│   │   ├── admin_controller.go
 <br>│   │   ├── auth_controller.go
 <br>│   │   ├── forum_controller.go
+<br>│   │   ├── moderator_controller.go
 <br>│   │   └── profile_controller.go
 <br>│   ├── DockerFile
-<br>│   ├── .env
 <br>│   ├── forum.db
 <br>│   ├── go.mod
 <br>│   ├── go.sum
@@ -67,12 +69,15 @@ SQL MÜQ bro
 <br>│   │   ├── topic.go
 <br>│   │   └── user.go
 <br>│   ├── routes
+<br>│   │   ├── admin_routes.go
 <br>│   │   ├── auth_routes.go
 <br>│   │   ├── forum_routes.go
+<br>│   │   ├── moderator_routes.go
 <br>│   │   └── profile_routes.go
 <br>│   └── utils
 <br>│       └── utils.go
 <br>├── docker-compose.yml
+<br>├── forum.db-x-users-5-password.bin
 <br>├── frontend
 <br>│   ├── static
 <br>│   │   ├── css
@@ -87,14 +92,20 @@ SQL MÜQ bro
 <br>│   │   └── js
 <br>│   │       └── main.js
 <br>│   ├── templates
+<br>│   │   ├── admin_dashboard.html
+<br>│   │   ├── admin.html
 <br>│   │   ├── base.html
 <br>│   │   ├── comment.html
+<br>│   │   ├── edit_post.html
 <br>│   │   ├── forum.html
 <br>│   │   ├── gallery.html
 <br>│   │   ├── index.html
+<br>│   │   ├── pending_posts.html
 <br>│   │   ├── post.html
 <br>│   │   ├── profile.html
-<br>│   │   └── rules.html
+<br>│   │   ├── request_moderator.html
+<br>│   │   ├── rules.html
+<br>│   │   └── user_profile.html
 <br>│   └── uploads
 <br>│       ├── _117310488_16.jpg
 <br>│       ├── 697b023b-64a5-49a0-8059-27b963453fb1.gif
@@ -106,7 +117,6 @@ SQL MÜQ bro
 <br>│       ├── WIN_20231009_16_47_03_Pro.jpg
 <br>│       ├── WIN_20231012_01_56_53_Pro.jpg
 <br>│       └── WIN_20231018_16_45_51_Pro.jpg
-<br>├── .gitattributes
 <br>└── README.md
 <br>
-<br>15 directories, 53 files
+<br>15 directories, 62 files
