@@ -6,8 +6,8 @@
 <br>User registered(created_at)
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>Resim boyutu max 20mb, only jpg, png, gif allowed
-<br>* Js optimize: *<br/>
-like/dislike 4 post/comments has to use js
+<br>**Js optimize:**<br/>
+like/dislike 4 post/comments has to use js<br/>
 Konu olmadiginda error fetching hatasi donduruyo<br/>
 ana sayfada F12 console da problemler var<br/>
 
