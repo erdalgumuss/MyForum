@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Posts</title>
+    <style>
+        /* Temel CSS stilleri */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .post-list {
+            margin-top: 20px;
+        }
+        .post-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .post-item h3 {
+            margin-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pending Posts</h1>
+    <div class="post-list">
+        {{ range .posts }}
+        <div class="post-item">
+            <h3>{{ .Title }}</h3>
+            <p>{{ .Content }}</p>
+            <form action="/moderator/approve_post" method="POST" class="approve-post-form">
+                <input type="hidden" name="post_id" value="{{ .ID }}">
+                <button type="submit">Approve</button>
+            </form>
+            <form action="/moderator/reject_post" method="POST" class="reject-post-form">
+                <input type="hidden" name="post_id" value="{{ .ID }}">
+                <button type="submit">Reject</button>
+            </form>
+            <form action="/moderator/delete_post" method="POST" class="delete-post-form">
+                <input type="hidden" name="post_id" value="{{ .ID }}">
+                <button type="submit">Delete</button>
+            </form>
+        </div>
+        {{ end }}
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const approvePostForms = document.querySelectorAll('.approve-post-form');
+            const rejectPostForms = document.querySelectorAll('.reject-post-form');
+            const deletePostForms = document.querySelectorAll('.delete-post-form');
+
+            const handleSubmit = (event, form) => {
+                event.preventDefault();
+                const formData = new FormData(form);
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Operation successful.');
+                        window.location.reload();
+                    } else {
+                        alert('Operation failed.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            };
+
+            approvePostForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    handleSubmit(event, form);
+                });
+            });
+
+            rejectPostForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    handleSubmit(event, form);
+                });
+            });
+
+            deletePostForms.forEach(form => {
+                form.addEventListener('submit', function (event) {
+                    handleSubmit(event, form);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
