@@ -296,6 +296,4 @@ async function dislikeComment(commentId) {
     }
 }
 
-
-
 // LIKE DISLIKE ENDED

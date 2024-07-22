@@ -444,37 +444,45 @@ func LikePost(c *gin.Context) {
 	}()
 
 	if action == "like" {
-		// User already liked the post
-		c.JSON(http.StatusOK, gin.H{"message": "Post already liked"})
-		return
-	}
-
-	if action == "dislike" {
-		// User disliked the post, remove dislike
-		_, err = tx.Exec("UPDATE posts SET dislikes = dislikes - 1 WHERE id = ?", postID)
+		// User already liked the post, remove like
+		_, err = tx.Exec("UPDATE posts SET likes = likes - 1 WHERE id = ?", postID)
 		if err != nil {
-			log.Println("Failed to remove dislike:", err)
+			log.Println("Failed to remove like:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
 			return
 		}
-	}
-
-	_, err = tx.Exec("UPDATE posts SET likes = likes + 1 WHERE id = ?", postID)
-	if err != nil {
-		log.Println("Failed to like post:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
-		return
-	}
-
-	if action == "" {
-		_, err = tx.Exec("INSERT INTO user_likes (user_id, post_id, action) VALUES (?, ?, 'like')", userID, postID)
+		_, err = tx.Exec("DELETE FROM user_likes WHERE user_id = ? AND post_id = ? AND comment_id IS NULL", userID, postID)
+		if err != nil {
+			log.Println("Failed to remove like record:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
 	} else {
-		_, err = tx.Exec("UPDATE user_likes SET action = 'like' WHERE user_id = ? AND post_id = ? AND comment_id IS NULL", userID, postID)
-	}
-	if err != nil {
-		log.Println("Failed to record like:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
-		return
+		if action == "dislike" {
+			// User disliked the post, remove dislike
+			_, err = tx.Exec("UPDATE posts SET dislikes = dislikes - 1 WHERE id = ?", postID)
+			if err != nil {
+				log.Println("Failed to remove dislike:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+				return
+			}
+		}
+		_, err = tx.Exec("UPDATE posts SET likes = likes + 1 WHERE id = ?", postID)
+		if err != nil {
+			log.Println("Failed to like post:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
+		if action == "" {
+			_, err = tx.Exec("INSERT INTO user_likes (user_id, post_id, action) VALUES (?, ?, 'like')", userID, postID)
+		} else {
+			_, err = tx.Exec("UPDATE user_likes SET action = 'like' WHERE user_id = ? AND post_id = ? AND comment_id IS NULL", userID, postID)
+		}
+		if err != nil {
+			log.Println("Failed to record like:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
 	}
 
 	var likes, dislikes int
@@ -529,37 +537,45 @@ func DislikePost(c *gin.Context) {
 	}()
 
 	if action == "dislike" {
-		// User already disliked the post
-		c.JSON(http.StatusOK, gin.H{"message": "Post already disliked"})
-		return
-	}
-
-	if action == "like" {
-		// User liked the post, remove like
-		_, err = tx.Exec("UPDATE posts SET likes = likes - 1 WHERE id = ?", postID)
+		// User already disliked the post, remove dislike
+		_, err = tx.Exec("UPDATE posts SET dislikes = dislikes - 1 WHERE id = ?", postID)
 		if err != nil {
-			log.Println("Failed to remove like:", err)
+			log.Println("Failed to remove dislike:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
 			return
 		}
-	}
-
-	_, err = tx.Exec("UPDATE posts SET dislikes = dislikes + 1 WHERE id = ?", postID)
-	if err != nil {
-		log.Println("Failed to dislike post:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
-		return
-	}
-
-	if action == "" {
-		_, err = tx.Exec("INSERT INTO user_likes (user_id, post_id, action) VALUES (?, ?, 'dislike')", userID, postID)
+		_, err = tx.Exec("DELETE FROM user_likes WHERE user_id = ? AND post_id = ? AND comment_id IS NULL", userID, postID)
+		if err != nil {
+			log.Println("Failed to remove dislike record:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
 	} else {
-		_, err = tx.Exec("UPDATE user_likes SET action = 'dislike' WHERE user_id = ? AND post_id = ? AND comment_id IS NULL", userID, postID)
-	}
-	if err != nil {
-		log.Println("Failed to record dislike:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
-		return
+		if action == "like" {
+			// User liked the post, remove like
+			_, err = tx.Exec("UPDATE posts SET likes = likes - 1 WHERE id = ?", postID)
+			if err != nil {
+				log.Println("Failed to remove like:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+				return
+			}
+		}
+		_, err = tx.Exec("UPDATE posts SET dislikes = dislikes + 1 WHERE id = ?", postID)
+		if err != nil {
+			log.Println("Failed to dislike post:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
+		if action == "" {
+			_, err = tx.Exec("INSERT INTO user_likes (user_id, post_id, action) VALUES (?, ?, 'dislike')", userID, postID)
+		} else {
+			_, err = tx.Exec("UPDATE user_likes SET action = 'dislike' WHERE user_id = ? AND post_id = ? AND comment_id IS NULL", userID, postID)
+		}
+		if err != nil {
+			log.Println("Failed to record dislike:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
 	}
 
 	var likes, dislikes int
@@ -614,37 +630,45 @@ func LikeComment(c *gin.Context) {
 	}()
 
 	if action == "like" {
-		// User already liked the comment
-		c.JSON(http.StatusOK, gin.H{"message": "Comment already liked"})
-		return
-	}
-
-	if action == "dislike" {
-		// User disliked the comment, remove dislike
-		_, err = tx.Exec("UPDATE comments SET dislikes = dislikes - 1 WHERE id = ?", commentID)
+		// User already liked the comment, remove like
+		_, err = tx.Exec("UPDATE comments SET likes = likes - 1 WHERE id = ?", commentID)
 		if err != nil {
-			log.Println("Failed to remove dislike:", err)
+			log.Println("Failed to remove like:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
 			return
 		}
-	}
-
-	_, err = tx.Exec("UPDATE comments SET likes = likes + 1 WHERE id = ?", commentID)
-	if err != nil {
-		log.Println("Failed to like comment:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
-		return
-	}
-
-	if action == "" {
-		_, err = tx.Exec("INSERT INTO user_likes (user_id, comment_id, action) VALUES (?, ?, 'like')", userID, commentID)
+		_, err = tx.Exec("DELETE FROM user_likes WHERE user_id = ? AND comment_id = ? AND post_id IS NULL", userID, commentID)
+		if err != nil {
+			log.Println("Failed to remove like record:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
 	} else {
-		_, err = tx.Exec("UPDATE user_likes SET action = 'like' WHERE user_id = ? AND comment_id = ? AND post_id IS NULL", userID, commentID)
-	}
-	if err != nil {
-		log.Println("Failed to record like:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
-		return
+		if action == "dislike" {
+			// User disliked the comment, remove dislike
+			_, err = tx.Exec("UPDATE comments SET dislikes = dislikes - 1 WHERE id = ?", commentID)
+			if err != nil {
+				log.Println("Failed to remove dislike:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+				return
+			}
+		}
+		_, err = tx.Exec("UPDATE comments SET likes = likes + 1 WHERE id = ?", commentID)
+		if err != nil {
+			log.Println("Failed to like comment:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
+		if action == "" {
+			_, err = tx.Exec("INSERT INTO user_likes (user_id, comment_id, action) VALUES (?, ?, 'like')", userID, commentID)
+		} else {
+			_, err = tx.Exec("UPDATE user_likes SET action = 'like' WHERE user_id = ? AND comment_id = ? AND post_id IS NULL", userID, commentID)
+		}
+		if err != nil {
+			log.Println("Failed to record like:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
 	}
 
 	var likes, dislikes int
@@ -699,37 +723,45 @@ func DislikeComment(c *gin.Context) {
 	}()
 
 	if action == "dislike" {
-		// User already disliked the comment
-		c.JSON(http.StatusOK, gin.H{"message": "Comment already disliked"})
-		return
-	}
-
-	if action == "like" {
-		// User liked the comment, remove like
-		_, err = tx.Exec("UPDATE comments SET likes = likes - 1 WHERE id = ?", commentID)
+		// User already disliked the comment, remove dislike
+		_, err = tx.Exec("UPDATE comments SET dislikes = dislikes - 1 WHERE id = ?", commentID)
 		if err != nil {
-			log.Println("Failed to remove like:", err)
+			log.Println("Failed to remove dislike:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
 			return
 		}
-	}
-
-	_, err = tx.Exec("UPDATE comments SET dislikes = dislikes + 1 WHERE id = ?", commentID)
-	if err != nil {
-		log.Println("Failed to dislike comment:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
-		return
-	}
-
-	if action == "" {
-		_, err = tx.Exec("INSERT INTO user_likes (user_id, comment_id, action) VALUES (?, ?, 'dislike')", userID, commentID)
+		_, err = tx.Exec("DELETE FROM user_likes WHERE user_id = ? AND comment_id = ? AND post_id IS NULL", userID, commentID)
+		if err != nil {
+			log.Println("Failed to remove dislike record:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
 	} else {
-		_, err = tx.Exec("UPDATE user_likes SET action = 'dislike' WHERE user_id = ? AND comment_id = ? AND post_id IS NULL", userID, commentID)
-	}
-	if err != nil {
-		log.Println("Failed to record dislike:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
-		return
+		if action == "like" {
+			// User liked the comment, remove like
+			_, err = tx.Exec("UPDATE comments SET likes = likes - 1 WHERE id = ?", commentID)
+			if err != nil {
+				log.Println("Failed to remove like:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+				return
+			}
+		}
+		_, err = tx.Exec("UPDATE comments SET dislikes = dislikes + 1 WHERE id = ?", commentID)
+		if err != nil {
+			log.Println("Failed to dislike comment:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
+		if action == "" {
+			_, err = tx.Exec("INSERT INTO user_likes (user_id, comment_id, action) VALUES (?, ?, 'dislike')", userID, commentID)
+		} else {
+			_, err = tx.Exec("UPDATE user_likes SET action = 'dislike' WHERE user_id = ? AND comment_id = ? AND post_id IS NULL", userID, commentID)
+		}
+		if err != nil {
+			log.Println("Failed to record dislike:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
+			return
+		}
 	}
 
 	var likes, dislikes int
