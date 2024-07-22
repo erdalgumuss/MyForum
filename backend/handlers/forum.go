@@ -119,9 +119,11 @@ func CreatePost(c *gin.Context) {
 		log.Println("Error creating post:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create post"})
 		return
+	} else {
+		c.Redirect(http.StatusFound, "/forum")
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
+	//c.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
 }
 
 func GetPosts(c *gin.Context) {
@@ -318,9 +320,11 @@ func CreateComment(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment"})
 		return
+	} else {
+		c.Redirect(http.StatusSeeOther, "/posts/"+postIDStr)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Comment created successfully"})
+	//c.JSON(http.StatusOK, gin.H{"message": "Comment created successfully"})
 }
 
 func GetComments(c *gin.Context) {
