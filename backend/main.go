@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"MyForum/config"
 	"MyForum/routes"
@@ -37,7 +38,8 @@ func main() {
 
 	// Serve static files
 	r.Static("/static", "../frontend/static")
-	r.Static("/uploads", "../frontend/uploads")
+	//r.Static("/uploads", "../frontend/uploads")
+	r.Static("/uploads", filepath.Join("frontend", "uploads"))
 
 	// Load HTML templates
 	r.LoadHTMLGlob("../frontend/templates/*")

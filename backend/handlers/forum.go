@@ -84,8 +84,14 @@ func CreatePost(c *gin.Context) {
 	// Handle file upload
 	file, err := c.FormFile("image")
 	if err == nil {
+		if file.Size > 20*1024*1024 {
+			log.Println("File size exceeds 20 MB")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "File size exceeds 20 MB"})
+			return
+		}
+
 		filename := filepath.Base(file.Filename)
-		filepath := filepath.Join("uploads", filename)
+		filepath := filepath.Join("frontend", "uploads", filename)
 		if err := c.SaveUploadedFile(file, filepath); err != nil {
 			log.Println("Error saving file:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "File could not be saved"})
@@ -122,8 +128,6 @@ func CreatePost(c *gin.Context) {
 	} else {
 		c.Redirect(http.StatusFound, "/forum")
 	}
-
-	//c.JSON(http.StatusOK, gin.H{"message": "Post created successfully"})
 }
 
 func GetPosts(c *gin.Context) {
