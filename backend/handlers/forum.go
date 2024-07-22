@@ -91,7 +91,7 @@ func CreatePost(c *gin.Context) {
 		}
 
 		filename := filepath.Base(file.Filename)
-		filepath := filepath.Join("frontend", "uploads", filename)
+		filepath := filepath.Join("..", "frontend", "uploads", filename)
 		if err := c.SaveUploadedFile(file, filepath); err != nil {
 			log.Println("Error saving file:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "File could not be saved"})

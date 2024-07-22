@@ -39,7 +39,7 @@ func main() {
 	// Serve static files
 	r.Static("/static", "../frontend/static")
 	//r.Static("/uploads", "../frontend/uploads")
-	r.Static("/uploads", filepath.Join("frontend", "uploads"))
+	r.Static("/uploads", filepath.Join("..", "frontend", "uploads"))
 
 	// Load HTML templates
 	r.LoadHTMLGlob("../frontend/templates/*")
