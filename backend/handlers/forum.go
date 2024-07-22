@@ -419,10 +419,10 @@ func LikePost(c *gin.Context) {
 
 	var action string
 	err := config.DB.QueryRow(`
-		SELECT action 
-		FROM user_likes 
-		WHERE user_id = ? AND post_id = ? AND comment_id IS NULL
-	`, userID, postID).Scan(&action)
+        SELECT action 
+        FROM user_likes 
+        WHERE user_id = ? AND post_id = ? AND comment_id IS NULL
+    `, userID, postID).Scan(&action)
 	if err != nil && err != sql.ErrNoRows {
 		log.Println("Failed to check user like status:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
@@ -477,7 +477,19 @@ func LikePost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Post liked"})
+	var likes, dislikes int
+	err = tx.QueryRow("SELECT likes, dislikes FROM posts WHERE id = ?", postID).Scan(&likes, &dislikes)
+	if err != nil {
+		log.Println("Failed to fetch updated counts:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch updated counts"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Post liked",
+		"likes":    likes,
+		"dislikes": dislikes,
+	})
 }
 
 // DislikePost handles the disliking of a post
@@ -492,10 +504,10 @@ func DislikePost(c *gin.Context) {
 
 	var action string
 	err := config.DB.QueryRow(`
-		SELECT action 
-		FROM user_likes 
-		WHERE user_id = ? AND post_id = ? AND comment_id IS NULL
-	`, userID, postID).Scan(&action)
+        SELECT action 
+        FROM user_likes 
+        WHERE user_id = ? AND post_id = ? AND comment_id IS NULL
+    `, userID, postID).Scan(&action)
 	if err != nil && err != sql.ErrNoRows {
 		log.Println("Failed to check user like status:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
@@ -550,7 +562,19 @@ func DislikePost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Post disliked"})
+	var likes, dislikes int
+	err = tx.QueryRow("SELECT likes, dislikes FROM posts WHERE id = ?", postID).Scan(&likes, &dislikes)
+	if err != nil {
+		log.Println("Failed to fetch updated counts:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch updated counts"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Post disliked",
+		"likes":    likes,
+		"dislikes": dislikes,
+	})
 }
 
 // LikeComment handles the liking of a comment
@@ -565,10 +589,10 @@ func LikeComment(c *gin.Context) {
 
 	var action string
 	err := config.DB.QueryRow(`
-		SELECT action 
-		FROM user_likes 
-		WHERE user_id = ? AND comment_id = ? AND post_id IS NULL
-	`, userID, commentID).Scan(&action)
+        SELECT action 
+        FROM user_likes 
+        WHERE user_id = ? AND comment_id = ? AND post_id IS NULL
+    `, userID, commentID).Scan(&action)
 	if err != nil && err != sql.ErrNoRows {
 		log.Println("Failed to check user like status:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
@@ -623,7 +647,19 @@ func LikeComment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Comment liked"})
+	var likes, dislikes int
+	err = tx.QueryRow("SELECT likes, dislikes FROM comments WHERE id = ?", commentID).Scan(&likes, &dislikes)
+	if err != nil {
+		log.Println("Failed to fetch updated counts:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch updated counts"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Comment liked",
+		"likes":    likes,
+		"dislikes": dislikes,
+	})
 }
 
 // DislikeComment handles the disliking of a comment
@@ -638,10 +674,10 @@ func DislikeComment(c *gin.Context) {
 
 	var action string
 	err := config.DB.QueryRow(`
-		SELECT action 
-		FROM user_likes 
-		WHERE user_id = ? AND comment_id = ? AND post_id IS NULL
-	`, userID, commentID).Scan(&action)
+        SELECT action 
+        FROM user_likes 
+        WHERE user_id = ? AND comment_id = ? AND post_id IS NULL
+    `, userID, commentID).Scan(&action)
 	if err != nil && err != sql.ErrNoRows {
 		log.Println("Failed to check user like status:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process request"})
@@ -696,5 +732,17 @@ func DislikeComment(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Comment disliked"})
+	var likes, dislikes int
+	err = tx.QueryRow("SELECT likes, dislikes FROM comments WHERE id = ?", commentID).Scan(&likes, &dislikes)
+	if err != nil {
+		log.Println("Failed to fetch updated counts:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch updated counts"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message":  "Comment disliked",
+		"likes":    likes,
+		"dislikes": dislikes,
+	})
 }

@@ -22,14 +22,10 @@
             {{else}}
             {{end}}
             <br><br>
-            <p>Likes: {{.Post.Likes}} || Dislikes: {{.Post.Dislikes}}</p>
+            <p id="post-likes-dislikes">Likes: {{.Post.Likes}} || Dislikes: {{.Post.Dislikes}}</p>
             <p>Posted by User: {{.Post.Username}} on {{.CreatedAt}}</p>
-            <form action="/posts/{{.Post.ID}}/like" method="POST">
-                <button type="submit">Like</button>
-            </form>
-            <form action="/posts/{{.Post.ID}}/dislike" method="POST">
-                <button type="submit">Dislike</button>
-            </form>
+            <button onclick="likePost('{{.Post.ID}}')">Like</button>
+            <button onclick="dislikePost('{{.Post.ID}}')">Dislike</button>
         </div><br><br>
         <form action="/create-comment" method="POST">
             <textarea name="content" placeholder="Write a comment..." required></textarea>
@@ -41,13 +37,9 @@
             <div class="comment">
                 <p>{{.content}}</p>
                 <p>Posted by {{.username}} on {{.created_at}}</p>
-                <p>Likes: {{.likes}} | Dislikes: {{.dislikes}}</p>
-                <form action="/comments/{{.id}}/like" method="POST">
-                    <button type="submit">Like</button>
-                </form>
-                <form action="/comments/{{.id}}/dislike" method="POST">
-                    <button type="submit">Dislike</button>
-                </form>
+                <p id="comment-likes-dislikes-{{.id}}">Likes: {{.likes}} | Dislikes: {{.dislikes}}</p>
+                <button onclick="likeComment('{{.id}}')">Like</button>
+                <button onclick="dislikeComment('{{.id}}')">Dislike</button>
             </div>
             {{end}}
         </div>
