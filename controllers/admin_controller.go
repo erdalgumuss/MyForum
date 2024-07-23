@@ -368,7 +368,6 @@ func RejectModeratorRequest(c *gin.Context) {
 		RequestID int `form:"request_id" binding:"required"`
 	}
 
-	// Bind form data or JSON based on the content type
 	contentType := c.GetHeader("Content-Type")
 	if contentType == "application/json" {
 		if err := c.ShouldBindJSON(&input); err != nil {
