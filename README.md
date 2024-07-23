@@ -48,7 +48,7 @@ ve bazen 0dan olmayan, gin kullaniyo olunca uygulamasi zor olan<br/>
 bu da kalsin dedirten bir cok (ozellikle gercek bir forumda) olan<br/>
 nitelikler mevcut. Test, bilme, yapiyi anlama, kafada olusturma<br/>
 neyin ne oldugunu, ne kadar profesyonelce oldugunu gorme adina::<br/>
-sonradan yapilan fixlerin, *OZELLIKLE ESKI README LERE BAKILARAK*<br/>
+sonradan yapilan fixlerin, **OZELLIKLE ESKI README LERE BAKILARAK**<br/>
 buraya eklenmesi gerektigini dusunuyorum<br/>
 
 ## MyForum
