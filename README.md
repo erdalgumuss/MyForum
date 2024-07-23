@@ -8,6 +8,7 @@
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>
 <br>**JS:**<br/>
+**pop-up / like-dislike js main.js icerisinden ayrilabilir**<br/>
 konu olusturulduktan sonra, olusturulan konuya yonlendirmeli<br/>
 comment icinde oyle, **comment bunu suan go uzerinden yapiyo.**<br/>
 resim 20 mbden buyuk oldugunda RAW hatasi donduruyo alert dondurmeli<br/>

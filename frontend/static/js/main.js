@@ -1,5 +1,10 @@
-function fetchThreads() {
-    fetch('/getpost', {
+function fetchThreads(category = '') {
+    let url = '/getpost';
+    if (category) {
+        url += `?category=${encodeURIComponent(category)}`;
+    }
+
+    fetch(url, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'
@@ -37,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInfoContainer = document.getElementById('user-info');
     const userNameElement = document.getElementById('user-name');
     const userEmailElement = document.getElementById('user-email');
+    const filterButton = document.getElementById('filter-button');
+    const categoryFilter = document.getElementById('category-filter');
 
     const togglePopup = (popup, action) => {
         popup.style.display = action === 'open' ? 'block' : 'none';
@@ -206,6 +213,11 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchThreads();
     }
 
+    filterButton.addEventListener('click', () => {
+        const category = categoryFilter.value;
+        fetchThreads(category);
+    });
+
     logoutBtn.addEventListener('click', async () => {
         try {
             const response = await fetch('/logout', {
@@ -231,8 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-
-// LIKE DISLIKE 4 POSTS N THREADS STARTED 
+// LIKE DISLIKE 4 POSTS N THREADS STARTED
 
 function updateLikesDislikes(type, id, likes, dislikes) {
     const elementId = type === 'post' ? 'post-likes-dislikes' : `comment-likes-dislikes-${id}`;

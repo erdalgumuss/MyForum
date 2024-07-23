@@ -131,17 +131,43 @@ func CreatePost(c *gin.Context) {
 }
 
 func GetPosts(c *gin.Context) {
-	var posts []models.Post
+	category := c.Query("category")
 
-	// Query posts with sorting by created_at descending
-	rows, err := config.DB.Query("SELECT id, COALESCE(username, '') AS username, title, content, user_id, likes, dislikes, created_at FROM posts ORDER BY created_at DESC")
+	var rows *sql.Rows
+	var err error
+
+	if category != "" {
+		// Filter by category
+		categoryID, err := getCategoryIDByName(category)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		rows, err = config.DB.Query(`
+            SELECT p.id, COALESCE(p.username, '') AS username, p.title, p.content, p.user_id, p.likes, p.dislikes, p.created_at
+            FROM posts p
+            JOIN post_categories pc ON p.id = pc.post_id
+            WHERE pc.category_id = ?
+            ORDER BY p.created_at DESC
+        `, categoryID)
+	} else {
+		// Get all posts without filtering
+		rows, err = config.DB.Query(`
+            SELECT id, COALESCE(username, '') AS username, title, content, user_id, likes, dislikes, created_at
+            FROM posts
+            ORDER BY created_at DESC
+        `)
+	}
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch posts"})
 		return
 	}
 	defer rows.Close()
 
-	// Iterate over rows and scan into Post structs
+	var posts []models.Post
+
 	for rows.Next() {
 		var post models.Post
 		if err := rows.Scan(&post.ID, &post.Username, &post.Title, &post.Content, &post.UserID, &post.Likes, &post.Dislikes, &post.CreatedAt); err != nil {
@@ -151,13 +177,11 @@ func GetPosts(c *gin.Context) {
 		posts = append(posts, post)
 	}
 
-	// Handle any iteration errors
 	if err := rows.Err(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error iterating through posts"})
 		return
 	}
 
-	// Return posts as JSON response
 	c.JSON(http.StatusOK, posts)
 }
 
