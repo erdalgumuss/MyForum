@@ -1,9 +1,10 @@
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
-
+<br>
+<br>Bir cok islem 2 kez gerceklestiriliyor:
+<br>suan kullaniciyi db de 2 kez kaydediyor
 <br>Ana Sayfa ayarlansin
 <br>Filtreleme
-<br>User registered(created_at)
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>
 <br>**JS:**<br/>
@@ -37,6 +38,18 @@ handlers'dan kullaniliyor<br/>
 > liked/disliked<br>
 > EKLENSIN
 <br>
+
+# ACHIEVED / SUCCESSED :: 
+
+<br>User registered(created_at)
+<br>
+Foruma suan akla gelmeyen, duzenlenirken elde edilen<br/>
+ve bazen 0dan olmayan, gin kullaniyo olunca uygulamasi zor olan<br/>
+bu da kalsin dedirten bir cok (ozellikle gercek bir forumda) olan<br/>
+nitelikler mevcut. Test, bilme, yapiyi anlama, kafada olusturma<br/>
+neyin ne oldugunu, ne kadar profesyonelce oldugunu gorme adina::<br/>
+sonradan yapilan fixlerin, *OZELLIKLE ESKI README LERE BAKILARAK*<br/>
+buraya eklenmesi gerektigini dusunuyorum<br/>
 
 ## MyForum
 
@@ -112,6 +125,7 @@ SQL MÜQ bro
 <br>│       ├── 697b023b-64a5-49a0-8059-27b963453fb1.gif
 <br>│       ├── 6c0eb42899de8820e8e699d42285e107.jpg
 <br>│       ├── 9D798CBA-D927-433B-A11E-FAD76E4C96AF.JPEG
+<br>│       ├── media-1576532915.jpeg
 <br>│       ├── Screenshot from 2024-07-07 18-07-09.png
 <br>│       ├── WIN_20220912_02_15_52_Pro.jpg
 <br>│       ├── WIN_20220912_02_15_59_Pro.jpg
@@ -119,5 +133,5 @@ SQL MÜQ bro
 <br>│       ├── WIN_20231012_01_56_53_Pro.jpg
 <br>│       └── WIN_20231018_16_45_51_Pro.jpg
 <br>└── README.md
-<br>
-<br>15 directories, 62 files
+
+15 directories, 63 files
