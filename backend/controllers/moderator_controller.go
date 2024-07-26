@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"log"
+	"database/sql"
 	"net/http"
 
 	"MyForum/config"
@@ -86,13 +86,17 @@ func DeletePost(c *gin.Context) {
 func RequestModerator(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("user_id")
+	role := session.Get("role")
 
 	if userID == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	log.Printf("Requesting moderator status for user ID: %v\n", userID)
+	if role == "moderator" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User is already a moderator"})
+		return
+	}
 
 	_, err := config.DB.Exec("INSERT INTO moderator_requests (user_id, status) VALUES (?, 'pending')", userID)
 	if err != nil {
@@ -129,4 +133,45 @@ func UpdatePost(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true})
+}
+func AssignModerator(c *gin.Context) {
+	var input struct {
+		UserID int `json:"user_id" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var user models.User
+	query := "SELECT id, username, email, role FROM users WHERE id = ?"
+	err := config.DB.QueryRow(query, input.UserID).Scan(&user.ID, &user.Username, &user.Email, &user.Role)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		}
+		return
+	}
+
+	user.Role = sql.NullString{String: "moderator", Valid: true}
+
+	updateQuery := "UPDATE users SET role = ? WHERE id = ?"
+	_, err = config.DB.Exec(updateQuery, user.Role.String, user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+
+	// Update the role in the session
+	session := sessions.Default(c)
+	session.Set("role", user.Role.String)
+	if err := session.Save(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User assigned as moderator"})
 }

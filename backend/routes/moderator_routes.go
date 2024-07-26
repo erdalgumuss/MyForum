@@ -18,6 +18,7 @@ func ModeratorRoutes(r *gin.Engine) {
 	moderator := r.Group("/moderator")
 	moderator.Use(utils.ModeratorOnly()) // Moderatör oturum kontrolü
 	{
+		moderator.GET("/dashboard", controllers.ModeratorDashboard)
 		moderator.GET("/pending_posts", controllers.PendingPosts)
 		moderator.POST("/approve_post", controllers.ApprovePost)
 		moderator.POST("/reject_post", controllers.RejectPost)

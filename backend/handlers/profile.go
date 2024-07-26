@@ -14,7 +14,6 @@ import (
 )
 
 func GetUserProfile(c *gin.Context) {
-	// Oturum açmış kullanıcıyı al
 	userID, ok := c.Get("userID")
 	if !ok {
 		log.Println("Kullanıcı kimliği oturumda bulunamadı")
@@ -22,9 +21,8 @@ func GetUserProfile(c *gin.Context) {
 		return
 	}
 
-	/// Kullanıcı bilgilerini veritabanından al
 	var user models.User
-	err := config.DB.QueryRow("SELECT id, email, username, name, surname FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Email, &user.Username, &user.Name, &user.Surname)
+	err := config.DB.QueryRow("SELECT id, email, username, name, surname, role FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Email, &user.Username, &user.Name, &user.Surname, &user.Role)
 	if err != nil {
 		log.Println("Kullanıcı profilini getirme başarısız oldu:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Kullanıcı profilini getirme başarısız oldu"})
@@ -38,6 +36,7 @@ func GetUserProfile(c *gin.Context) {
 		"username": user.Username,
 		"name":     user.Name,
 		"surname":  user.Surname,
+		"role":     user.Role,
 	})
 }
 
