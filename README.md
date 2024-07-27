@@ -5,9 +5,9 @@ User comments on profile page (working but *title: undefined*)
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
 <br>
-<br>Bir cok islem 2 kez gerceklestiriliyor: --suan kullaniciyi db de 2 kez kaydediyor
-<br>Ana Sayfa ayarlansin
+<br>Bir cok islem 2 kez gerceklestiriliyor: **suan kullaniciyi db de 2 kez kaydediyor**
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
+<br>Ana Sayfa ayarlansin
 <br>
 <br>CSS problems --such as the structure dissappearing in the footer.<br/><br/>
 > Profilde::: <br><br>
@@ -17,12 +17,14 @@ User comments on profile page (working but *title: undefined*)
 > EKLENSIN
 <br>
 <br>
-<br>**JS:**<br/>
+
+**JS:**
+
 **pop-up / like-dislike js main.js icerisinden ayrilabilir**<br/>
 konu olusturulduktan sonra, olusturulan konuya yonlendirmeli<br/>
 comment icinde oyle, **comment bunu suan go uzerinden yapiyo.**<br/>
 resim 20 mbden buyuk oldugunda RAW hatasi donduruyo alert dondurmeli<br/>
-Konu olmadiginda error fetching hatasi donduruyo<br/>
+Konu olmadiginda error fetching hatasi donduruyo<br/><br/><br><br>
 
 # Tidy:
 forum_controller/getPosts ve forum_controller/getPosts -- `silindi`<br/>
@@ -32,12 +34,11 @@ handlers'dan kullaniliyor<br/>
 # Dublicating Stuff:
 GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
 createPost<br/>
-<br><br>
 
 # ACHIEVED / SUCCESSED :: 
 
 <br>~~User registered(created_at)~~
-<br>~~Filtering~~
+<br>~~Filtering~~<br/>
 <br>
 Foruma suan akla gelmeyen, duzenlenirken elde edilen<br/>
 ve bazen 0dan olmayan, gin kullaniyo olunca uygulamasi zor olan<br/>
@@ -51,7 +52,7 @@ buraya eklenmesi gerektigini dusunuyorum<br/>
 
 SQL MÜQ bro
 
-<br>MyForum/
+<br>**MyForum/**
 <br>├── backend
 <br>│   ├── config
 <br>│   │   └── config.go
