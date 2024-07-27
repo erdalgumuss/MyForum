@@ -33,7 +33,25 @@ likePost, dislikePost, likeComment, dislikeComment -- `controllersdan silindi`<b
 handlers'dan kullaniliyor<br/>
 # Dublicating Stuff:
 GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
-createPost<br/>
+createPost<br/><br/><br><br>
+
+# Future: #
+<br>
+
+**MANAGEMENT:**<br/>
+Admin paneli<br/>
+Moderator paneli<br/>
+**For Staff:**<br/>
+Post delete<br/>
+Comment delete<br/>
+**For User:**<br/>
+Mesaj edit<br/>
+Comment edit<br/>
+
+**FORUM:**<br/>
+Mesajlasma (PM/DM)
+<br>
+<br>
 
 # ACHIEVED / SUCCESSED :: 
 
