@@ -47,6 +47,8 @@ Comment delete<br/>
 **For User:**<br/>
 Mesaj edit<br/>
 Comment edit<br/>
+<br>
+Report/Bildir<br/>
 
 **FORUM:**<br/>
 Mesajlasma (PM/DM)
