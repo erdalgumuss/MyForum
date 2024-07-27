@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.location.pathname === '/profile.html') {
                     document.getElementById('profile-name').textContent = `${user.name} ${user.surname}`;
                     document.getElementById('profile-email').textContent = user.email;
-
+    
                     // Load user-specific content
                     loadUserPosts(user.id);
                     loadUserLikes(user.id);
@@ -151,13 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleUserUI(false);
         }
     };
-
+    
     const loadUserPosts = async (userId) => {
         try {
             const response = await fetch(`/user/${userId}/posts`);
             const posts = await response.json();
             const postsContainer = document.getElementById('posts-container');
-            postsContainer.innerHTML = ''; // Mevcut içeriği temizle
+            postsContainer.innerHTML = ''; // Clear current content
             posts.forEach(post => {
                 const postElement = document.createElement('div');
                 postElement.classList.add('post');
@@ -171,41 +171,59 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error loading user posts:', error);
         }
     };
-
+    
     const loadUserLikes = async (userId) => {
         try {
             const response = await fetch(`/user/${userId}/likes`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch user likes');
+            }
             const likes = await response.json();
-            const likesList = document.getElementById('likes-list');
-            likesList.innerHTML = ''; // Mevcut içeriği temizle
-            likes.forEach(like => {
-                const likeElement = document.createElement('li');
-                likeElement.textContent = like.postTitle;
-                likesList.appendChild(likeElement);
-            });
+            if (Array.isArray(likes)) {
+                const likesList = document.getElementById('likes-list');
+                likesList.innerHTML = ''; // Clear current content
+                likes.forEach(like => {
+                    const likeElement = document.createElement('li');
+                    if (like.post_id !== 0) {
+                        likeElement.textContent = `Liked post: ${like.post_title || `Post ID: ${like.post_id}`}`;
+                    } 
+                    likesList.appendChild(likeElement);
+                });
+            } else {
+                console.error('Unexpected response for likes:', likes);
+                alert('Unexpected response for likes');
+            }
         } catch (error) {
             console.error('Error loading user likes:', error);
         }
     };
-
+    
     const loadUserComments = async (userId) => {
         try {
             const response = await fetch(`/user/${userId}/comments`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch user comments');
+            }
             const comments = await response.json();
-            const commentsList = document.getElementById('comments-list');
-            commentsList.innerHTML = ''; // Mevcut içeriği temizle
-            comments.forEach(comment => {
-                const commentElement = document.createElement('li');
-                commentElement.innerHTML = `
-                    <strong>${comment.postTitle}</strong>: ${comment.content}
-                `;
-                commentsList.appendChild(commentElement);
-            });
+            if (Array.isArray(comments)) {
+                const commentsList = document.getElementById('comments-list');
+                commentsList.innerHTML = ''; // Clear current content
+                comments.forEach(comment => {
+                    const commentElement = document.createElement('li');
+                    commentElement.innerHTML = `
+                        <strong>${comment.post_title || `Post ID: ${comment.post_id}`}</strong>: ${comment.content}
+                    `;
+                    commentsList.appendChild(commentElement);
+                });
+            } else {
+                console.error('Unexpected response for comments:', comments);
+                alert('Unexpected response for comments');
+            }
         } catch (error) {
             console.error('Error loading user comments:', error);
         }
-    };
-
+    }; 
+    
     loadUser();
 
     // Fetch threads only if on the forum page
@@ -213,10 +231,12 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchThreads();
     }
 
-    filterButton.addEventListener('click', () => {
-        const category = categoryFilter.value;
-        fetchThreads(category);
-    });
+    if (filterButton) {
+        filterButton.addEventListener('click', () => {
+            const category = categoryFilter.value;
+            fetchThreads(category);
+        });
+    }
 
     logoutBtn.addEventListener('click', async () => {
         try {
