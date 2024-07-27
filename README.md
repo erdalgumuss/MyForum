@@ -1,6 +1,7 @@
 # Working On:
 User likes on profile page<br/>
-User comments on profile page (working but *title: undefined*)
+User comments on profile page (working but *title: undefined*)<br/>
+JS has both on profile.html(injected) AND main.js
 
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
