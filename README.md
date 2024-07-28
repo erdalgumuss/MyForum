@@ -1,7 +1,9 @@
 # Working On:
-User likes on profile page<br/>
-User comments on profile page (working but *title: undefined*)<br/>
-JS has both on profile.html(injected) AND main.js
+
+JS has both on profile.html(injected) AND main.js<br/>
+(like_dislike) seperated from main.js to like_dislike.js<br/>
+script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi gerekli ?
+
 
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
@@ -58,6 +60,8 @@ Mesajlasma (PM/DM)
 
 # ACHIEVED / SUCCESSED :: 
 
+<br>~~User likes on profile page~~
+<br>~~User comments on profile page~~
 <br>~~User registered(created_at)~~
 <br>~~Filtering~~<br/>
 <br>
