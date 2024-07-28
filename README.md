@@ -1,8 +1,6 @@
 # Working On:
 
-JS has both on profile.html(injected) AND main.js<br/>
-(like_dislike) seperated from main.js to like_dislike.js<br/>
-script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi gerekli ?
+
 
 
 # Yapilacaklar:
@@ -23,11 +21,11 @@ script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi ge
 
 **JS:**
 
-**pop-up / like-dislike js main.js icerisinden ayrilabilir**<br/>
+**pop-up / main.js icerisinden ayrilabilir**<br/>
 konu olusturulduktan sonra, olusturulan konuya yonlendirmeli<br/>
 comment icinde oyle, **comment bunu suan go uzerinden yapiyo.**<br/>
 resim 20 mbden buyuk oldugunda RAW hatasi donduruyo alert dondurmeli<br/>
-Konu olmadiginda error fetching hatasi donduruyo<br/><br/><br><br>
+Forumda konu olmadiginda error fetching hatasi donduruyo<br/><br/><br><br>
 
 # Tidy:
 forum_controller/getPosts ve forum_controller/getPosts -- `silindi`<br/>
@@ -37,6 +35,10 @@ handlers'dan kullaniliyor<br/>
 # Dublicating Stuff:
 GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
 createPost<br/><br/><br><br>
+
+# QUESTION:
+script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi gerekli ?<br/>
+{{base}} olayi incelenmeli, bi tik degisti, yorum satirina alinan var profile.html de<br/>
 
 # Future: #
 <br>
@@ -60,6 +62,8 @@ Mesajlasma (PM/DM)
 
 # ACHIEVED / SUCCESSED :: 
 
+<br>~~(like_dislike) seperated from main.js to like_dislike.js~~
+<br>~~JS has both on profile.html(injected) AND main.js~~
 <br>~~User likes on profile page~~
 <br>~~User comments on profile page~~
 <br>~~User registered(created_at)~~
