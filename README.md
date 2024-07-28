@@ -10,7 +10,15 @@ Register basarili ise alert versin.<br/><br/>
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>Ana Sayfa ayarlansin
 <br>
-<br>CSS problems --such as the structure dissappearing in the footer.<br/><br/>
+<br>
+
+# CSS problems:
+~~the structure dissappearing in the footer.~~<br/>
+body { min-height } ile ayarlandi<br/><br/>
+header'in ayrilmasi gerekiyo, belki iyilestirilebilir.<br/>
+base de (main-container) olayinin ayarlanmasi gerekiyo<br/>
+suan main-container da ki img headera da yansiyo
+<br/>
 > Profilde::: <br><br>
 > kullanici adi<br>
 > email<br>
