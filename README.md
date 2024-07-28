@@ -1,48 +1,65 @@
+# Working On:
+User likes on profile page<br/>
+User comments on profile page (working but *title: undefined*)<br/>
+JS has both on profile.html(injected) AND main.js
+
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
 <br>
-<br>Bir cok islem 2 kez gerceklestiriliyor:
-<br>suan kullaniciyi db de 2 kez kaydediyor
-<br>Ana Sayfa ayarlansin
-<br>Filtreleme
+<br>Bir cok islem 2 kez gerceklestiriliyor: **suan kullaniciyi db de 2 kez kaydediyor**
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
+<br>Ana Sayfa ayarlansin
 <br>
-<br>**JS:**<br/>
+<br>CSS problems --such as the structure dissappearing in the footer.<br/><br/>
+> Profilde::: <br><br>
+> kullanici adi<br>
+> email<br>
+> Limit ? kac tane gosterilecek ve `show more`<br>
+> EKLENSIN
+<br>
+<br>
+
+**JS:**
+
 **pop-up / like-dislike js main.js icerisinden ayrilabilir**<br/>
 konu olusturulduktan sonra, olusturulan konuya yonlendirmeli<br/>
 comment icinde oyle, **comment bunu suan go uzerinden yapiyo.**<br/>
 resim 20 mbden buyuk oldugunda RAW hatasi donduruyo alert dondurmeli<br/>
-Konu olmadiginda error fetching hatasi donduruyo<br/>
-
-# Dublicating Stuff:
-
-<br><br>
-GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
-createPost<br/>
-<br><br>
+Konu olmadiginda error fetching hatasi donduruyo<br/><br/><br><br>
 
 # Tidy:
 forum_controller/getPosts ve forum_controller/getPosts -- `silindi`<br/>
 modes/topic.go ihtiyac var mi ? -- `yorum satirina alindi`<br/>
 likePost, dislikePost, likeComment, dislikeComment -- `controllersdan silindi`<br/>
 handlers'dan kullaniliyor<br/>
-<br><br>
+# Dublicating Stuff:
+GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
+createPost<br/><br/><br><br>
 
-# Might improve:
-<br>CSS problems --such as the structure dissappearing in the footer.<br><br>
-<br><br><br><br>
+# Future: #
+<br>
 
-> Profilde::: <br><br>
-> kullanici adi<br>
-> email<br>
-> yorumlar<br>
-> liked/disliked<br>
-> EKLENSIN
+**MANAGEMENT:**<br/>
+Admin paneli<br/>
+Moderator paneli<br/>
+**For Staff:**<br/>
+Post delete<br/>
+Comment delete<br/>
+**For User:**<br/>
+Mesaj edit<br/>
+Comment edit<br/>
+<br>
+Report/Bildir<br/>
+
+**FORUM:**<br/>
+Mesajlasma (PM/DM)
+<br>
 <br>
 
 # ACHIEVED / SUCCESSED :: 
 
-<br>User registered(created_at)
+<br>~~User registered(created_at)~~
+<br>~~Filtering~~<br/>
 <br>
 Foruma suan akla gelmeyen, duzenlenirken elde edilen<br/>
 ve bazen 0dan olmayan, gin kullaniyo olunca uygulamasi zor olan<br/>
@@ -56,7 +73,7 @@ buraya eklenmesi gerektigini dusunuyorum<br/>
 
 SQL MÜQ bro
 
-<br>MyForum/
+<br>**MyForum/**
 <br>├── backend
 <br>│   ├── config
 <br>│   │   └── config.go
