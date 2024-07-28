@@ -1,16 +1,24 @@
 # Working On:
-User likes on profile page<br/>
-User comments on profile page (working but *title: undefined*)<br/>
-JS has both on profile.html(injected) AND main.js
+
+
+
 
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
-<br>
+Register basarili ise alert versin.<br/><br/>
 <br>Bir cok islem 2 kez gerceklestiriliyor: **suan kullaniciyi db de 2 kez kaydediyor**
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>Ana Sayfa ayarlansin
 <br>
-<br>CSS problems --such as the structure dissappearing in the footer.<br/><br/>
+<br>
+
+# CSS problems:
+~~the structure dissappearing in the footer.~~<br/>
+body { min-height } ile ayarlandi<br/><br/>
+header'in ayrilmasi gerekiyo, belki iyilestirilebilir.<br/>
+base de (main-container) olayinin ayarlanmasi gerekiyo<br/>
+suan main-container da ki img headera da yansiyo
+<br/>
 > Profilde::: <br><br>
 > kullanici adi<br>
 > email<br>
@@ -21,11 +29,11 @@ JS has both on profile.html(injected) AND main.js
 
 **JS:**
 
-**pop-up / like-dislike js main.js icerisinden ayrilabilir**<br/>
+**pop-up / main.js icerisinden ayrilabilir**<br/>
 konu olusturulduktan sonra, olusturulan konuya yonlendirmeli<br/>
 comment icinde oyle, **comment bunu suan go uzerinden yapiyo.**<br/>
 resim 20 mbden buyuk oldugunda RAW hatasi donduruyo alert dondurmeli<br/>
-Konu olmadiginda error fetching hatasi donduruyo<br/><br/><br><br>
+Forumda konu olmadiginda error fetching hatasi donduruyo<br/><br/><br><br>
 
 # Tidy:
 forum_controller/getPosts ve forum_controller/getPosts -- `silindi`<br/>
@@ -35,6 +43,11 @@ handlers'dan kullaniliyor<br/>
 # Dublicating Stuff:
 GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
 createPost<br/><br/><br><br>
+logout dublicating in auth_controller and auth.go<br/>
+
+# QUESTION:
+script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi gerekli ?<br/>
+{{base}} olayi incelenmeli, bi tik degisti, yorum satirina alinan var profile.html de<br/>
 
 # Future: #
 <br>
@@ -58,6 +71,10 @@ Mesajlasma (PM/DM)
 
 # ACHIEVED / SUCCESSED :: 
 
+<br>~~(like_dislike) seperated from main.js to like_dislike.js~~
+<br>~~JS has both on profile.html(injected) AND main.js~~
+<br>~~User likes on profile page~~
+<br>~~User comments on profile page~~
 <br>~~User registered(created_at)~~
 <br>~~Filtering~~<br/>
 <br>

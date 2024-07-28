@@ -17,8 +17,8 @@ func ProfileRoutes(router *gin.Engine) {
 		// protected.GET("/profile", handlers.ShowProfilePage)
 		protected.GET("/profile", handlers.ProfileView)
 		protected.GET("/user/:id/posts", handlers.GetUserPosts)
-		//r.GET("/user/:id/likes", handlers.GetUserLikes)
-		//r.GET("/user/:id/comments", handlers.GetUserComments)
+		protected.GET("/user/:id/likes", handlers.GetUserLikes)
+		protected.GET("/user/:id/comments", handlers.GetUserComments)
 
 		// router.PUT("/profile", utils.AuthMiddleware(), handlers.ProfileUpdate)
 		// router.POST("/profile/change-password", utils.AuthMiddleware(), handlers.ChangePassword)

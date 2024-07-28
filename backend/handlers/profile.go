@@ -107,33 +107,88 @@ func GetUserPosts(c *gin.Context) {
 	c.JSON(http.StatusOK, posts)
 }
 
-/*func GetUserComments(c *gin.Context) {
-	userID := c.Param("id")
-	var comments []models.Comment
-
-	err := config.DB.Select(&comments, "SELECT * FROM comments WHERE user_id = ?", userID)
-	if err != nil {
-		log.Println("Error fetching user comments:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user comments"})
+func GetUserComments(c *gin.Context) {
+	userID, ok := c.Get("userID")
+	if !ok {
+		log.Println("User ID not found in session")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
+	}
+
+	var comments []models.Comment
+	rows, err := config.DB.Query(`
+		SELECT comments.id, comments.content, comments.post_id, comments.user_id, comments.username, comments.likes, comments.dislikes, comments.created_at, comments.updated_at, posts.title
+		FROM comments
+		JOIN posts ON comments.post_id = posts.id
+		WHERE comments.user_id = ?`, userID)
+	if err != nil {
+		log.Println("Failed to retrieve user comments:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user comments"})
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var comment models.Comment
+		var postTitle string
+		err := rows.Scan(&comment.ID, &comment.Content, &comment.PostID, &comment.UserID, &comment.Username, &comment.Likes, &comment.Dislikes, &comment.CreatedAt, &comment.UpdatedAt, &postTitle)
+		if err != nil {
+			log.Println("Failed to scan user comments:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan user comments"})
+			return
+		}
+		comment.PostTitle = postTitle
+		comments = append(comments, comment)
 	}
 
 	c.JSON(http.StatusOK, comments)
-}*/
+}
 
-/*func GetUserLikes(c *gin.Context) {
-	userID := c.Param("id")
-	var likes []models.Like
-
-	err := config.DB.Select(&likes, "SELECT * FROM likes WHERE user_id = ?", userID)
-	if err != nil {
-		log.Println("Error fetching user likes:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user likes"})
+func GetUserLikes(c *gin.Context) {
+	userID, ok := c.Get("userID")
+	if !ok {
+		log.Println("User ID not found in session")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
+	var likes []models.Like
+	rows, err := config.DB.Query("SELECT id, user_id, post_id, comment_id, action, created_at, updated_at FROM user_likes WHERE user_id = ?", userID)
+	if err != nil {
+		log.Println("Failed to retrieve user likes:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user likes"})
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var like models.Like
+		err := rows.Scan(&like.ID, &like.UserID, &like.PostID, &like.CommentID, &like.Action, &like.CreatedAt, &like.UpdatedAt)
+		if err != nil {
+			log.Println("Failed to scan user likes:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan user likes"})
+			return
+		}
+		if like.PostID.Valid {
+			err = config.DB.QueryRow("SELECT title FROM posts WHERE id = ?", like.PostID.Int64).Scan(&like.PostTitle)
+			if err != nil {
+				log.Println("Failed to retrieve post title for like:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve post title for like"})
+				return
+			}
+		} else if like.CommentID.Valid {
+			err = config.DB.QueryRow("SELECT content FROM comments WHERE id = ?", like.CommentID.Int64).Scan(&like.PostTitle)
+			if err != nil {
+				log.Println("Failed to retrieve comment content for like:", err)
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve comment content for like"})
+				return
+			}
+		}
+		likes = append(likes, like)
+	}
+
 	c.JSON(http.StatusOK, likes)
-}*/
+}
 
 /*func ProfileUpdate(c *gin.Context) {
 	userID := utils.GetUserIDFromSession(c)
