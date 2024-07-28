@@ -5,7 +5,7 @@
 
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
-<br>
+Register basarili ise alert versin.<br/><br/>
 <br>Bir cok islem 2 kez gerceklestiriliyor: **suan kullaniciyi db de 2 kez kaydediyor**
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>Ana Sayfa ayarlansin
@@ -35,6 +35,7 @@ handlers'dan kullaniliyor<br/>
 # Dublicating Stuff:
 GetUserProfile in handlers/profile.go and in controller profile_controller.go<br/>
 createPost<br/><br/><br><br>
+logout dublicating in auth_controller and auth.go<br/>
 
 # QUESTION:
 script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi gerekli ?<br/>
