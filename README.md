@@ -28,8 +28,6 @@ suan main-container da ki img headera da yansiyo
 **JS:**
 
 **pop-up / main.js icerisinden ayrilabilir**<br/>
-konu olusturulduktan sonra, olusturulan konuya yonlendirmeli<br/>
-comment icinde oyle, **comment bunu suan go uzerinden yapiyo.**<br/>
 resim 20 mbden buyuk oldugunda RAW hatasi donduruyo alert dondurmeli<br/>
 Forumda konu olmadiginda error fetching hatasi donduruyo<br/><br/><br><br>
 
@@ -71,6 +69,8 @@ Mesajlasma (PM/DM)
 
 # ACHIEVED / SUCCESSED :: 
 
+<br>~~konu olusturulduktan sonra, olusturulan konuya yonlendirmeli~~
+<br>~~comment icinde oyle, **comment bunu suan go uzerinden yapiyo.**~~
 <br>~~Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo~~
 <br>~~Bir cok islem 2 kez gerceklestiriliyor: **suan kullaniciyi db de 2 kez kaydediyor**~~
 <br>~~(like_dislike) seperated from main.js to like_dislike.js~~

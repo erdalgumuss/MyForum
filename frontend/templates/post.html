@@ -27,7 +27,7 @@
             <button onclick="likePost('{{.Post.ID}}')">Like</button>
             <button onclick="dislikePost('{{.Post.ID}}')">Dislike</button>
         </div><br><br>
-        <form action="/create-comment" method="POST">
+        <form action="/create-comment" id="create-comment-form" method="POST">
             <textarea name="content" placeholder="Write a comment..." required></textarea>
             <input type="hidden" id="post_id" name="post_id" value="{{.Post.ID}}"><br/>
             <button type="submit">Post Comment</button>

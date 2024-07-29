@@ -7,12 +7,12 @@ import (
 	"MyForum/models"
 )
 
-func CreatePostWithPost(post models.Post) error {
+func CreatePostWithPost(post models.Post) (int, error) {
 	// Start a transaction
 	tx, err := config.DB.Begin()
 	if err != nil {
 		log.Println("Transaction start error:", err)
-		return err
+		return 0, err
 	}
 
 	// Insert into posts table
@@ -26,7 +26,7 @@ func CreatePostWithPost(post models.Post) error {
 	if err != nil {
 		log.Println("Error inserting post:", err)
 		tx.Rollback()
-		return err
+		return 0, err
 	}
 
 	// Insert categories into post_categories table
@@ -36,7 +36,7 @@ func CreatePostWithPost(post models.Post) error {
 		if err != nil {
 			log.Println("Error inserting post category:", err)
 			tx.Rollback()
-			return err
+			return 0, err
 		}
 	}
 
@@ -44,8 +44,8 @@ func CreatePostWithPost(post models.Post) error {
 	err = tx.Commit()
 	if err != nil {
 		log.Println("Transaction commit error:", err)
-		return err
+		return 0, err
 	}
 
-	return nil
+	return postID, nil
 }

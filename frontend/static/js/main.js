@@ -79,40 +79,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const handleFormSubmit = (form, url) => {
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
+        if (form) {
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData);
 
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        body: formData // Use formData directly for multipart/form-data
+                    });
 
-                const responseData = await response.json();
-                if (response.ok) {
-                    if (form.id === 'login-form') {
-                        localStorage.setItem('user', JSON.stringify(responseData));
-                        loadUser(); // Reload user information
-                        togglePopup(loginPopup, 'close');
-                    } else if (form.id === 'register-form') {
-                        togglePopup(registerPopup, 'close');
+                    if (response.ok) {
+                        const responseData = await response.json();
+                        if (form.id === 'login-form') {
+                            localStorage.setItem('user', JSON.stringify(responseData));
+                            loadUser(); // Reload user information
+                            togglePopup(loginPopup, 'close');
+                        } else if (form.id === 'register-form') {
+                            togglePopup(registerPopup, 'close');
+                        } else if (form.id === 'create-post-form') {
+                            // Redirect to the new post's URL
+                            window.location.href = `/posts/${responseData.postID}`;
+                        } else if (form.id === 'create-comment-form') {
+                            // Redirect to the post's URL with the new comment
+                            window.location.href = `/posts/${responseData.postID}`;
+                        }
+                    } else {
+                        const responseData = await response.json();
+                        alert(responseData.error);
                     }
-                } else {
-                    alert(responseData.error);
+                } catch (error) {
+                    console.error(`${form.id} request failed:`, error);
                 }
-            } catch (error) {
-                console.error(`${form.id} request failed:`, error);
-            }
-        });
+            });
+        }
     };
 
     handleFormSubmit(document.getElementById('login-form'), '/login');
     handleFormSubmit(document.getElementById('register-form'), '/register');
+    handleFormSubmit(document.getElementById('create-post-form'), '/create-post');
+    handleFormSubmit(document.getElementById('create-comment-form'), '/create-comment');
 
     const toggleUserUI = (isLoggedIn) => {
         loginBtn.style.display = isLoggedIn ? 'none' : 'inline';
@@ -139,11 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.location.pathname === '/profile.html') {
                     document.getElementById('profile-name').textContent = `${user.name} ${user.surname}`;
                     document.getElementById('profile-email').textContent = user.email;
-    
-                    // Load user-specific content
-                    loadUserPosts(user.id);
-                    loadUserLikes(user.id);
-                    loadUserComments(user.id);
                 }
             } else {
                 toggleUserUI(false);
@@ -153,79 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleUserUI(false);
         }
     };
-    
-    const loadUserPosts = async (userId) => {
-        try {
-            const response = await fetch(`/user/${userId}/posts`);
-            const posts = await response.json();
-            const postsContainer = document.getElementById('posts-container');
-            postsContainer.innerHTML = ''; // Clear current content
-            posts.forEach(post => {
-                const postElement = document.createElement('div');
-                postElement.classList.add('post');
-                postElement.innerHTML = `
-                    <h4>${post.title}</h4>
-                    <p>${post.content}</p>
-                `;
-                postsContainer.appendChild(postElement);
-            });
-        } catch (error) {
-            console.error('Error loading user posts:', error);
-        }
-    };
-    
-    const loadUserLikes = async (userId) => {
-        try {
-            const response = await fetch(`/user/${userId}/likes`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch user likes');
-            }
-            const likes = await response.json();
-            if (Array.isArray(likes)) {
-                const likesList = document.getElementById('likes-list');
-                likesList.innerHTML = ''; // Clear current content
-                likes.forEach(like => {
-                    const likeElement = document.createElement('li');
-                    if (like.post_id !== 0) {
-                        likeElement.textContent = `Liked post: ${like.post_title || `Post ID: ${like.post_id}`}`;
-                    } 
-                    likesList.appendChild(likeElement);
-                });
-            } else {
-                console.error('Unexpected response for likes:', likes);
-                alert('Unexpected response for likes');
-            }
-        } catch (error) {
-            console.error('Error loading user likes:', error);
-        }
-    };
-    
-    const loadUserComments = async (userId) => {
-        try {
-            const response = await fetch(`/user/${userId}/comments`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch user comments');
-            }
-            const comments = await response.json();
-            if (Array.isArray(comments)) {
-                const commentsList = document.getElementById('comments-list');
-                commentsList.innerHTML = ''; // Clear current content
-                comments.forEach(comment => {
-                    const commentElement = document.createElement('li');
-                    commentElement.innerHTML = `
-                        <strong>${comment.post_title || `Post ID: ${comment.post_id}`}</strong>: ${comment.content}
-                    `;
-                    commentsList.appendChild(commentElement);
-                });
-            } else {
-                console.error('Unexpected response for comments:', comments);
-                alert('Unexpected response for comments');
-            }
-        } catch (error) {
-            console.error('Error loading user comments:', error);
-        }
-    }; 
-    
+
     loadUser();
 
     // Fetch threads only if on the forum page

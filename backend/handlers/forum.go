@@ -121,13 +121,15 @@ func CreatePost(c *gin.Context) {
 	log.Printf("Form data bound successfully: %+v\n", input)
 
 	// Call controller function
-	if err := controllers.CreatePostWithPost(input); err != nil {
+	postID, err := controllers.CreatePostWithPost(input)
+	if err != nil {
 		log.Println("Error creating post:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not create post"})
 		return
-	} else {
-		c.Redirect(http.StatusFound, "/forum")
 	}
+
+	// Return the postID in the response
+	c.JSON(http.StatusOK, gin.H{"postID": postID})
 }
 
 func GetPosts(c *gin.Context) {
@@ -348,11 +350,10 @@ func CreateComment(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment"})
 		return
-	} else {
-		c.Redirect(http.StatusSeeOther, "/posts/"+postIDStr)
 	}
 
-	//c.JSON(http.StatusOK, gin.H{"message": "Comment created successfully"})
+	// Return the postID in the response
+	c.JSON(http.StatusOK, gin.H{"postID": postID})
 }
 
 func GetComments(c *gin.Context) {
