@@ -6,7 +6,6 @@
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
 Register basarili ise alert versin.<br/><br/>
-<br>Bir cok islem 2 kez gerceklestiriliyor: **suan kullaniciyi db de 2 kez kaydediyor**
 <br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>Ana Sayfa ayarlansin
 <br>
@@ -48,6 +47,7 @@ logout dublicating in auth_controller and auth.go<br/>
 # QUESTION:
 script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi gerekli ?<br/>
 {{base}} olayi incelenmeli, bi tik degisti, yorum satirina alinan var profile.html de<br/>
+**script src MAIN.js 4 htmlde de vardi. suan sadece base de var. herseyi 2 kez yapma cozuldu, dublicate register cozuldu**
 
 # Future: #
 <br>
@@ -71,6 +71,7 @@ Mesajlasma (PM/DM)
 
 # ACHIEVED / SUCCESSED :: 
 
+<br>~~Bir cok islem 2 kez gerceklestiriliyor: **suan kullaniciyi db de 2 kez kaydediyor**~~
 <br>~~(like_dislike) seperated from main.js to like_dislike.js~~
 <br>~~JS has both on profile.html(injected) AND main.js~~
 <br>~~User likes on profile page~~
@@ -112,6 +113,7 @@ SQL MÜQ bro
 <br>│   ├── models
 <br>│   │   ├── category.go
 <br>│   │   ├── comment.go
+<br>│   │   ├── like.go
 <br>│   │   ├── post.go
 <br>│   │   ├── profile.go
 <br>│   │   ├── session.go
@@ -136,10 +138,16 @@ SQL MÜQ bro
 <br>│   │   │   ├── default-profile.png
 <br>│   │   │   ├── hells.jpg
 <br>│   │   │   ├── never_stop_riding.jpg
+<br>│   │   │   ├── resized.jpg
+<br>│   │   │   ├── soa2.jpg
+<br>│   │   │   ├── soa3.jpg
 <br>│   │   │   ├── soa.jpg
-<br>│   │   │   └── Sonny_Barger.jpg
+<br>│   │   │   ├── Sonny_Barger.jpg
+<br>│   │   │   └── wp.jpg
 <br>│   │   └── js
-<br>│   │       └── main.js
+<br>│   │       ├── like_dislike.js
+<br>│   │       ├── main.js
+<br>│   │       └── profile.js
 <br>│   ├── templates
 <br>│   │   ├── admin_dashboard.html
 <br>│   │   ├── admin.html
@@ -169,4 +177,4 @@ SQL MÜQ bro
 <br>│       └── WIN_20231018_16_45_51_Pro.jpg
 <br>└── README.md
 
-15 directories, 63 files
+15 directories, 70 files

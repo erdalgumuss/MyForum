@@ -1,3 +1,5 @@
+alert("called");
+
 function fetchThreads(category = '') {
     let url = '/getpost';
     if (category) {
