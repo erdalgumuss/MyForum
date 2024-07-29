@@ -42,6 +42,7 @@ createPost<br/><br/><br><br>
 logout dublicating in auth_controller and auth.go<br/>
 
 # QUESTION:
+Controllers neden gerekli ? cagirmasi mi gerekli yoksa ikincil func. mi gerekli ?<br/>
 script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi gerekli ?<br/>
 {{base}} olayi incelenmeli, bi tik degisti, yorum satirina alinan var profile.html de<br/>
 **script src MAIN.js 4 htmlde de vardi. suan sadece base de var. herseyi 2 kez yapma cozuldu, dublicate register cozuldu**<br><br>
