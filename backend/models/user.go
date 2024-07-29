@@ -44,7 +44,7 @@ type User struct {
 	GoogleID   JSONNullString `json:"googleid"`
 	GitHubID   sql.NullInt64  `json:"githubid"`
 	FacebookID JSONNullString `json:"facebookid"`
-	Role       string         `json:"role"`
+	Role       sql.NullString `json:"role"` // Ensure Role is defined as sql.NullString
 }
 
 type GoogleUserInfo struct {

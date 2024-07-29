@@ -14,31 +14,29 @@ import (
 
 // GetUserProfile retrieves user profile details
 func GetUserProfile(c *gin.Context) {
-	// Get the logged-in user ID from the context
 	userID, ok := c.Get("userID")
 	if !ok {
-		log.Println("User ID not found in session")
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		log.Println("Kullanıcı kimliği oturumda bulunamadı")
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Yetkisiz"})
 		return
 	}
 
-	// Fetch user information from the database
 	var user models.User
-	err := config.DB.QueryRow("SELECT id, email, username, name, surname FROM users WHERE id = ?", userID).Scan(
-		&user.ID, &user.Email, &user.Username, &user.Name, &user.Surname)
+	err := config.DB.QueryRow("SELECT id, email, username, name, surname, role FROM users WHERE id = ?", userID).Scan(&user.ID, &user.Email, &user.Username, &user.Name, &user.Surname, &user.Role)
 	if err != nil {
-		log.Println("Failed to fetch user profile:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch user profile"})
+		log.Println("Kullanıcı profilini getirme başarısız oldu:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Kullanıcı profilini getirme başarısız oldu"})
 		return
 	}
 
-	log.Println("User profile fetched successfully, User ID:", user.ID)
+	log.Println("Kullanıcı profili getirildi, Kullanıcı ID:", user.ID)
 	c.JSON(http.StatusOK, gin.H{
 		"id":       user.ID,
 		"email":    user.Email,
-		"username": user.Username.String,
-		"name":     user.Name.String,
-		"surname":  user.Surname.String,
+		"username": user.Username,
+		"name":     user.Name,
+		"surname":  user.Surname,
+		"role":     user.Role,
 	})
 }
 

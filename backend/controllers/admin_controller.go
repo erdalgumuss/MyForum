@@ -187,21 +187,17 @@ func ListUsers(c *gin.Context) {
 
 	c.JSON(http.StatusOK, users)
 }
-
 func EditUser(c *gin.Context) {
 	var input struct {
 		UserID int    `json:"user_id" binding:"required"`
 		Role   string `json:"role" binding:"required"`
-		// Add other editable fields here
 	}
 
-	// Bind JSON input to struct
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Fetch the user from database
 	var user models.User
 	query := "SELECT id, username, email, role FROM users WHERE id = ?"
 	err := config.DB.QueryRow(query, input.UserID).Scan(&user.ID, &user.Username, &user.Email, &user.Role)
@@ -214,62 +210,27 @@ func EditUser(c *gin.Context) {
 		return
 	}
 
-	// Update the user's role
-	user.Role = input.Role
+	user.Role = sql.NullString{String: input.Role, Valid: true}
 
-	// Execute update query
 	updateQuery := "UPDATE users SET role = ? WHERE id = ?"
-	_, err = config.DB.Exec(updateQuery, user.Role, user.ID)
+	_, err = config.DB.Exec(updateQuery, user.Role.String, user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		return
 	}
 
-	// Respond with success message
+	// Update the role in the session if the user is editing their own role
+	session := sessions.Default(c)
+	if session.Get("user_id") == input.UserID {
+		session.Set("role", user.Role.String)
+		if err := session.Save(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save session"})
+			return
+		}
+	}
+
 	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
 }
-
-// admin_controller.go
-
-func AssignModerator(c *gin.Context) {
-	var input struct {
-		UserID int `json:"user_id" binding:"required"`
-	}
-
-	// Bind JSON input to struct
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	// Fetch the user from database
-	var user models.User
-	query := "SELECT id, username, email, role FROM users WHERE id = ?"
-	err := config.DB.QueryRow(query, input.UserID).Scan(&user.ID, &user.Username, &user.Email, &user.Role)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		}
-		return
-	}
-
-	// Update the user's role to "moderator"
-	user.Role = "moderator"
-
-	// Execute update query
-	updateQuery := "UPDATE users SET role = ? WHERE id = ?"
-	_, err = config.DB.Exec(updateQuery, user.Role, user.ID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		return
-	}
-
-	// Respond with success message
-	c.JSON(http.StatusOK, gin.H{"message": "User assigned as moderator"})
-}
-
 func EditUserRole(c *gin.Context) {
 	var input struct {
 		UserID int    `form:"user_id" binding:"required"`
@@ -330,7 +291,6 @@ func ListModeratorRequests(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "admin_dashboard.html", gin.H{"requests": requests})
 }
-
 func ApproveModeratorRequest(c *gin.Context) {
 	var input struct {
 		RequestID int `form:"request_id" binding:"required"`
@@ -368,7 +328,6 @@ func RejectModeratorRequest(c *gin.Context) {
 		RequestID int `form:"request_id" binding:"required"`
 	}
 
-	// Bind form data or JSON based on the content type
 	contentType := c.GetHeader("Content-Type")
 	if contentType == "application/json" {
 		if err := c.ShouldBindJSON(&input); err != nil {

@@ -33,28 +33,28 @@ func AuthMiddleware() gin.HandlerFunc {
 			} else {
 				log.Println("Error querying session:", err)
 			}
-			// End session
 			logoutUser(c, sessionToken)
 			return
 		}
 
 		if session.ExpiresAt.Before(time.Now()) {
 			log.Println("Session expired for token:", sessionToken)
-			// End session
-			logoutUser(c, sessionToken)
-			return
-		}
-
-		var username string
-		err = config.DB.QueryRow("SELECT username FROM users WHERE id = ?", session.UserID).Scan(&username)
-		if err != nil {
-			log.Println("Failed to fetch username:", err)
 			logoutUser(c, sessionToken)
 			return
 		}
 
 		c.Set("userID", session.UserID)
-		c.Set("username", username)
+
+		// Retrieve the user's role and set it in the context
+		var role string
+		err = config.DB.QueryRow("SELECT role FROM users WHERE id = ?", session.UserID).Scan(&role)
+		if err != nil {
+			log.Println("Failed to retrieve user role:", err)
+			logoutUser(c, sessionToken)
+			return
+		}
+		c.Set("role", role)
+
 		c.Next()
 	}
 }
@@ -87,7 +87,9 @@ func ModeratorOnly() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
 		role := session.Get("role")
+		log.Printf("Checking role in ModeratorOnly middleware: %v", role) // Additional logging
 		if role == nil || role != "moderator" {
+			log.Println("Access denied. Role:", role)
 			c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 			c.Abort()
 			return
@@ -170,4 +172,13 @@ func ContainsForbiddenContent(content string) bool {
 		}
 	}
 	return false
+}
+
+func SetUserSession(c *gin.Context, user models.User) {
+	session := sessions.Default(c)
+	session.Set("user_id", user.ID)
+	session.Set("role", user.Role.String)
+	if err := session.Save(); err != nil {
+		log.Println("Failed to save session:", err)
+	}
 }

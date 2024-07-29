@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"MyForum/controllers"
 	"MyForum/handlers"
 	"MyForum/utils"
 
@@ -11,7 +12,7 @@ func ProfileRoutes(router *gin.Engine) {
 	protected := router.Group("/")
 	protected.Use(utils.AuthMiddleware())
 	{
-		protected.GET("/models/user", handlers.GetUserProfile) // Yeni endpoint
+		protected.GET("/models/user", controllers.GetUserProfile) // Yeni endpoint
 
 		// protected.GET("/profile", handlers.ShowProfilePage)
 		protected.GET("/profile", handlers.ProfileView)
@@ -22,7 +23,7 @@ func ProfileRoutes(router *gin.Engine) {
 		// router.PUT("/profile", utils.AuthMiddleware(), handlers.ProfileUpdate)
 		// router.POST("/profile/change-password", utils.AuthMiddleware(), handlers.ChangePassword)
 
-		protected.GET("/profile/", handlers.GetUserProfile)
+		protected.GET("/profile/", controllers.GetUserProfile)
 		// router.POST("/profile/change-password", utils.AuthRequired(), controllers.ChangePassword)
 	}
 }
