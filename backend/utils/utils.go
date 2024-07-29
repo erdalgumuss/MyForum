@@ -20,9 +20,9 @@ func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionToken, err := c.Cookie("session_token")
 		if err != nil {
-			log.Println("No session token found, redirecting to home")
-			c.Redirect(http.StatusFound, "/")
-			c.Abort()
+			//log.Println("No session token found, redirecting to home")
+			//c.Redirect(http.StatusFound, "/")
+			//c.Abort()
 			return
 		}
 

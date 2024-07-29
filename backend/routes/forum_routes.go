@@ -12,7 +12,6 @@ func ForumRoutes(r *gin.Engine) {
 	authorized := r.Group("/")
 	authorized.Use(utils.AuthMiddleware())
 	{
-		authorized.GET("/create-post", handlers.RenderCreatePostPage)
 		authorized.POST("/create-post", handlers.CreatePost)
 		authorized.POST("/create-comment", handlers.CreateComment)
 		authorized.POST("/posts/:id/like", handlers.LikePost)
@@ -20,6 +19,9 @@ func ForumRoutes(r *gin.Engine) {
 		authorized.POST("/comments/:id/like", handlers.LikeComment)
 		authorized.POST("/comments/:id/dislike", handlers.DislikeComment)
 	}
+
+	// oturum dogrulamasi js alertinde --go ile--
+	authorized.GET("/create-post", handlers.RenderCreatePostPage)
 
 	// Oturum doğrulaması gerektirmeyen rotalar
 	r.GET("/getpost", handlers.GetPosts)

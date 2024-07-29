@@ -1,14 +1,8 @@
 # Working On:
 
-
-
-
 # Yapilacaklar:
-<br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
-<br/>
-<br>Ana Sayfa ayarlansin
-<br>
-<br>
+
+<br>Ana Sayfa ayarlansin<br/>
 
 # CSS problems:
 ~~the structure dissappearing in the footer.~~<br/>
