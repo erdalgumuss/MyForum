@@ -337,14 +337,14 @@ func CreateComment(c *gin.Context) {
 		return
 	}
 
-	stmt, err := config.DB.Prepare("INSERT INTO comments (content, user_id, post_id, username, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)")
+	stmt, err := config.DB.Prepare("INSERT INTO comments (content, user_id, post_id, username, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
 		return
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(content, userID, postID, username)
+	_, err = stmt.Exec(content, userID, postID, username, time.Now(), time.Now())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment"})
 		return

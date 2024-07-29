@@ -6,7 +6,6 @@
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
 Register basarili ise alert versin.<br/><br/>
-<br>Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo
 <br>Ana Sayfa ayarlansin
 <br>
 <br>
@@ -47,7 +46,8 @@ logout dublicating in auth_controller and auth.go<br/>
 # QUESTION:
 script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi gerekli ?<br/>
 {{base}} olayi incelenmeli, bi tik degisti, yorum satirina alinan var profile.html de<br/>
-**script src MAIN.js 4 htmlde de vardi. suan sadece base de var. herseyi 2 kez yapma cozuldu, dublicate register cozuldu**
+**script src MAIN.js 4 htmlde de vardi. suan sadece base de var. herseyi 2 kez yapma cozuldu, dublicate register cozuldu**<br><br>
+CreatePost/GetPost ve CreateComment/GetComment func. time code is different but working fine ???<br/>
 
 # Future: #
 <br>
@@ -71,6 +71,7 @@ Mesajlasma (PM/DM)
 
 # ACHIEVED / SUCCESSED :: 
 
+<br>~~Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo~~
 <br>~~Bir cok islem 2 kez gerceklestiriliyor: **suan kullaniciyi db de 2 kez kaydediyor**~~
 <br>~~(like_dislike) seperated from main.js to like_dislike.js~~
 <br>~~JS has both on profile.html(injected) AND main.js~~
