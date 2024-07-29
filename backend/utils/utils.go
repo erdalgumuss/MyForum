@@ -45,7 +45,6 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		c.Set("userID", session.UserID)
 
-		// Retrieve the user's role and set it in the context
 		var role string
 		err = config.DB.QueryRow("SELECT role FROM users WHERE id = ?", session.UserID).Scan(&role)
 		if err != nil {
@@ -54,6 +53,8 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		c.Set("role", role)
+
+		log.Printf("Session found for token: %v, UserID: %v, Role: %v", sessionToken, session.UserID, role)
 
 		c.Next()
 	}
@@ -129,7 +130,7 @@ func CreateSession(userID int) (string, error) {
 	sessionToken := uuid.NewString()
 	createdAt := time.Now().Format("2006-01-02 15:04:05")
 	updatedAt := createdAt
-	expiresAt := time.Now().Add(24 * time.Hour).Format("2006-01-02 15:04:05") // 24 saat sonra
+	expiresAt := time.Now().Add(24 * time.Hour).Format("2006-01-02 15:04:05")
 
 	insertSessionQuery := `
     INSERT INTO sessions (user_id, token, created_at, updated_at, expires_at)
@@ -177,8 +178,19 @@ func ContainsForbiddenContent(content string) bool {
 func SetUserSession(c *gin.Context, user models.User) {
 	session := sessions.Default(c)
 	session.Set("user_id", user.ID)
-	session.Set("role", user.Role.String)
+	session.Set("username", user.Username)
+	session.Set("role", user.Role)
 	if err := session.Save(); err != nil {
 		log.Println("Failed to save session:", err)
 	}
+}
+
+// InvalidateOldSessions invalidates all existing sessions for a given user ID
+func InvalidateOldSessions(userID int) error {
+	_, err := config.DB.Exec("DELETE FROM sessions WHERE user_id = ?", userID)
+	if err != nil {
+		log.Printf("Failed to invalidate sessions for user ID %d: %v", userID, err)
+		return err
+	}
+	return nil
 }

@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <title>Profil</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .centered-image {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .centered-image img {
+            max-width: 50%;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
 
@@ -11,11 +24,12 @@
         {{ block "content" . }}{{ end }}
     </main>
 
-    <main id="content">
-Galeri
+    <main id="content" class="centered-image">
+        <img src="/static/images/WIN_20210513_15_12_05_Pro (2).jpg" alt="Profile Image">
     </main>
-
 
     <footer>
         <p>&copy; 2024 FIXIT FORUM</p>
     </footer>
+</body>
+</html>

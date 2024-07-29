@@ -3,6 +3,7 @@ package controllers
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 
 	"MyForum/config"
@@ -94,7 +95,6 @@ func Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Logout successful"})
 }
 
-// Login handles user login.
 func Login(c *gin.Context) {
 	var input struct {
 		Email    string `json:"email"`
@@ -122,12 +122,23 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	// Invalidate old sessions
+	err = utils.InvalidateOldSessions(user.ID)
+	if err != nil {
+		log.Println("Error invalidating old sessions:", err)
+	}
+
+	// Create a new session
 	sessionToken, err := utils.CreateSession(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
 		return
 	}
 	c.SetCookie("session_token", sessionToken, 3600, "/", "localhost", false, true)
+
+	// Set user session with role
+	utils.SetUserSession(c, *user) // Dereference the pointer here
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 		"user": gin.H{
@@ -143,6 +154,9 @@ func Login(c *gin.Context) {
 
 func getUserByEmail(email string) (*models.User, error) {
 	var user models.User
-	err := config.DB.QueryRow("SELECT id, password FROM users WHERE email = ?", email).Scan(&user.ID, &user.Password)
-	return &user, err
+	err := config.DB.QueryRow("SELECT id, email, username, name, surname, role, password FROM users WHERE email = ?", email).Scan(&user.ID, &user.Email, &user.Username, &user.Name, &user.Surname, &user.Role, &user.Password)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

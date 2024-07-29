@@ -10,44 +10,45 @@
         {{ block "content" . }}{{ end }}
     </main>
 
-<main id="content">
-    <h2>Kullanıcı Profili</h2>
-    <div id="profile-info">
-        <div id="profile-picture">
-            <img src="/static/images/default-profile.png" alt="Profil Resmi">
+    <main id="content">
+        <h2>Kullanıcı Profili</h2>
+        <div id="profile-info">
+            <div id="profile-picture">
+                <img src="/static/images/default-profile.png" alt="Profil Resmi">
+            </div>
+            <div id="profile-details">
+                <h3 id="user-name">Kullanıcı Adı</h3>
+                <p id="user-email">email@example.com</p>
+            </div>
         </div>
-        <div id="profile-details">
-            <h3 id="user-name">Kullanıcı Adı</h3>
-            <p id="user-email">email@example.com</p>
+
+        <div id="user-posts">
+            <h3>Paylaşılan Gönderiler</h3>
+            <div id="posts-container"></div>
         </div>
-    </div>
 
-    <div id="user-posts">
-        <h3>Paylaşılan Gönderiler</h3>
-        <div id="posts-container"></div>
-    </div>
+        <div id="user-comments">
+            <h3>Yorumlar</h3>
+            <div id="comments-container"></div>
+        </div>
 
-    <div id="user-comments">
-        <h3>Yorumlar</h3>
-        <div id="comments-container"></div>
-    </div>
+        <div id="user-likes">
+            <h3>Beğeniler</h3>
+            <h4>Konular:</h4>
+            <ul id="topics-likes-list"></ul>
+            <h4>Yorumlar:</h4>
+            <ul id="comments-likes-list"></ul>
+        </div>
 
-    <div id="user-likes">
-        <h3>Beğeniler</h3>
-        <h4>Konular:</h4>
-        <ul id="topics-likes-list"></ul>
-        <h4>Yorumlar:</h4>
-        <ul id="comments-likes-list"></ul>
-    </div>
-
-    <div id="moderator-request">
-        <button id="request-moderator-btn">Moderatörlük İsteğinde Bulun</button>
-    </div>
-</main>
-<br><br><br><br><br><br><br>
-<footer>
-    <p>&copy; 2024 Forum Sitesi</p>
-</footer>
-<script src="/static/js/profile.js"></script>
+        <div id="moderator-request">
+            <button id="request-moderator-btn">Moderatörlük İsteğinde Bulun</button>
+        </div>
+        <div id="user-role" style="display: none;"></div>
+    </main>
+    <br><br><br><br><br><br><br>
+    <footer>
+        <p>&copy; 2024 Forum Sitesi</p>
+    </footer>
+    <script src="/static/js/profile.js"></script>
 </body>
 </html>

@@ -1,93 +1,107 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM fully loaded and parsed - profile.js");
+    const logoutBtn = document.getElementById('logout-btn');
     const userNameElement = document.getElementById('user-name');
     const userEmailElement = document.getElementById('user-email');
+    const profilePictureElement = document.querySelector('#profile-picture img');
     const postsContainer = document.getElementById('posts-container');
-    const topicsLikesList = document.getElementById('topics-likes-list');
-    const commentsLikesList = document.getElementById('comments-likes-list');
-    const commentsContainer = document.getElementById('comments-container');
+    const likesList = document.getElementById('topics-likes-list');
+    const commentsList = document.getElementById('comments-likes-list');
     const requestModeratorBtn = document.getElementById('request-moderator-btn');
+    const moderatorRequestDiv = document.getElementById('moderator-request');
+    const userRoleElement = document.getElementById('user-role');
+
+    const toggleUserUI = (isLoggedIn) => {
+        logoutBtn.style.display = isLoggedIn ? 'inline' : 'none';
+    };
 
     const loadUser = async () => {
-        console.log("Loading user profile - profile.js");
         try {
             const response = await fetch('/models/user');
             const user = await response.json();
+            console.log('User data:', user); // Debug log
             if (response.ok) {
-                console.log("User profile loaded - profile.js", user);
-
+                toggleUserUI(true);
                 userNameElement.textContent = `${user.name} ${user.surname}`;
                 userEmailElement.textContent = user.email;
+                profilePictureElement.src = user.profilePicture || '/static/images/default-profile.png';
+                userRoleElement.textContent = user.role; // Set user role in hidden div
 
+                // Check if the user is a moderator and redirect if necessary
+                if (user.role === 'moderator') {
+                    requestModeratorBtn.textContent = "Go to Moderator Dashboard";
+                    requestModeratorBtn.onclick = () => {
+                        window.location.href = '/moderator/dashboard';
+                    };
+                } else {
+                    requestModeratorBtn.textContent = "Request Moderator";
+                    requestModeratorBtn.onclick = requestModerator;
+                }
+
+                // Load user's posts, likes, and comments
                 loadUserPosts(user.id);
                 loadUserLikes(user.id);
                 loadUserComments(user.id);
             } else {
-                console.error('Failed to load user profile - profile.js');
+                toggleUserUI(false);
             }
         } catch (error) {
-            console.error('Error loading user - profile.js:', error);
+            console.error('Error loading user:', error);
+            toggleUserUI(false);
         }
     };
 
     const loadUserPosts = async (userId) => {
-        console.log("Loading user posts - profile.js");
         try {
             const response = await fetch(`/user/${userId}/posts`);
             const posts = await response.json();
-            postsContainer.innerHTML = '';
+            postsContainer.innerHTML = ''; // Clear existing content
             posts.forEach(post => {
                 const postElement = document.createElement('div');
                 postElement.classList.add('post');
-                postElement.innerHTML = `<h4><a href="/posts/${post.id}">${post.title}</a></h4><p>${post.content}</p>`;
+                postElement.innerHTML = `
+                    <h4>${post.title}</h4>
+                    <p>${post.content}</p>
+                `;
                 postsContainer.appendChild(postElement);
             });
         } catch (error) {
-            console.error('Error loading user posts - profile.js:', error);
+            console.error('Error loading user posts:', error);
         }
     };
 
     const loadUserLikes = async (userId) => {
-        console.log("Loading user likes - profile.js");
         try {
             const response = await fetch(`/user/${userId}/likes`);
             const likes = await response.json();
-            topicsLikesList.innerHTML = '';
-            commentsLikesList.innerHTML = '';
+            likesList.innerHTML = ''; // Clear existing content
             likes.forEach(like => {
                 const likeElement = document.createElement('li');
-                if (like.post_id && like.post_id.Valid) {
-                    likeElement.innerHTML = `<a href="/posts/${like.post_id.Int64}">${like.post_title}</a>`;
-                    topicsLikesList.appendChild(likeElement);
-                } else if (like.comment_id && like.comment_id.Valid) {
-                    likeElement.innerHTML = `<a href="/posts/${like.comment_id.Int64}">${like.post_title}</a>`;
-                    commentsLikesList.appendChild(likeElement);
-                }
+                likeElement.textContent = like.postTitle;
+                likesList.appendChild(likeElement);
             });
         } catch (error) {
-            console.error('Error loading user likes - profile.js:', error);
+            console.error('Error loading user likes:', error);
         }
     };
 
     const loadUserComments = async (userId) => {
-        console.log("Loading user comments - profile.js");
         try {
             const response = await fetch(`/user/${userId}/comments`);
             const comments = await response.json();
-            commentsContainer.innerHTML = '';
+            commentsList.innerHTML = ''; // Clear existing content
             comments.forEach(comment => {
-                const commentElement = document.createElement('div');
-                commentElement.classList.add('comment');
-                commentElement.innerHTML = `<h4><a href="/posts/${comment.post_id}">${comment.PostTitle}</a></h4><p>${comment.content}</p>`;
-                commentsContainer.appendChild(commentElement);
+                const commentElement = document.createElement('li');
+                commentElement.innerHTML = `
+                    <strong>${comment.postTitle}</strong>: ${comment.content}
+                `;
+                commentsList.appendChild(commentElement);
             });
         } catch (error) {
-            console.error('Error loading user comments - profile.js:', error);
+            console.error('Error loading user comments:', error);
         }
     };
 
     const requestModerator = async () => {
-        console.log("Requesting moderator - profile.js");
         try {
             const response = await fetch('/user/request_moderator', {
                 method: 'POST',
@@ -98,16 +112,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 alert('Moderator request submitted successfully.');
-                requestModeratorBtn.style.display = 'none';
+                document.getElementById('moderator-request').style.display = 'none';
             } else {
                 alert('Failed to submit moderator request.');
             }
         } catch (error) {
-            console.error('Error submitting moderator request - profile.js:', error);
+            console.error('Error submitting moderator request:', error);
         }
     };
 
-    requestModeratorBtn.addEventListener('click', requestModerator);
-
     loadUser();
+
+    logoutBtn.addEventListener('click', async (event) => {
+        event.preventDefault();
+        try {
+            const response = await fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                const responseData = await response.json();
+                alert(responseData.message);
+                localStorage.removeItem('user');
+                toggleUserUI(false);
+                window.location.href = "/";  // Logout işleminden sonra anasayfaya yönlendir
+            } else {
+                const responseData = await response.json();
+                alert(responseData.error);
+            }
+        } catch (error) {
+            console.error('Logout request failed:', error);
+        }
+    });
 });

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 
 	"MyForum/config"
@@ -84,22 +85,25 @@ func DeletePost(c *gin.Context) {
 }
 
 func RequestModerator(c *gin.Context) {
-	session := sessions.Default(c)
-	userID := session.Get("user_id")
-	role := session.Get("role")
-
-	if userID == nil {
+	userID, exists := c.Get("userID")
+	if !exists {
+		log.Println("User ID not found in context")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	if role == "moderator" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User is already a moderator"})
+	role, exists := c.Get("role")
+	if !exists || role == "moderator" || role == "admin" {
+		log.Printf("Invalid role: %v, or role not found in context", role)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User is already a moderator or admin"})
 		return
 	}
 
+	log.Printf("User ID: %v is requesting to be a moderator", userID)
+
 	_, err := config.DB.Exec("INSERT INTO moderator_requests (user_id, status) VALUES (?, 'pending')", userID)
 	if err != nil {
+		log.Println("Failed to submit moderator request:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to submit request"})
 		return
 	}

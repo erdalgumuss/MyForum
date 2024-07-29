@@ -8,6 +8,7 @@ import (
 
 	"MyForum/config"
 	"MyForum/models"
+	"MyForum/utils"
 
 	"github.com/gin-contrib/sessions"
 
@@ -141,7 +142,20 @@ func ProcessAdminLogin(c *gin.Context) {
 		return
 	}
 
+	// Invalidate any existing sessions for this admin
+	err = utils.InvalidateOldSessions(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to invalidate old sessions"})
+		return
+	}
+
 	// Admin successfully authenticated
+	sessionToken, err := utils.CreateSession(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create session"})
+		return
+	}
+
 	session := sessions.Default(c)
 	session.Set("user_id", user.ID)
 	session.Set("username", user.Username)
@@ -151,6 +165,7 @@ func ProcessAdminLogin(c *gin.Context) {
 		return
 	}
 
+	c.SetCookie("session_token", sessionToken, 3600, "/", "localhost", false, true)
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Admin login successful",
 		"user": gin.H{
