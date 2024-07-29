@@ -1,0 +1,51 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>{{.Post.Title}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <favic icon href="/static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+    <main id="content">
+        
+        {{ block "content" . }}{{ end }}
+
+    </main>
+    
+    <main id="content">
+
+    <form action="/create-post" method="POST" enctype="multipart/form-data">
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" required><br>
+    
+        <label for="categories">Category:</label><br>
+        <select id="categories" name="categories" multiple required>
+            <option value="Tamir">Tamir</option>
+            <option value="Bakim Onarim">Bakim Onarim</option>
+            <option value="Yedek Parca">Yedek Parca</option>
+        </select><br>
+    
+        <label for="content">Content:</label><br>
+        <textarea id="content" name="content" rows="4" cols="50" required></textarea><br>
+    
+        <label for="image">Upload Image:</label><br>
+        <input type="file" id="image" name="image"><br><br>
+    
+        <button type="submit">Create Post</button>
+    </form>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2024 FIXIT FORUM</p>
+    </footer>
+    <!--script src="/static/js/main.js"></script-->
+ 
+</body>
+</html>

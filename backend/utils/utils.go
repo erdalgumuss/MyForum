@@ -34,16 +34,29 @@ func AuthMiddleware() gin.HandlerFunc {
 				log.Println("Error querying session:", err)
 			}
 			logoutUser(c, sessionToken)
+			c.Abort()
 			return
 		}
 
 		if session.ExpiresAt.Before(time.Now()) {
 			log.Println("Session expired for token:", sessionToken)
 			logoutUser(c, sessionToken)
+			c.Abort()
 			return
 		}
 
 		c.Set("userID", session.UserID)
+
+		// Retrieve the user's username and set it in the context
+		var username string
+		err = config.DB.QueryRow("SELECT username FROM users WHERE id = ?", session.UserID).Scan(&username)
+		if err != nil {
+			log.Println("Failed to retrieve user username:", err)
+			logoutUser(c, sessionToken)
+			c.Abort()
+			return
+		}
+		c.Set("username", username)
 
 		// Retrieve the user's role and set it in the context
 		var role string
@@ -51,6 +64,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		if err != nil {
 			log.Println("Failed to retrieve user role:", err)
 			logoutUser(c, sessionToken)
+			c.Abort()
 			return
 		}
 		c.Set("role", role)
