@@ -28,7 +28,6 @@ suan main-container da ki img headera da yansiyo<br/>
 **JS:**
 
 **pop-up / main.js icerisinden ayrilabilir**<br/>
-resim 20 mbden buyuk oldugunda RAW hatasi donduruyo alert dondurmeli<br/>
 Forumda konu olmadiginda error fetching hatasi donduruyo<br/><br/><br><br>
 
 # Tidy:
