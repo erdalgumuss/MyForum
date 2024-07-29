@@ -15,7 +15,7 @@ Register basarili ise alert versin.<br/><br/>
 body { min-height } ile ayarlandi<br/><br/>
 header'in ayrilmasi gerekiyo, belki iyilestirilebilir.<br/>
 base de (main-container) olayinin ayarlanmasi gerekiyo<br/>
-suan main-container da ki img headera da yansiyo
+suan main-container da ki img headera da yansiyo<br/>
 <br/>
 > Profilde::: <br><br>
 > kullanici adi<br>
@@ -155,6 +155,7 @@ SQL MÜQ bro
 <br>│   │   ├── admin.html
 <br>│   │   ├── base.html
 <br>│   │   ├── comment.html
+<br>│   │   ├── create_post.html
 <br>│   │   ├── edit_post.html
 <br>│   │   ├── forum.html
 <br>│   │   ├── gallery.html
@@ -179,4 +180,4 @@ SQL MÜQ bro
 <br>│       └── WIN_20231018_16_45_51_Pro.jpg
 <br>└── README.md
 
-15 directories, 70 files
+15 directories, 71 files
