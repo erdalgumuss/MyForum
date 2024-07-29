@@ -83,12 +83,15 @@ document.addEventListener('DOMContentLoaded', () => {
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 const formData = new FormData(form);
-                const data = Object.fromEntries(formData);
+                const data = Object.fromEntries(formData.entries());
 
                 try {
                     const response = await fetch(url, {
                         method: 'POST',
-                        body: formData // Use formData directly for multipart/form-data
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
                     });
 
                     if (response.ok) {
@@ -98,13 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             loadUser(); // Reload user information
                             togglePopup(loginPopup, 'close');
                         } else if (form.id === 'register-form') {
+                            alert("Registered successfully");
                             togglePopup(registerPopup, 'close');
-                        } else if (form.id === 'create-post-form') {
-                            // Redirect to the new post's URL
-                            window.location.href = `/posts/${responseData.postID}`;
-                        } else if (form.id === 'create-comment-form') {
-                            // Redirect to the post's URL with the new comment
-                            window.location.href = `/posts/${responseData.postID}`;
                         }
                     } else {
                         const responseData = await response.json();
@@ -119,8 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     handleFormSubmit(document.getElementById('login-form'), '/login');
     handleFormSubmit(document.getElementById('register-form'), '/register');
-    handleFormSubmit(document.getElementById('create-post-form'), '/create-post');
-    handleFormSubmit(document.getElementById('create-comment-form'), '/create-comment');
 
     const toggleUserUI = (isLoggedIn) => {
         loginBtn.style.display = isLoggedIn ? 'none' : 'inline';

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"time"
 
 	"MyForum/config"
 	"MyForum/models"
@@ -69,8 +70,11 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	// Set the CreatedAt field to the current time
+	currentTime := time.Now().Format("2006-01-02 15:04:05")
+
 	// Insert user into database
-	stmt, err := config.DB.Prepare("INSERT INTO users(username, name, surname, email, password) VALUES(?, ?, ?, ?, ?)")
+	stmt, err := config.DB.Prepare("INSERT INTO users(username, name, surname, email, password, created_at) VALUES(?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to prepare statement"})
 		fmt.Println("Failed to prepare statement:", err)
@@ -78,7 +82,7 @@ func Register(c *gin.Context) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(input.Username, input.Name, input.Surname, input.Email, hashedPassword)
+	_, err = stmt.Exec(input.Username, input.Name, input.Surname, input.Email, hashedPassword, currentTime)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		fmt.Println("Failed to create user:", err)

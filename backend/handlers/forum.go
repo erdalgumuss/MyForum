@@ -346,7 +346,7 @@ func CreateComment(c *gin.Context) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(content, userID, postID, username, time.Now(), time.Now())
+	_, err = stmt.Exec(content, userID, postID, username, time.Now().Format("2006-01-02 15:04:05"), time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment"})
 		return

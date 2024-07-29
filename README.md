@@ -5,7 +5,7 @@
 
 # Yapilacaklar:
 <br>Guest iken konu olusturmuyo ama hata dondurmuyo, login pop up'ini acsin
-Register basarili ise alert versin.<br/><br/>
+<br/>
 <br>Ana Sayfa ayarlansin
 <br>
 <br>
@@ -47,6 +47,12 @@ script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi ge
 {{base}} olayi incelenmeli, bi tik degisti, yorum satirina alinan var profile.html de<br/>
 **script src MAIN.js 4 htmlde de vardi. suan sadece base de var. herseyi 2 kez yapma cozuldu, dublicate register cozuldu**<br><br>
 CreatePost/GetPost ve CreateComment/GetComment func. time code is different but working fine ???<br/>
+
+# Note #
+Saving time for Turkey (i guess) not UTC. and the form : 2024-07-20 15:17:46 (Year-Month-Day - Clock)<br/>
+comment ve postta time.Now ve degisik 2-3 farkli format kullaniliyo. duzgun bi sekilde almasina ragmen terminsalde 00000 gorunuyo<br/>
+register icin de boyle fakat konu olusturma normal fakat kusuratli yani 2024-07-29 13:23:39.58706561 +0300 +03 m=+46.487987987<br/>
+yorum icinse bise yok
 
 # Future: #
 <br>
