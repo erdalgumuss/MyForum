@@ -45,7 +45,9 @@ CreatePost/GetPost ve CreateComment/GetComment func. time code is different but 
 Saving time for Turkey (i guess) not UTC. and the form : 2024-07-20 15:17:46 (Year-Month-Day - Clock)<br/>
 comment ve postta time.Now ve degisik 2-3 farkli format kullaniliyo. duzgun bi sekilde almasina ragmen terminsalde 00000 gorunuyo<br/>
 register icin de boyle fakat konu olusturma normal fakat kusuratli yani 2024-07-29 13:23:39.58706561 +0300 +03 m=+46.487987987<br/>
-yorum icinse bise yok<br/>
+yorum icinse bise yok<br/><br><br>
+
+login4postFIXED commitinde utils/middleware ve routes/forum_routes login/auth check icin degisiklik oldu. Post atarken logged in degilse js dondursun diye hata dondurme go dan --yorum satirina alindi/protecteddan cikarildi<br/>
 
 ## JS ##
 forum.js seperated CUZ its either not registering or not creating post properly (no title-no content)<br/>
@@ -94,6 +96,9 @@ Mesajlasma (PM/DM)
 
 # ACHIEVED / SUCCESSED :: 
 
+<br>~~resim 20 mbden buyuk oldugunda RAW hatasi donduruyo alert dondurmeli~~
+<br>~~Guest iken konu olusturmuyo ama hata dondurmuyo, dondursun~~
+<br>~~Register basarili ise alert versin.~~
 <br>~~konu olusturulduktan sonra, olusturulan konuya yonlendirmeli~~
 <br>~~comment icinde oyle, **comment bunu suan go uzerinden yapiyo.**~~
 <br>~~Post/Comment (created_at) birbirinden farkli, yanlis gosteriyo~~
