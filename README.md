@@ -52,8 +52,33 @@ CreatePost/GetPost ve CreateComment/GetComment func. time code is different but 
 Saving time for Turkey (i guess) not UTC. and the form : 2024-07-20 15:17:46 (Year-Month-Day - Clock)<br/>
 comment ve postta time.Now ve degisik 2-3 farkli format kullaniliyo. duzgun bi sekilde almasina ragmen terminsalde 00000 gorunuyo<br/>
 register icin de boyle fakat konu olusturma normal fakat kusuratli yani 2024-07-29 13:23:39.58706561 +0300 +03 m=+46.487987987<br/>
-yorum icinse bise yok
+yorum icinse bise yok<br/>
 
+## JS ##
+forum.js seperated CUZ its either not registering or not creating post properly (no title-no content)<br/>
+Working for both: on main.js<br/>
+> const data = Object.fromEntries(formData);
+> const data = Object.fromEntries(formData.entries());
+<br>
+main.js: working with: <br/>
+
+> const response = await fetch(url, {
+>     method: 'POST',
+>     headers: {
+>         'Content-Type': 'application/json',
+>     },
+>     body: JSON.stringify(data)
+> });
+
+<br>
+not gonna work with: <br/>
+
+> const response = await fetch(url, {
+>     method: 'POST',
+>     body: formData // Use formData directly for multipart/form-data
+> });
+
+<br>
 # Future: #
 <br>
 

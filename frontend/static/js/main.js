@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 const formData = new FormData(form);
-                const data = Object.fromEntries(formData.entries());
+                const data = Object.fromEntries(formData);
 
                 try {
                     const response = await fetch(url, {
