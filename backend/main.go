@@ -48,8 +48,6 @@ func main() {
 	routes.AuthRoutes(r)
 	routes.ForumRoutes(r)
 	routes.ProfileRoutes(r)
-	routes.AdminRoutes(r)
-	routes.ModeratorRoutes(r)
 
 	// Start the server
 	r.Run(":8080")
