@@ -1,0 +1,78 @@
+<main id="content">
+    {{ block "content" . }}{{ end }}
+</main>
+<main id="content">
+    <h2>Inbox</h2>
+    <div id="messages-container">
+        <!-- Messages will be dynamically inserted here by the script -->
+    </div>
+    
+    <h2>Send Message</h2>
+    <form id="send-message-form">
+        <label for="receiver-username">Recipient Username:</label>
+        <input type="text" id="receiver-username" name="receiver_username" required>
+        <label for="content">Message:</label>
+        <textarea id="content" name="content" rows="4" cols="50" required></textarea>
+        <button type="submit">Send</button>
+    </form>
+    </main>
+    <script>
+    function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            const options = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false  // Use 24-hour format
+            };
+            return date.toLocaleDateString('en-GB', options).replace(',', '');
+        }
+        async function loadMessages() {
+            try {
+                const response = await fetch('/get-messages');
+                const messages = await response.json();
+                const container = document.getElementById('messages-container');
+                container.innerHTML = '';
+                messages.forEach(message => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.innerHTML = `
+                        <p>
+                            <strong>From:</strong> ${message.sender_username} <br>
+                            <strong>Message:</strong> ${message.content} <br>
+                            <strong>Sent at:</strong> ${formatTimestamp(message.created_at)}
+                        </p>`;
+                    container.appendChild(messageDiv);
+                });
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+    
+        document.getElementById('send-message-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const response = await fetch('/send-message', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    loadMessages();  // Refresh messages after sending
+                } else {
+                    alert(result.error);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+            }
+        });
+    
+        document.addEventListener('DOMContentLoaded', loadMessages);
+    </script>
+<footer>
+    <p>&copy; 2024 Forum Sitesi</p>
+</footer>

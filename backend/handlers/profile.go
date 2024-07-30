@@ -13,6 +13,75 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func SendMessages(c *gin.Context) {
+	senderID, ok := utils.GetUserIDFromSession(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	receiverUsername := c.PostForm("receiver_username")
+	content := c.PostForm("content")
+
+	var receiverID int
+	err := config.DB.QueryRow("SELECT id FROM users WHERE username = ?", receiverUsername).Scan(&receiverID)
+	if err != nil {
+		log.Println("Failed to find user by username:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Recipient username not found"})
+		return
+	}
+
+	_, err = config.DB.Exec("INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)", senderID, receiverID, content)
+	if err != nil {
+		log.Println("Failed to send message:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send message"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Message sent successfully"})
+}
+
+func GetMessages(c *gin.Context) {
+	userID, ok := utils.GetUserIDFromSession(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	rows, err := config.DB.Query(`
+		SELECT messages.id, users1.username AS sender_username, users2.username AS receiver_username, messages.content, messages.created_at
+		FROM messages
+		JOIN users AS users1 ON messages.sender_id = users1.id
+		JOIN users AS users2 ON messages.receiver_id = users2.id
+		WHERE messages.receiver_id = ?`, userID)
+	if err != nil {
+		log.Println("Failed to get messages:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get messages"})
+		return
+	}
+	defer rows.Close()
+
+	var messages []gin.H
+	for rows.Next() {
+		var id int
+		var senderUsername, receiverUsername, content, createdAt string
+		if err := rows.Scan(&id, &senderUsername, &receiverUsername, &content, &createdAt); err != nil {
+			log.Println("Failed to scan message:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to scan message"})
+			return
+		}
+		messages = append(messages, gin.H{
+			"id":                id,
+			"sender_username":   senderUsername,
+			"receiver_username": receiverUsername,
+			"content":           content,
+			"created_at":        createdAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, messages)
+}
+
 func GetUserProfile(c *gin.Context) {
 	userID, ok := c.Get("userID")
 	if !ok {

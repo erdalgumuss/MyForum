@@ -35,6 +35,14 @@ func ProcessLogin(c *gin.Context) {
 	controllers.Login(c)
 }
 
+// DM -- PM //
+// ShowInbox renders the inbox.html template
+func ShowInbox(c *gin.Context) {
+	c.HTML(http.StatusOK, "inbox.html", gin.H{})
+}
+
+// DM -- PM //
+
 func ShowRegisterPage(c *gin.Context) {
 	c.HTML(http.StatusOK, "register.html", nil)
 }
@@ -281,4 +289,5 @@ func FacebookCallback(c *gin.Context) {
 	c.SetCookie("session_token", sessionToken, 3600*24, "/", "localhost", false, true)
 	c.Redirect(http.StatusFound, "/")
 }
+
 //

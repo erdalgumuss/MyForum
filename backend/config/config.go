@@ -208,6 +208,23 @@ func createTables() error {
 		return fmt.Errorf("failed to create sessions table: %v", err)
 	}
 
+	createMessagesTable := `
+	CREATE TABLE IF NOT EXISTS messages (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		sender_id INTEGER NOT NULL,
+		sender_username TEXT NOT NULL,
+		receiver_id INTEGER NOT NULL,
+		content TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (sender_id) REFERENCES users(id),
+		FOREIGN KEY (receiver_id) REFERENCES users(id)
+	);`
+	_, err = DB.Exec(createMessagesTable)
+	if err != nil {
+		log.Fatalf("Failed to create messages table: %v", err)
+		return fmt.Errorf("failed to create messages table: %v", err)
+	}
+
 	// Try to add the column if it doesn't exist
 	alterTableQuery := `ALTER TABLE sessions ADD COLUMN expires_at DATETIME;`
 	_, err = DB.Exec(alterTableQuery)

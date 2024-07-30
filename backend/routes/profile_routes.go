@@ -20,6 +20,10 @@ func ProfileRoutes(router *gin.Engine) {
 		protected.GET("/user/:id/likes", handlers.GetUserLikes)
 		protected.GET("/user/:id/comments", handlers.GetUserComments)
 
+		protected.GET("/inbox", handlers.ShowInbox)
+		protected.GET("/get-messages", handlers.GetMessages)
+		protected.POST("/send-message", handlers.SendMessages)
+
 		// router.PUT("/profile", utils.AuthMiddleware(), handlers.ProfileUpdate)
 		// router.POST("/profile/change-password", utils.AuthMiddleware(), handlers.ChangePassword)
 
