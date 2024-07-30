@@ -47,9 +47,12 @@ comment ve postta time.Now ve degisik 2-3 farkli format kullaniliyo. duzgun bi s
 register icin de boyle fakat konu olusturma normal fakat kusuratli yani 2024-07-29 13:23:39.58706561 +0300 +03 m=+46.487987987<br/>
 yorum icinse bise yok<br/><br><br>
 
-login4postFIXED `1 parent 7bfb0e1 commit f6c5025` commitinde utils/middleware ve routes/forum_routes login/auth check icin degisiklik oldu. Post atarken logged in degilse js dondursun diye hata dondurme go dan --yorum satirina alindi/protecteddan cikarildi<br/>
+login4postFIXED `1 parent 7bfb0e1 commit f6c5025` commitinde utils/middleware ve routes/forum_routes login/auth check icin degisiklik oldu. Post atarken logged in degilse js dondursun diye hata dondurme go dan --yorum satirina alindi/protecteddan cikarildi<br/><br><br>
+
+
 
 ## JS ##
+
 forum.js seperated CUZ its either not registering or not creating post properly (no title-no content)<br/>
 Working for both: on main.js<br/>
 > const data = Object.fromEntries(formData);
@@ -74,7 +77,13 @@ not gonna work with: <br/>
 > });
 
 <br>
+
+`profileJSDONE 1 parent 73aba37 commit 282c958` commitinde profilde info bastirmak icin yorum satirina alinan ve yazilan yeni js kodlari mevcut.<br/>
+
+<br>
+
 # Future: #
+
 <br>
 
 **MANAGEMENT:**<br/>
