@@ -1,38 +1,3 @@
-alert("called");
-
-function fetchThreads(category = '') {
-    let url = '/getpost';
-    if (category) {
-        url += `?category=${encodeURIComponent(category)}`;
-    }
-
-    fetch(url, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to fetch threads');
-        }
-        return response.json();
-    })
-    .then(data => {
-        const threadsDiv = document.getElementById('threads');
-        threadsDiv.innerHTML = '';
-        data.forEach(thread => {
-            const threadDiv = document.createElement('div');
-            threadDiv.innerHTML = `<h2><a href="/posts/${thread.id}">${thread.title}</a></h2><p>${thread.content}</p>`;
-            threadsDiv.appendChild(threadDiv);
-        });
-    })
-    .catch(error => {
-        console.error('Error fetching threads:', error);
-        alert('Error fetching threads. Please try again later.'); // Display error to user
-    });
-}
-
 document.addEventListener('DOMContentLoaded', () => {
     const loginPopup = document.getElementById('login-popup');
     const registerPopup = document.getElementById('register-popup');
@@ -51,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const userInfoHeader = document.getElementById('user-info-header');
     const userUsernameHeaderElement = document.getElementById('user-username-header');
     const userEmailHeaderElement = document.getElementById('user-email-header');
+
+    // Define profileLink
+    const profileLink = document.getElementById('profile-link');
 
     const togglePopup = (popup, action) => {
         popup.style.display = action === 'open' ? 'block' : 'none';
@@ -127,11 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
         loginBtn.style.display = isLoggedIn ? 'none' : 'inline';
         registerBtn.style.display = isLoggedIn ? 'none' : 'inline';
         logoutBtn.style.display = isLoggedIn ? 'inline' : 'none';
-        //userInfoContainer.style.display = isLoggedIn ? 'inline' : 'none';
         userInfoHeader.style.display = isLoggedIn ? 'inline' : 'none'; // Updated line
 
         // Show or hide the profile link
-        const profileLink = document.getElementById('profile-link');
         if (profileLink) {
             profileLink.style.display = isLoggedIn ? 'inline' : 'none';
         }
@@ -140,20 +106,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadUser = async () => {
         try {
             const response = await fetch('/models/user');
+            if (!response.ok) {
+                throw new Error('Failed to fetch user data');
+            }
             const user = await response.json();
-            if (response.ok) {
-                toggleUserUI(true);
+            toggleUserUI(true);
+            if (userNameElement) {
                 userNameElement.textContent = `${user.name} ${user.surname}`;
+            }
+            if (userEmailElement) {
                 userEmailElement.textContent = user.email;
-                userUsernameHeaderElement.textContent = user.username; // Added to update the header
-                userEmailHeaderElement.textContent = user.email; // Added to update the header
-                // If on profile.html, update profile information
-                if (window.location.pathname === '/profile.html') {
-                    document.getElementById('profile-name').textContent = `${user.name} ${user.surname}`;
-                    document.getElementById('profile-email').textContent = user.email;
-                }
-            } else {
-                toggleUserUI(false);
+            }
+            if (userUsernameHeaderElement) {
+                userUsernameHeaderElement.textContent = user.username;
+            }
+            if (userEmailHeaderElement) {
+                userEmailHeaderElement.textContent = user.email;
+            }
+            if (window.location.pathname === '/profile.html') {
+                document.getElementById('profile-name').textContent = `${user.name} ${user.surname}`;
+                document.getElementById('profile-email').textContent = user.email;
             }
         } catch (error) {
             console.error('Error loading user:', error);

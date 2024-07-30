@@ -1,5 +1,39 @@
 alert("forum.js loaded");
 
+// Function to fetch and display threads
+function fetchThreads(category = '') {
+    let url = '/getpost';
+    if (category) {
+        url += `?category=${encodeURIComponent(category)}`;
+    }
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to fetch threads');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const threadsDiv = document.getElementById('threads');
+        threadsDiv.innerHTML = '';
+        data.forEach(thread => {
+            const threadDiv = document.createElement('div');
+            threadDiv.innerHTML = `<h2><a href="/posts/${thread.id}">${thread.title}</a></h2><p>${thread.content}</p>`;
+            threadsDiv.appendChild(threadDiv);
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching threads:', error);
+        alert('Error fetching threads. Please try again later.'); // Display error to user
+    });
+}
+
 const handleFormSubmit = (form, url) => {
     if (form) {
         form.addEventListener('submit', async (event) => {

@@ -320,3 +320,27 @@ button:hover {
 #profile-details h3, #profile-details p {
     margin: 5px 0;
 }
+
+.google-login-btn {
+    display: inline-block;
+    background: #6200EE;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 10px 20px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    width: 240px;
+}
+.google-login-btn img {
+    height: 20px;
+    width: 20px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+.google-login-btn:hover {
+    background: #3700B3;
+}
