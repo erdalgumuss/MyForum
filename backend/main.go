@@ -50,5 +50,9 @@ func main() {
 	routes.ProfileRoutes(r)
 
 	// Start the server
-	r.Run(":8080")
+	//r.Run(":8080")
+	err = r.RunTLS(":8080", "../certificate.pem", "../privatekey.pem")
+	if err != nil {
+		panic(err)
+	}
 }
