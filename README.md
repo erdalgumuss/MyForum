@@ -140,10 +140,8 @@ SQL MÜQ bro
 <br>│   ├── config
 <br>│   │   └── config.go
 <br>│   ├── controllers
-<br>│   │   ├── admin_controller.go
 <br>│   │   ├── auth_controller.go
 <br>│   │   ├── forum_controller.go
-<br>│   │   ├── moderator_controller.go
 <br>│   │   └── profile_controller.go
 <br>│   ├── DockerFile
 <br>│   ├── forum.db
@@ -164,13 +162,12 @@ SQL MÜQ bro
 <br>│   │   ├── topic.go
 <br>│   │   └── user.go
 <br>│   ├── routes
-<br>│   │   ├── admin_routes.go
 <br>│   │   ├── auth_routes.go
 <br>│   │   ├── forum_routes.go
-<br>│   │   ├── moderator_routes.go
 <br>│   │   └── profile_routes.go
 <br>│   └── utils
 <br>│       └── utils.go
+<br>├── certificate.pem
 <br>├── docker-compose.yml
 <br>├── forum.db-x-users-5-password.bin
 <br>├── frontend
@@ -189,25 +186,22 @@ SQL MÜQ bro
 <br>│   │   │   ├── Sonny_Barger.jpg
 <br>│   │   │   └── wp.jpg
 <br>│   │   └── js
+<br>│   │       ├── forum.js
 <br>│   │       ├── like_dislike.js
 <br>│   │       ├── main.js
 <br>│   │       └── profile.js
 <br>│   ├── templates
-<br>│   │   ├── admin_dashboard.html
-<br>│   │   ├── admin.html
 <br>│   │   ├── base.html
 <br>│   │   ├── comment.html
 <br>│   │   ├── create_post.html
 <br>│   │   ├── edit_post.html
 <br>│   │   ├── forum.html
 <br>│   │   ├── gallery.html
+<br>│   │   ├── inbox.html
 <br>│   │   ├── index.html
-<br>│   │   ├── pending_posts.html
 <br>│   │   ├── post.html
 <br>│   │   ├── profile.html
-<br>│   │   ├── request_moderator.html
-<br>│   │   ├── rules.html
-<br>│   │   └── user_profile.html
+<br>│   │   └── rules.html
 <br>│   └── uploads
 <br>│       ├── _117310488_16.jpg
 <br>│       ├── 697b023b-64a5-49a0-8059-27b963453fb1.gif
@@ -220,6 +214,7 @@ SQL MÜQ bro
 <br>│       ├── WIN_20231009_16_47_03_Pro.jpg
 <br>│       ├── WIN_20231012_01_56_53_Pro.jpg
 <br>│       └── WIN_20231018_16_45_51_Pro.jpg
+<br>├── privatekey.pem
 <br>└── README.md
 
-15 directories, 71 files
+15 directories, 66 files
