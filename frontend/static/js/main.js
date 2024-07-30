@@ -47,6 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterButton = document.getElementById('filter-button');
     const categoryFilter = document.getElementById('category-filter');
 
+    // for profile user info
+    const userInfoHeader = document.getElementById('user-info-header');
+    const userUsernameHeaderElement = document.getElementById('user-username-header');
+    const userEmailHeaderElement = document.getElementById('user-email-header');
+
     const togglePopup = (popup, action) => {
         popup.style.display = action === 'open' ? 'block' : 'none';
     };
@@ -122,7 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loginBtn.style.display = isLoggedIn ? 'none' : 'inline';
         registerBtn.style.display = isLoggedIn ? 'none' : 'inline';
         logoutBtn.style.display = isLoggedIn ? 'inline' : 'none';
-        userInfoContainer.style.display = isLoggedIn ? 'inline' : 'none';
+        //userInfoContainer.style.display = isLoggedIn ? 'inline' : 'none';
+        userInfoHeader.style.display = isLoggedIn ? 'inline' : 'none'; // Updated line
 
         // Show or hide the profile link
         const profileLink = document.getElementById('profile-link');
@@ -139,6 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 toggleUserUI(true);
                 userNameElement.textContent = `${user.name} ${user.surname}`;
                 userEmailElement.textContent = user.email;
+                userUsernameHeaderElement.textContent = user.username; // Added to update the header
+                userEmailHeaderElement.textContent = user.email; // Added to update the header
                 // If on profile.html, update profile information
                 if (window.location.pathname === '/profile.html') {
                     document.getElementById('profile-name').textContent = `${user.name} ${user.surname}`;

@@ -13,11 +13,7 @@ header'in ayrilmasi gerekiyo, belki iyilestirilebilir.<br/>
 base de (main-container) olayinin ayarlanmasi gerekiyo<br/>
 suan main-container da ki img headera da yansiyo<br/>
 <br/>
-> Profilde::: <br><br>
-> kullanici adi<br>
-> email<br>
-> Limit ? kac tane gosterilecek ve `show more`<br>
-> EKLENSIN
+Profilde kac tane gosterilicek, postlar begenilenler vs. ?<br/>
 <br>
 <br>
 
@@ -36,7 +32,8 @@ GetUserProfile in handlers/profile.go and in controller profile_controller.go<br
 createPost<br/><br/><br><br>
 logout dublicating in auth_controller and auth.go<br/>
 
-# QUESTION:
+# QUESTION / WILL CHECK:
+F12 debug console will be removed<br/>
 Guest iken url sonunda /profile konunda RAW `not authorized` hatasi donuyo, saglikli mi yoksa err handling gerekli mi ?<br/>
 Controllers neden gerekli ? cagirmasi mi gerekli yoksa ikincil func. mi gerekli ?<br/>
 script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi gerekli ?<br/>
@@ -99,6 +96,7 @@ Mesajlasma (PM/DM)
 
 # ACHIEVED / SUCCESSED :: 
 
+<br>~~profilde username, email, name surname bastirma~~
 <br>~~resim 20 mbden buyuk oldugunda RAW hatasi donduruyo alert dondurmeli~~
 <br>~~Guest iken konu olusturmuyo ama hata dondurmuyo, dondursun~~
 <br>~~Register basarili ise alert versin.~~
