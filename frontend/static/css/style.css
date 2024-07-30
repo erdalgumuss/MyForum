@@ -312,3 +312,11 @@ button:hover {
         font-size: 0.9em;
     }
 }
+
+#profile-details {
+    margin-top: 10px;
+}
+
+#profile-details h3, #profile-details p {
+    margin: 5px 0;
+}

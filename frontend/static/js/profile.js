@@ -1,7 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM fully loaded and parsed - profile.js");
+
+    const userUsernameElement = document.getElementById('user-username');
     const userNameElement = document.getElementById('user-name');
+    const userSurnameElement = document.getElementById('user-surname');
     const userEmailElement = document.getElementById('user-email');
+
+    const userUsernameHeaderElement = document.getElementById('user-username-header');
+    const userEmailHeaderElement = document.getElementById('user-email-header');
+    const userInfoHeaderElement = document.getElementById('user-info-header');
+
     const postsContainer = document.getElementById('posts-container');
     const topicsLikesList = document.getElementById('topics-likes-list');
     const commentsLikesList = document.getElementById('comments-likes-list');
@@ -16,8 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 console.log("User profile loaded - profile.js", user);
 
-                userNameElement.textContent = `${user.name} ${user.surname}`;
+                userUsernameElement.textContent = user.username;
+                userNameElement.textContent = user.name;
+                userSurnameElement.textContent = user.surname;
                 userEmailElement.textContent = user.email;
+
+                userUsernameHeaderElement.textContent = user.username;
+                userEmailHeaderElement.textContent = user.email;
+                userInfoHeaderElement.style.display = 'block';
 
                 loadUserPosts(user.id);
                 loadUserLikes(user.id);

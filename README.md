@@ -1,7 +1,9 @@
-# Working On:
-
 # Yapilacaklar:
 
+<br>CSS
+<br>Optimization
+<br>Tidy (the code and check for #Questions 4 learning and optimization)
+<br>#Future
 <br>Ana Sayfa ayarlansin<br/>
 
 # CSS problems:
@@ -35,6 +37,7 @@ createPost<br/><br/><br><br>
 logout dublicating in auth_controller and auth.go<br/>
 
 # QUESTION:
+Guest iken url sonunda /profile konunda RAW `not authorized` hatasi donuyo, saglikli mi yoksa err handling gerekli mi ?<br/>
 Controllers neden gerekli ? cagirmasi mi gerekli yoksa ikincil func. mi gerekli ?<br/>
 script src ???? base de olmasi yeterli mi ? hangi dosyada hangi import olmasi gerekli ?<br/>
 {{base}} olayi incelenmeli, bi tik degisti, yorum satirina alinan var profile.html de<br/>
