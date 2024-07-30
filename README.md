@@ -101,13 +101,13 @@ Comment edit<br/>
 <br>
 Report/Bildir<br/>
 
-**FORUM:**<br/>
-Mesajlasma (PM/DM)
 <br>
 <br>
 
 # ACHIEVED / SUCCESSED :: 
 
+<br>~~**FORUM:**~~
+<br>~~Mesajlasma (PM/DM)~~
 <br>~~profilde username, email, name surname bastirma~~
 <br>~~resim 20 mbden buyuk oldugunda RAW hatasi donduruyo alert dondurmeli~~
 <br>~~Guest iken konu olusturmuyo ama hata dondurmuyo, dondursun~~
