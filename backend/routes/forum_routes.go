@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"MyForum/controllers"
 	"MyForum/handlers"
 	"MyForum/utils" // AuthMiddleware'i kullanmak için
 
@@ -18,6 +19,9 @@ func ForumRoutes(r *gin.Engine) {
 		authorized.POST("/posts/:id/dislike", handlers.DislikePost)
 		authorized.POST("/comments/:id/like", handlers.LikeComment)
 		authorized.POST("/comments/:id/dislike", handlers.DislikeComment)
+
+		authorized.GET("/post/edit/:id", controllers.EditPostHandler)
+		authorized.POST("/post/update", controllers.UpdatePostHandler)
 	}
 
 	// oturum dogrulamasi js alertinde --go ile--

@@ -1,3 +1,7 @@
+# Working on:
+
+edit post calisiyo fakat `{{ if eq .Post.Username .User.Username }}` sorgusu duzeltilmeli
+
 # Yapilacaklar:
 
 <br>CSS

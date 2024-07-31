@@ -1,3 +1,4 @@
+<!-- templates/edit_post.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Post</title>
     <style>
-        /* Temel CSS stilleri */
+        /* Basic CSS styles */
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
@@ -20,7 +21,7 @@
 </head>
 <body>
     <h1>Edit Post</h1>
-    <form action="/admin/update_post" method="POST" class="edit-post-form">
+    <form action="/post/update" method="POST" class="edit-post-form">
         <input type="hidden" name="post_id" value="{{ .post.ID }}">
         <div class="form-group">
             <label for="title">Title:</label>
@@ -48,7 +49,6 @@
                 .then(data => {
                     if (data.success) {
                         alert('Post updated successfully.');
-                        window.location.href = "/admin/dashboard";
                     } else {
                         alert('Failed to update post.');
                     }

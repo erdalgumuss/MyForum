@@ -1,10 +1,15 @@
 package controllers
 
 import (
+	"database/sql"
 	"log"
+	"net/http"
+	"strconv"
 
 	"MyForum/config"
 	"MyForum/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 func CreatePostWithPost(post models.Post) (int, error) {
@@ -48,4 +53,46 @@ func CreatePostWithPost(post models.Post) (int, error) {
 	}
 
 	return postID, nil
+}
+
+func EditPostHandler(c *gin.Context) {
+	postID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+		return
+	}
+
+	var post models.Post
+	query := "SELECT id, title, content FROM posts WHERE id = ?"
+	err = config.DB.QueryRow(query, postID).Scan(&post.ID, &post.Title, &post.Content)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch post"})
+		}
+		return
+	}
+
+	c.HTML(http.StatusOK, "edit_post.html", gin.H{"post": post})
+}
+
+func UpdatePostHandler(c *gin.Context) {
+	postID, err := strconv.Atoi(c.PostForm("post_id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
+		return
+	}
+
+	title := c.PostForm("title")
+	content := c.PostForm("content")
+
+	query := "UPDATE posts SET title = ?, content = ? WHERE id = ?"
+	_, err = config.DB.Exec(query, title, content, postID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update post"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }
