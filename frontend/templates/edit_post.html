@@ -49,6 +49,7 @@
                 .then(data => {
                     if (data.success) {
                         alert('Post updated successfully.');
+                        window.location.href = `/posts/${formData.get('post_id')}`; // Redirect to the updated post's URL
                     } else {
                         alert('Failed to update post.');
                     }

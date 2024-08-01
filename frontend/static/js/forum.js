@@ -77,3 +77,41 @@ document.addEventListener('DOMContentLoaded', () => {
     handleFormSubmit(document.getElementById('create-post-form'), '/create-post');
     handleFormSubmit(document.getElementById('create-comment-form'), '/create-comment');
 });
+
+// CHECK IF THE USER IS THE SAME USER WHO WANTS TO EDIT THE POST
+document.addEventListener('DOMContentLoaded', () => {
+    const editPostLinkElement = document.getElementById('edit-post-link');
+    const postID = document.getElementById('post-container').getAttribute('data-post-id');
+
+    const fetchCurrentUser = async () => {
+        try {
+            const response = await fetch('/models/user');
+            if (!response.ok) {
+                throw new Error('Failed to fetch user data');
+            }
+            const user = await response.json();
+            console.log("Current user fetched:", user); // Log current user data
+            return user;
+        } catch (error) {
+            console.error('Error loading user:', error);
+            return null;
+        }
+    };
+
+    const checkIfUserCanEdit = async () => {
+        const currentUser = await fetchCurrentUser();
+        if (!currentUser) {
+            return;
+        }
+
+        const postUsername = document.getElementById('post-author-username').textContent.trim();
+        console.log("Post username:", postUsername); // Log post username
+        console.log("Current username:", currentUser.username); // Log current user username
+
+        if (currentUser.username === postUsername) {
+            editPostLinkElement.innerHTML = `<a href="/post/edit/${postID}">Edit Post</a>`;
+        }
+    };
+
+    checkIfUserCanEdit();
+});

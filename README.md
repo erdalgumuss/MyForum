@@ -1,7 +1,5 @@
 # Working on:
 
-edit post calisiyo fakat `{{ if eq .Post.Username .User.Username }}` sorgusu duzeltilmeli
-
 # Yapilacaklar:
 
 <br>CSS
@@ -110,6 +108,8 @@ Report/Bildir<br/>
 
 # ACHIEVED / SUCCESSED :: 
 
+<br>~~**For User:**~~
+<br>~~Mesaj edit~~
 <br>~~**FORUM:**~~
 <br>~~Mesajlasma (PM/DM)~~
 <br>~~profilde username, email, name surname bastirma~~

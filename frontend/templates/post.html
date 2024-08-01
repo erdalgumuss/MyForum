@@ -13,25 +13,21 @@
     </main>
 
     <main id="content">
-        <div id="post-container">
-            <h1>{{.Post.Title}}</h1> 
+        <div id="post-container" data-post-id="{{.Post.ID}}">
+            <h1>{{.Post.Title}}</h1>
             <h3>{{.Categories}}</h3><br/>
             <p>{{.Post.Content}}</p>
             {{if .Post.ImageURL}}
             <img src="{{.Post.ImageURL}}" alt="Post Image" style="max-width: 100%; max-height: 100%;">
-            {{else}}
             {{end}}
             <br><br>
             <p id="post-likes-dislikes">Likes: {{.Post.Likes}} || Dislikes: {{.Post.Dislikes}}</p>
-            <p>Posted by User: {{.Post.Username}} on {{.CreatedAt}}</p>
+            <p id="post-username">Posted by User: <span id="post-author-username">{{.Post.Username}}</span> on {{.CreatedAt}}</p>
 
-            {{ if eq .Post.Username .User.Username }}
-            <a href="/post/edit/{{.Post.ID}}">Edit Post</a>
-            {{ end }}
+            <div id="edit-post-link"></div><br>
 
             <button onclick="likePost('{{.Post.ID}}')">Like</button>
             <button onclick="dislikePost('{{.Post.ID}}')">Dislike</button>
-
         </div><br><br>
         <form action="/create-comment" id="create-comment-form" method="POST">
             <textarea name="content" placeholder="Write a comment..." required></textarea>
@@ -55,9 +51,7 @@
     <footer>
         <p>&copy; 2024 FIXIT FORUM</p>
     </footer>
-    <!--script src="/static/js/main.js"></script-->
     <script src="/static/js/like_dislike.js"></script>
     <script src="/static/js/forum.js"></script>
- 
 </body>
 </html>
